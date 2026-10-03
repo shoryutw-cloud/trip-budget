@@ -12,62 +12,40 @@
   box-sizing: border-box;
   padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  --bg: #f3f5f7;
-  --panel: #ffffff;
-  --ink: #17233b;
-  --muted: #5d6b82;
-  --line: #d5dbe4;
-  --accent: #0b6e8a;
-  --accent-ink: #ffffff;
-  --total-bg: #17233b;
-  --total-ink: #ffffff;
-  --warn: #8a5a00;
-  --warn-bg: #fff4d6;
-  --focus: #e08a00;
+  --bg: #f3f5f7; --panel: #ffffff; --ink: #17233b; --muted: #5d6b82; --line: #d5dbe4;
+  --accent: #0b6e8a; --accent-ink: #ffffff; --total-bg: #17233b; --total-ink: #ffffff;
+  --warn: #8a5a00; --warn-bg: #fff4d6; --focus: #e08a00;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0f1522; --panel: #182033; --ink: #e8edf6; --muted: #9aa8c0;
-    --line: #2b3650; --accent: #4cc0dd; --accent-ink: #08202a;
-    --total-bg: #0a0f1a; --total-ink: #e8edf6; --warn: #f2c261; --warn-bg: #3a2e10;
+    --bg: #0f1522; --panel: #182033; --ink: #e8edf6; --muted: #9aa8c0; --line: #2b3650;
+    --accent: #4cc0dd; --accent-ink: #08202a; --total-bg: #0a0f1a; --total-ink: #e8edf6;
+    --warn: #f2c261; --warn-bg: #3a2e10;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0f1522; --panel: #182033; --ink: #e8edf6; --muted: #9aa8c0;
-  --line: #2b3650; --accent: #4cc0dd; --accent-ink: #08202a;
-  --total-bg: #0a0f1a; --total-ink: #e8edf6; --warn: #f2c261; --warn-bg: #3a2e10;
+  --bg: #0f1522; --panel: #182033; --ink: #e8edf6; --muted: #9aa8c0; --line: #2b3650;
+  --accent: #4cc0dd; --accent-ink: #08202a; --total-bg: #0a0f1a; --total-ink: #e8edf6;
+  --warn: #f2c261; --warn-bg: #3a2e10;
 }
 html { scroll-padding-top: env(safe-area-inset-top, 0px); }
 *, *::before, *::after { box-sizing: border-box; }
-body {
-  margin: 0; background: var(--bg); color: var(--ink);
-  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
-  font-size: 16px; line-height: 1.6;
-}
-main { max-width: 880px; margin: 0 auto; padding: 20px 16px 120px; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif; font-size: 16px; line-height: 1.6; }
+main { max-width: 900px; margin: 0 auto; padding: 20px 16px 120px; }
 h1 { font-size: 1.6rem; margin: 8px 0 4px; letter-spacing: .02em; }
 .sub { color: var(--muted); margin: 0 0 20px; font-size: .95rem; }
-section {
-  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
-  padding: 18px; margin-bottom: 16px;
-}
+section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
 h2 { font-size: 1.05rem; margin: 0 0 12px; }
 .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.grid.three { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: 4px; }
-input, select, button {
-  font: inherit; color: var(--ink); background: var(--bg);
-  border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; width: 100%;
-}
+input, select, button { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; width: 100%; }
 input[type="radio"], input[type="checkbox"] { width: auto; }
-input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {
-  outline: 3px solid var(--focus); outline-offset: 1px;
-}
+input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
 .num { font-variant-numeric: tabular-nums; text-align: right; }
 .links { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
-.links a {
-  display: inline-block; text-decoration: none; color: var(--accent);
-  border: 1px solid var(--accent); border-radius: 8px; padding: 8px 12px; font-size: .92rem;
-}
+.links a { display: inline-block; text-decoration: none; color: var(--accent); border: 1px solid var(--accent); border-radius: 8px; padding: 8px 12px; font-size: .92rem; }
 .links a:hover { background: var(--accent); color: var(--accent-ink); }
 .note { font-size: .85rem; color: var(--muted); margin: 8px 0 0; }
 .warn { background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 10px 12px; font-size: .88rem; margin-top: 10px; }
@@ -78,47 +56,46 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 .row > .btn { flex: 0 0 auto; width: auto; }
 .choices { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: .92rem; }
 .choices label { display: inline-flex; gap: 6px; align-items: center; color: var(--ink); margin: 0; }
+.rate { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-top: 12px; }
+.rate strong { font-size: 1.25rem; font-variant-numeric: tabular-nums; }
 table { width: 100%; border-collapse: collapse; font-size: .95rem; }
 th, td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
 td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
-tr.sub td { color: var(--muted); font-size: .85rem; padding-top: 2px; border-bottom: 0; }
-.total {
-  position: sticky; bottom: 0; background: var(--total-bg); color: var(--total-ink);
-  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); margin: 0 -16px;
-  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
-}
+.total { position: sticky; bottom: 0; background: var(--total-bg); color: var(--total-ink);
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); margin: 0 -16px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .total strong { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
 .scroll { overflow-x: auto; }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .actions button { width: auto; }
 details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margin-top: 10px; }
-@media print {
-  .links, .actions, details, .total { display: none; }
-  body { background: #fff; color: #000; }
-  section { break-inside: avoid; }
-}
+@media print { .links, .actions, details, .total { display: none; } body { background: #fff; color: #000; } section { break-inside: avoid; } }
 </style>
 </head>
 <body>
 <main>
   <h1>出國經費試算</h1>
-  <p class="sub">機票＋日支生活費＋其他費用，一頁估出預算。</p>
+  <p class="sub">選地區、國家、城市，帶出日支數額；再加上機票與其他費用，一頁估出預算。</p>
 
   <section aria-labelledby="s1">
     <h2 id="s1">1. 行程</h2>
-    <div class="grid">
-      <div><label for="country">目的地國家／地區</label><select id="country"></select></div>
-      <div><label for="city">城市（用於日支數額對照）</label><input id="city" placeholder="例如：東京"></div>
+    <div class="grid three">
+      <div><label for="region">地區</label><select id="region"></select></div>
+      <div><label for="country">國家</label><select id="country"></select></div>
+      <div><label for="city">城市</label><select id="city"></select></div>
+    </div>
+    <div class="grid" style="margin-top:12px">
       <div><label for="from">出發機場</label>
         <select id="from">
           <option value="TPE">桃園 TPE</option><option value="TSA">松山 TSA</option>
           <option value="KHH">高雄 KHH</option><option value="RMQ">台中 RMQ</option>
         </select></div>
-      <div><label for="to">抵達機場</label><select id="to"></select></div>
+      <div><label for="to">抵達機場（3 碼代碼，可自行輸入）</label>
+        <input id="to" list="toList" maxlength="3" autocomplete="off" placeholder="例如 NRT"
+               style="text-transform:uppercase"><datalist id="toList"></datalist></div>
       <div><label for="d1">出發日期</label><input type="date" id="d1"></div>
       <div><label for="d2">返國日期</label><input type="date" id="d2"></div>
       <div><label for="pax">人數</label><input type="number" id="pax" min="1" value="1" class="num"></div>
-      <div><label for="cabin">艙等（僅用於查詢連結）</label>
+      <div><label for="cabin">艙等</label>
         <select id="cabin"><option value="e">經濟艙</option><option value="b">商務艙</option></select></div>
     </div>
     <p class="note" id="daysInfo"></p>
@@ -127,7 +104,6 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
   <section aria-labelledby="s2">
     <h2 id="s2">2. 機票查價</h2>
     <div class="links" id="links"></div>
-
     <div class="grid">
       <div><label for="fareBR">長榮 BR 每人票價（NT$）</label><input id="fareBR" type="number" min="0" class="num" placeholder="查到後填入"></div>
       <div><label for="fareCI">華航 CI 每人票價（NT$）</label><input id="fareCI" type="number" min="0" class="num" placeholder="查到後填入"></div>
@@ -140,15 +116,15 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       <label><input type="radio" name="fareMode" value="other"> 自訂</label>
       <label><input type="radio" name="fareMode" value="max"> 採用已填的最高價（保守估）</label>
     </div>
-    <p class="note">官網與比價網站有驗證碼，頁面無法替你自動取價。打開上方連結查到票價後填入即可。</p>
+    <p class="note">自動查價取得的是 Google Flights 顯示的最低價組合，不是航空公司官網價格。訂票前請到官網核對，並把實際價格填入「其他／自訂票價」。</p>
 
     <details>
       <summary>進階：接上自動查價服務</summary>
-      <p class="note">如果你之後架好後端代理（例如 Cloudflare Workers），在此填入網址。頁面會以 GET 呼叫
+      <p class="note">在此填入你的 Cloudflare Worker 網址（需含 https://）。頁面會以 GET 呼叫
         <code>?from=TPE&amp;to=NRT&amp;depart=2026-11-01&amp;return=2026-11-05&amp;cabin=e</code>，
-        並預期回傳 <code>{"BR": 12345, "CI": 13456}</code>（每人、新台幣）。</p>
+        並預期回傳 <code>{"BR": 12345, "CI": 13456}</code>（每人來回、新台幣）。</p>
       <div class="row">
-        <div><label for="api">查價服務網址</label><input id="api" placeholder="https://your-worker.example.workers.dev/fare"></div>
+        <div><label for="api">查價服務網址</label><input id="api" placeholder="https://flight-fare.your-name.workers.dev"></div>
         <button class="btn" id="apiBtn" type="button">自動查價</button>
       </div>
       <p class="note" id="apiMsg" role="status"></p>
@@ -157,23 +133,29 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
 
   <section aria-labelledby="s3">
     <h2 id="s3">3. 日支生活費</h2>
-    <div class="grid">
-      <div><label for="perdiem">該地區日支數額（US$／人／日）</label><input id="perdiem" type="number" min="0" step="0.01" class="num"></div>
+    <div class="rate" id="rateInfo" aria-live="polite"></div>
+    <div class="grid" style="margin-top:12px">
+      <div><label for="override">手動覆寫日支數額（US$／人／日，留空則依表）</label><input id="override" type="number" min="0" step="0.01" class="num"></div>
       <div><label for="rate">美元兌台幣匯率</label><input id="rate" type="number" min="0" step="0.001" class="num" placeholder="依規定匯率填入"></div>
       <div><label for="payDays">計支日數</label><input id="payDays" type="number" min="0" class="num"></div>
     </div>
-    <p class="note">數額請照行政院「中央政府各機關派赴國外各地區出差人員生活費日支數額表」填入，頁面會依國家＋城市記住你填過的值。
-      <a href="https://law.dgbas.gov.tw/LawContent.aspx?id=FL017584" target="_blank" rel="noopener">國外出差旅費報支要點（主計總處）</a></p>
     <div class="choices">
-      <label><input type="checkbox" id="longStay" checked> 同地駐留超過 1 個月時，依要點打折（第 2–3 個月 80%、第 4 個月起 70%，以 30 天為 1 個月概算）</label>
+      <label><input type="checkbox" id="longStay" checked> 同地駐留超過 1 個月時依要點折算（第 2–3 個月 80%、第 4 個月起 70%，以 30 天為 1 個月概算）</label>
     </div>
-    <div class="warn">供膳宿、返國當日、跨區出差等情形的扣減規定不同，此處以「日數 × 日支數額」概算，正式報支前請依要點逐項核對。</div>
+    <div class="warn">數額依各日期所處的季節逐日套用；總計後尾數不足 1 元者進位為 1 元。供膳宿、返國當日、跨區出差等扣減請依要點逐項核對，此處以「日數 × 日支數額」概算。</div>
     <div class="scroll" style="margin-top:12px">
       <table>
-        <thead><tr><th>項目（要點：住宿 70%、膳食 20%、零用 10%）</th><th class="r">US$</th><th class="r">NT$</th></tr></thead>
+        <thead><tr><th>期間</th><th class="r">日數</th><th class="r">日支 US$</th><th class="r">折算</th><th class="r">小計 US$</th></tr></thead>
+        <tbody id="runRows"></tbody>
+      </table>
+    </div>
+    <div class="scroll" style="margin-top:12px">
+      <table>
+        <thead><tr><th>每人（住宿 70%、膳食 20%、零用 10%）</th><th class="r">US$</th><th class="r">NT$</th></tr></thead>
         <tbody id="pdRows"></tbody>
       </table>
     </div>
+    <p class="note">資料來源：行政院 114 年 10 月 31 日院授主預字第 1140103430 號函修正之日支數額表，自 115 年 1 月 1 日生效。香港、澳門及大陸地區另有日支數額表，請在上方手動覆寫。</p>
   </section>
 
   <section aria-labelledby="s4">
@@ -184,17 +166,14 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       <div><label for="oTrans">當地交通（機場往返、市區）</label><input id="oTrans" type="number" min="0" class="num" value="0"></div>
       <div><label for="oGift">禮品交際及雜費（每人每日）</label><input id="oGift" type="number" min="0" class="num" value="0"></div>
       <div><label for="oMisc">其他</label><input id="oMisc" type="number" min="0" class="num" value="0"></div>
+      <div><label for="buffer">票價緩衝（%）</label><input id="buffer" type="number" min="0" max="100" class="num" value="0"></div>
     </div>
-    <p class="note">依要點，非隨同司處長級以上出差者，禮品交際及雜費得按日數每人每日 NT$600 內檢附原始單據報支。</p>
+    <p class="note">依要點，非隨同司處長級以上出差者，禮品交際及雜費得按日數每人每日 NT$600 內檢附原始單據報支。票價緩衝只加在機票上，用來涵蓋 Google Flights 與官網的價差。</p>
   </section>
 
   <section aria-labelledby="s5">
     <h2 id="s5">5. 試算結果</h2>
-    <div class="scroll">
-      <table>
-        <tbody id="sumRows"></tbody>
-      </table>
-    </div>
+    <div class="scroll"><table><tbody id="sumRows"></tbody></table></div>
     <div class="actions">
       <button class="btn" id="copyBtn" type="button">複製摘要</button>
       <button class="btn ghost" id="printBtn" type="button">列印／存成 PDF</button>
@@ -202,118 +181,251 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <p class="note" id="copyMsg" role="status"></p>
   </section>
 
-  <div class="total" aria-live="polite">
-    <span>預算合計</span><strong id="grand">NT$ 0</strong>
-  </div>
+  <div class="total" aria-live="polite"><span>預算合計</span><strong id="grand">NT$ 0</strong></div>
 </main>
 
 <script>
-// 國家 → 主要機場（可自行增修）
-var DEST = [
-  ["日本", [["NRT","東京成田"],["HND","東京羽田"],["KIX","大阪關西"],["FUK","福岡"],["CTS","札幌新千歲"],["OKA","沖繩那霸"],["NGO","名古屋"]]],
-  ["韓國", [["ICN","首爾仁川"],["GMP","首爾金浦"],["PUS","釜山"],["CJU","濟州"]]],
-  ["香港", [["HKG","香港"]]],
-  ["澳門", [["MFM","澳門"]]],
-  ["中國大陸", [["PVG","上海浦東"],["PEK","北京首都"],["CAN","廣州"],["SZX","深圳"],["CTU","成都"]]],
-  ["新加坡", [["SIN","新加坡"]]],
-  ["泰國", [["BKK","曼谷素萬那普"],["DMK","曼谷廊曼"],["CNX","清邁"],["HKT","普吉"]]],
-  ["越南", [["SGN","胡志明市"],["HAN","河內"],["DAD","峴港"]]],
-  ["菲律賓", [["MNL","馬尼拉"],["CEB","宿霧"]]],
-  ["馬來西亞", [["KUL","吉隆坡"],["PEN","檳城"]]],
-  ["印尼", [["CGK","雅加達"],["DPS","峇里島"]]],
-  ["印度", [["DEL","德里"],["BOM","孟買"]]],
-  ["美國", [["LAX","洛杉磯"],["SFO","舊金山"],["SEA","西雅圖"],["JFK","紐約甘迺迪"],["IAH","休士頓"],["ORD","芝加哥"],["WAS","華盛頓特區"],["HNL","檀香山"]]],
-  ["加拿大", [["YVR","溫哥華"],["YYZ","多倫多"]]],
-  ["英國", [["LHR","倫敦希斯洛"]]],
-  ["法國", [["CDG","巴黎戴高樂"]]],
-  ["德國", [["FRA","法蘭克福"],["MUC","慕尼黑"]]],
-  ["荷蘭", [["AMS","阿姆斯特丹"]]],
-  ["奧地利", [["VIE","維也納"]]],
-  ["義大利", [["MXP","米蘭"],["FCO","羅馬"]]],
-  ["瑞士", [["ZRH","蘇黎世"],["GVA","日內瓦"]]],
-  ["捷克", [["PRG","布拉格"]]],
-  ["澳洲", [["SYD","雪梨"],["MEL","墨爾本"],["BNE","布里斯本"]]],
-  ["紐西蘭", [["AKL","奧克蘭"]]],
-  ["阿聯", [["DXB","杜拜"]]],
-  ["土耳其", [["IST","伊斯坦堡"]]]
-];
+var DATA = [{"code":"A","zh":"亞太地區","countries":[{"zh":"日本","en":"Japan","entries":[{"id":1,"zh":"福岡","en":"Fukuoka","rate":246},{"id":2,"zh":"神戶","en":"Kobe","rate":216},{"id":3,"zh":"京都","en":"Kyoto","rate":282},{"id":4,"zh":"名古屋","en":"Nagoya","rate":291},{"id":5,"zh":"大阪","en":"Osaka","rate":246},{"id":6,"zh":"東京","en":"Tokyo","rate":299},{"id":7,"zh":"橫濱","en":"Yokohama","rate":231},{"id":8,"zh":"其他","en":"Other","rate":209}]},{"zh":"北韓","en":"Korea,Dem. People's Rep. of","entries":[{"id":9,"zh":"平壤","en":"Pyongyang","rate":275},{"id":10,"zh":"其他","en":"Other","rate":108}]},{"zh":"南韓","en":"Korea","entries":[{"id":11,"zh":"濟州","en":"Cheju","rate":321},{"id":12,"zh":"大田","en":"Daejon","rate":297},{"id":13,"zh":"仁川","en":"Incheon","rate":294},{"id":14,"zh":"光州","en":"Kwangju","rate":316},{"id":15,"zh":"慶州","en":"Kyongju","rate":305},{"id":16,"zh":"首爾","en":"Seoul","rate":290},{"id":17,"zh":"麗水","en":"Yeosu","rate":277},{"id":18,"zh":"其他","en":"Other","rate":261}]},{"zh":"蒙古","en":"Mongolia","entries":[{"id":19,"zh":"烏蘭巴托","en":"Ulaanbaatar","rate":184},{"id":20,"zh":"其他","en":"Other","rate":116}]},{"zh":"菲律賓","en":"Philippines","entries":[{"id":21,"zh":"碧瑤","en":"Baguio","rate":187},{"id":22,"zh":"宿霧","en":"Cebu","rate":228},{"id":23,"zh":"納卯","en":"Davao","rate":221},{"id":24,"zh":"大馬尼拉都會區","en":"Metro Manila","rate":315},{"id":25,"zh":"巴丹","en":"Bataan","rate":203},{"id":26,"zh":"克拉克","en":"Clark, Pampanga","rate":270},{"id":27,"zh":"大雅台","en":"Tagaytay","rate":224},{"id":28,"zh":"其他","en":"Other","rate":165}]},{"zh":"密克羅尼西亞","en":"Micronesia","entries":[{"id":29,"zh":"恰克","en":"Chuuk","rate":225},{"id":30,"zh":"波納佩","en":"Pohnpei","rate":223},{"id":31,"zh":"雅浦","en":"Yap","rate":262}]},{"zh":"薩摩亞","en":"Samoa","entries":[{"id":32,"zh":"薩摩亞","en":"Samoa","rate":210}]},{"zh":"汶萊","en":"Brunei","entries":[{"id":33,"zh":"汶萊","en":"Brunei","rate":198}]},{"zh":"泰國","en":"Thailand","entries":[{"id":34,"zh":"曼谷","en":"Bangkok","rate":284},{"id":35,"zh":"清邁","en":"Chiang Mai","rate":178},{"id":36,"zh":"華欣","en":"Hua Hin","rate":243},{"id":37,"zh":"芭達雅","en":"Pattaya","rate":173},{"id":38,"zh":"普吉","en":"Phuket","rate":358},{"id":39,"zh":"羅勇","en":"Rayong","rate":192},{"id":40,"zh":"蘇梅島","en":"Samui Island","rate":145},{"id":41,"zh":"其他","en":"Other","rate":103}]},{"zh":"馬來西亞","en":"Malaysia","entries":[{"id":42,"zh":"沙巴","en":"Kota Kinabalu Sabah","rate":214},{"id":43,"zh":"吉隆坡","en":"Kuala Lumpur","rate":251},{"id":44,"zh":"古晉","en":"Kuching","rate":235},{"id":45,"zh":"布城","en":"Putrajaya","rate":251},{"id":46,"zh":"其他","en":"Other","rate":197}]},{"zh":"新加坡","en":"Singapore","entries":[{"id":47,"zh":"新加坡","en":"Singapore","rate":452}]},{"zh":"印尼","en":"Indonesia","entries":[{"id":48,"zh":"巴里島","en":"Bali Island","rate":295},{"id":49,"zh":"萬隆","en":"Bandung","rate":143},{"id":50,"zh":"茂物","en":"Bogor City","rate":135},{"id":51,"zh":"雅加達","en":"Jakarta","rate":212},{"id":52,"zh":"棉蘭","en":"Medan","rate":152},{"id":53,"zh":"泗水","en":"Surabaya","rate":198},{"id":54,"zh":"日惹","en":"Yogyakarta","rate":156},{"id":55,"zh":"其他","en":"Other","rate":114}]},{"zh":"緬甸","en":"Burma","entries":[{"id":56,"zh":"仰光","en":"Rangoon","rate":206},{"id":57,"zh":"內比都","en":"Naypyitaw","rate":145},{"id":58,"zh":"曼德勒","en":"Mandalay","rate":184},{"id":59,"zh":"羌達","en":"Chaung Tha","rate":114},{"id":60,"zh":"內維桑","en":"Ngwe Saung","rate":119},{"id":61,"zh":"葡萄","en":"Putao","rate":141},{"id":62,"zh":"額不里","en":"Ngapali","rate":146},{"id":63,"zh":"其他","en":"Other","rate":100}]},{"zh":"印度","en":"India","entries":[{"id":64,"zh":"邦加羅爾","en":"Bangalore","rate":249},{"id":65,"zh":"加爾各答","en":"Kolkata","rate":183},{"id":66,"zh":"清奈","en":"Chennai","rate":208},{"id":67,"zh":"果阿","en":"Goa","rate":250},{"id":68,"zh":"海得拉巴","en":"Hyderabad","rate":219},{"id":69,"zh":"孟買","en":"Mumbai","rate":260},{"id":70,"zh":"德里國家首都轄區／國家首都區","en":"National Capital Territory of Delhi, NCT / National Capital Region, NCR","seasons":[[[[4,1,8,31]],227],[[[9,1,3,31]],259]]},{"id":71,"zh":"浦內","en":"Pune","rate":186},{"id":72,"zh":"其他","en":"Other","rate":156}]},{"zh":"斯里蘭卡","en":"Sri Lanka","entries":[{"id":73,"zh":"可倫坡","en":"Colombo","rate":192},{"id":74,"zh":"其他","en":"Other","rate":102}]},{"zh":"不丹","en":"Bhutan","entries":[{"id":75,"zh":"亭布","en":"Thimphu","rate":120},{"id":76,"zh":"其他","en":"Other","rate":100}]},{"zh":"尼泊爾","en":"Nepal","entries":[{"id":77,"zh":"加德滿都","en":"Kathmandu","rate":189},{"id":78,"zh":"波卡拉","en":"Pokhara","rate":107},{"id":79,"zh":"其他","en":"Other","rate":100}]},{"zh":"澳大利亞","en":"Australia","entries":[{"id":80,"zh":"坎培拉","en":"Canberra","rate":304},{"id":81,"zh":"墨爾本","en":"Melbourne","rate":304},{"id":82,"zh":"雪梨","en":"Sydney","rate":304},{"id":83,"zh":"布里斯本","en":"Brisbane","rate":304},{"id":84,"zh":"其他","en":"Other","rate":295}]},{"zh":"紐西蘭","en":"New Zealand","entries":[{"id":85,"zh":"奧克蘭","en":"Auckland","rate":294},{"id":86,"zh":"威靈頓","en":"Wellington","rate":294},{"id":87,"zh":"其他","en":"Other","rate":271}]},{"zh":"斐濟","en":"Fiji","entries":[{"id":88,"zh":"南地","en":"Nadi","rate":229},{"id":89,"zh":"蘇瓦","en":"Suva","rate":317},{"id":90,"zh":"其他","en":"Other","rate":165}]},{"zh":"東加王國","en":"Tonga","entries":[{"id":91,"zh":"努瓜婁發","en":"Nukualofa","rate":274},{"id":92,"zh":"其他","en":"Other","rate":197}]},{"zh":"諾魯","en":"Nauru","entries":[{"id":93,"zh":"諾魯","en":"Nauru","rate":194}]},{"zh":"索羅門群島","en":"Solomon Islands","entries":[{"id":94,"zh":"荷尼阿拉市","en":"Honiara","rate":376},{"id":95,"zh":"其他","en":"Other","rate":150}]},{"zh":"巴布亞紐幾內亞","en":"Papua New Guinea","entries":[{"id":96,"zh":"摩士比港","en":"Port Moresby","rate":272},{"id":97,"zh":"布卡","en":"Buka","rate":188},{"id":98,"zh":"可可坡","en":"Kokopo","rate":202},{"id":99,"zh":"萊城","en":"Lae","rate":224},{"id":100,"zh":"拉包爾","en":"Rabaul","rate":222},{"id":101,"zh":"其他","en":"Other","rate":154}]},{"zh":"柬埔寨","en":"Cambodia","entries":[{"id":102,"zh":"金邊","en":"Phnom Penh","rate":157},{"id":103,"zh":"暹粒","en":"Siem Riep","rate":122},{"id":104,"zh":"施亞努市","en":"Sihanoukville","rate":110},{"id":105,"zh":"其他","en":"Other","rate":100}]},{"zh":"阿富汗","en":"Afghanistan","entries":[{"id":106,"zh":"喀布爾","en":"Kabul","rate":163},{"id":107,"zh":"其他","en":"Other","rate":100}]},{"zh":"孟加拉","en":"Bangladesh","entries":[{"id":108,"zh":"達卡","en":"Dhaka","rate":157},{"id":109,"zh":"其他","en":"Other","rate":100}]},{"zh":"庫克群島","en":"Cook Islands","entries":[{"id":110,"zh":"拉羅東加","en":"Rarotonga","rate":383},{"id":111,"zh":"其他","en":"Other","rate":253}]},{"zh":"寮國","en":"Laos","entries":[{"id":112,"zh":"永珍","en":"Vientiane","rate":249},{"id":113,"zh":"其他","en":"Other","rate":100}]},{"zh":"馬爾地夫","en":"Maldives","entries":[{"id":114,"zh":"馬利","en":"Male","rate":280},{"id":115,"zh":"其他","en":"Other","rate":144}]},{"zh":"托克勞群島","en":"Tokelau Islands","entries":[{"id":116,"zh":"托克勞群島","en":"Tokelau Islands","rate":100}]},{"zh":"吉里巴斯共和國","en":"Kiribati","entries":[{"id":117,"zh":"聖誕島","en":"Christmas Island","rate":121},{"id":118,"zh":"其他","en":"Other","rate":138}]},{"zh":"吐瓦魯","en":"Tuvalu","entries":[{"id":119,"zh":"吐瓦魯","en":"Tuvalu","rate":197}]},{"zh":"帛琉共和國","en":"Palau Rep.of","entries":[{"id":120,"zh":"帛琉共和國","en":"Palau Rep.of","rate":314}]},{"zh":"越南","en":"Vietnam","entries":[{"id":121,"zh":"大叻","en":"Dalat","rate":118},{"id":122,"zh":"蜆港","en":"Danang","rate":138},{"id":123,"zh":"河內","en":"Hanoi","rate":167},{"id":124,"zh":"胡志明市","en":"Ho Chi Minh City","rate":155},{"id":125,"zh":"海防市","en":"Hai Phong","rate":109},{"id":126,"zh":"會安","en":"Hoi An","rate":105},{"id":127,"zh":"下龍","en":"Ha Long City","rate":110},{"id":128,"zh":"其他","en":"Other","rate":100}]},{"zh":"法屬新喀里多尼亞島","en":"New Caledonia Is.","entries":[{"id":129,"zh":"法屬新喀里多尼亞島","en":"New Caledonia Is.","rate":344}]},{"zh":"馬紹爾群島","en":"Marshall Islands","entries":[{"id":130,"zh":"瓜加蓮環礁","en":"Kwajalein Atoll","rate":265},{"id":131,"zh":"馬久羅環礁","en":"Majuro Atoll","rate":221},{"id":132,"zh":"其他","en":"Other","rate":144}]},{"zh":"萬那杜","en":"Vanuatu","entries":[{"id":133,"zh":"維拉港","en":"Port Vila","rate":281},{"id":134,"zh":"三多港","en":"Santos","rate":235},{"id":135,"zh":"唐納島","en":"Tanna Is.","rate":351},{"id":136,"zh":"其他","en":"Other","rate":100}]}]},{"code":"B","zh":"亞西地區","countries":[{"zh":"巴基斯坦","en":"Pakistan","entries":[{"id":137,"zh":"費沙拉巴德","en":"Faisalabad","rate":238},{"id":138,"zh":"伊斯蘭馬巴德","en":"Islamabad","rate":316},{"id":139,"zh":"喀拉蚩","en":"Karachi","rate":147},{"id":140,"zh":"拉合爾","en":"Lahore","rate":113},{"id":141,"zh":"圭塔","en":"Quetta","rate":220},{"id":142,"zh":"其他","en":"Other","rate":100}]},{"zh":"伊朗","en":"Iran","entries":[{"id":143,"zh":"德黑蘭","en":"Tehran","rate":177},{"id":144,"zh":"其他","en":"Other","rate":118}]},{"zh":"伊拉克","en":"Iraq","entries":[{"id":145,"zh":"巴格達","en":"Baghdad","rate":278},{"id":146,"zh":"其他","en":"Other","rate":174}]},{"zh":"約旦","en":"Jordan","entries":[{"id":147,"zh":"安曼","en":"Amman","rate":264},{"id":148,"zh":"阿卡巴","en":"Aqaba","rate":290},{"id":149,"zh":"死海","en":"Dead Sea","rate":290},{"id":150,"zh":"其他","en":"Other","rate":157}]},{"zh":"科威特","en":"Kuwait","entries":[{"id":151,"zh":"科威特","en":"Kuwait","rate":321}]},{"zh":"巴林","en":"Bahrain","entries":[{"id":152,"zh":"巴林","en":"Bahrain","rate":326}]},{"zh":"卡達","en":"Qatar","entries":[{"id":153,"zh":"卡達","en":"Qatar","rate":354}]},{"zh":"阿拉伯聯合大公國","en":"United Arab Emirates","entries":[{"id":154,"zh":"阿布達比","en":"Abu Dhabi","seasons":[[[[4,1,9,30]],362],[[[11,1,11,30]],540],[[[10,1,10,31],[12,1,3,31]],417]]},{"id":155,"zh":"杜拜","en":"Dubai","seasons":[[[[4,1,7,31],[10,1,10,31]],368],[[[12,1,12,31]],590],[[[1,1,3,31],[11,1,11,30]],493]]},{"id":156,"zh":"其他","en":"Other","rate":341}]},{"zh":"敘利亞","en":"Syria","entries":[{"id":157,"zh":"大馬士革","en":"Damascus","rate":236},{"id":158,"zh":"其他","en":"Other","rate":133}]},{"zh":"黎巴嫩","en":"Lebanon","entries":[{"id":159,"zh":"貝魯特","en":"Beirut","rate":232},{"id":160,"zh":"其他","en":"Other","rate":204}]},{"zh":"阿曼","en":"Oman","entries":[{"id":161,"zh":"馬斯開特","en":"Muscat","seasons":[[[[4,1,8,31]],257],[[[9,1,3,31]],327]]},{"id":162,"zh":"其他","en":"Other","rate":239}]},{"zh":"葉門","en":"Yemen","entries":[{"id":163,"zh":"亞丁","en":"Aden","rate":248},{"id":164,"zh":"沙那","en":"Sanaa","rate":278},{"id":165,"zh":"其他","en":"Other","rate":100}]},{"zh":"沙烏地阿拉伯","en":"Saudi Arabia","entries":[{"id":166,"zh":"吉達","en":"Jeddah","rate":474},{"id":167,"zh":"利雅德","en":"Riyadh","rate":384},{"id":168,"zh":"其他","en":"Other","rate":368}]},{"zh":"耶路撒冷","en":"Jerusalem","entries":[{"id":169,"zh":"耶路撒冷","en":"Jerusalem","rate":300}]},{"zh":"以色列","en":"Israel","entries":[{"id":170,"zh":"海法","en":"Haifa","rate":354},{"id":171,"zh":"台拉維夫","en":"Tel Aviv","rate":359},{"id":172,"zh":"其他","en":"Other","rate":298}]},{"zh":"土耳其","en":"Turkey","entries":[{"id":173,"zh":"安卡拉","en":"Ankara","rate":311},{"id":174,"zh":"安達利亞","en":"Antalya","rate":246},{"id":175,"zh":"伊斯坦堡","en":"Istanbul","rate":378},{"id":176,"zh":"伊士麥","en":"Izmir-Cigli","rate":255},{"id":177,"zh":"其他","en":"Other","rate":165}]},{"zh":"俄羅斯","en":"Russia","entries":[{"id":178,"zh":"莫斯科","en":"Moscow","rate":289},{"id":179,"zh":"聖彼得堡","en":"Saint. Petersburg","seasons":[[[[1,1,4,30],[10,1,12,31]],208],[[[5,1,9,30]],272]]},{"id":180,"zh":"海參崴","en":"Vladivostok","rate":175},{"id":181,"zh":"其他","en":"Other","rate":162}]},{"zh":"亞塞拜然","en":"Azerbaijan","entries":[{"id":182,"zh":"巴庫","en":"Baku","rate":194},{"id":183,"zh":"其他","en":"Other","rate":108}]},{"zh":"白俄羅斯","en":"Belarus","entries":[{"id":184,"zh":"明斯克","en":"Minsk","rate":265},{"id":185,"zh":"其他","en":"Other","rate":100}]},{"zh":"亞美尼亞","en":"Armenia","entries":[{"id":186,"zh":"葉里溫","en":"Yerevan","rate":205},{"id":187,"zh":"其他","en":"Other","rate":142}]},{"zh":"喬治亞","en":"Georgia","entries":[{"id":188,"zh":"第比利斯","en":"Tbilisi","rate":199},{"id":189,"zh":"其他","en":"Other","rate":172}]},{"zh":"吉爾吉斯","en":"Kyrgyzstan","entries":[{"id":190,"zh":"比什凱克","en":"Bishkek","rate":164},{"id":191,"zh":"其他","en":"Other","rate":100}]},{"zh":"哈薩克","en":"Kazakhstan","entries":[{"id":192,"zh":"阿拉木圖","en":"Almaty","rate":231},{"id":193,"zh":"阿斯坦納","en":"Astana","rate":245},{"id":194,"zh":"其他","en":"Other","rate":152}]},{"zh":"塔吉克","en":"Tajikistan","entries":[{"id":195,"zh":"杜尚別","en":"Dushanbe","rate":173},{"id":196,"zh":"其他","en":"Other","rate":100}]},{"zh":"土庫曼","en":"Turkmenistan","entries":[{"id":197,"zh":"阿什哈巴德","en":"Ashgabat","rate":314},{"id":198,"zh":"其他","en":"Other","rate":188}]},{"zh":"烏克蘭","en":"Ukraine","entries":[{"id":199,"zh":"基輔","en":"Kiev","rate":178},{"id":200,"zh":"利維夫","en":"Lviv","rate":157},{"id":201,"zh":"其他","en":"Other","rate":113}]},{"zh":"烏茲別克","en":"Uzbekistan","entries":[{"id":202,"zh":"塔什干","en":"Tashkent","rate":172},{"id":203,"zh":"其他","en":"Other","rate":100}]},{"zh":"摩爾多瓦","en":"Moldova","entries":[{"id":204,"zh":"基希訥烏","en":"Chisinau","rate":177},{"id":205,"zh":"其他","en":"Other","rate":162}]}]},{"code":"C","zh":"歐洲地區","countries":[{"zh":"法國","en":"France","entries":[{"id":206,"zh":"巴黎","en":"Paris","rate":439},{"id":207,"zh":"其他","en":"Other","rate":379}]},{"zh":"德國","en":"Germany","entries":[{"id":208,"zh":"柏林","en":"Berlin","rate":374},{"id":209,"zh":"漢堡","en":"Hamburg","rate":437},{"id":210,"zh":"慕尼黑","en":"Munich","seasons":[[[[11,1,8,31]],377],[[[9,1,10,31]],492]]},{"id":211,"zh":"其他","en":"Other","rate":340}]},{"zh":"荷蘭","en":"Netherlands","entries":[{"id":212,"zh":"荷蘭","en":"Netherlands","rate":359}]},{"zh":"比利時","en":"Belgium","entries":[{"id":213,"zh":"布魯塞爾","en":"Brussels","rate":457},{"id":214,"zh":"其他","en":"Other","rate":301}]},{"zh":"盧森堡","en":"Luxembourg","entries":[{"id":215,"zh":"盧森堡","en":"Luxembourg","rate":500}]},{"zh":"瑞士","en":"Switzerland","entries":[{"id":216,"zh":"瑞士","en":"Switzerland","rate":465}]},{"zh":"北馬其頓共和國","en":"Republic of North Macedonia","entries":[{"id":217,"zh":"史可普利","en":"Skopje","rate":194},{"id":218,"zh":"其他","en":"Other","rate":100}]},{"zh":"塞爾維亞","en":"Serbia","entries":[{"id":219,"zh":"貝爾格勒","en":"Belgrade","rate":276},{"id":220,"zh":"其他","en":"Other","rate":154}]},{"zh":"蒙特內哥羅","en":"Montenegro","entries":[{"id":221,"zh":"波多里察","en":"Podgorica","rate":207},{"id":222,"zh":"其他","en":"Other","rate":120}]},{"zh":"科索沃","en":"Kosovo","entries":[{"id":223,"zh":"科索沃","en":"Kosovo","rate":161}]},{"zh":"列支敦斯登","en":"Liechtenstein","entries":[{"id":224,"zh":"列支敦斯登","en":"Liechtenstein","rate":461}]},{"zh":"奧地利","en":"Austria","entries":[{"id":225,"zh":"奧地利","en":"Austria","rate":325}]},{"zh":"安道爾拉","en":"Andorra","entries":[{"id":226,"zh":"安道爾拉","en":"Andorra","rate":283}]},{"zh":"摩納哥","en":"Monaco","entries":[{"id":227,"zh":"摩納哥","en":"Monaco","rate":338}]},{"zh":"丹麥","en":"Denmark","entries":[{"id":228,"zh":"丹麥","en":"Denmark","rate":399}]},{"zh":"冰島","en":"Iceland","entries":[{"id":229,"zh":"冰島","en":"Iceland","seasons":[[[[5,1,9,30]],365],[[[10,1,4,30]],285]]}]},{"zh":"挪威","en":"Norway","entries":[{"id":230,"zh":"挪威","en":"Norway","rate":390}]},{"zh":"瑞典","en":"Sweden","entries":[{"id":231,"zh":"斯德哥爾摩","en":"Stockholm","rate":422},{"id":232,"zh":"其他","en":"Other","rate":319}]},{"zh":"芬蘭","en":"Finland","entries":[{"id":233,"zh":"赫爾辛基","en":"Helsinki","rate":388},{"id":234,"zh":"其他","en":"Other","rate":335}]},{"zh":"英國","en":"United Kingdom","entries":[{"id":235,"zh":"倫敦","en":"London","rate":510},{"id":236,"zh":"其他","en":"Other","rate":324}]},{"zh":"愛爾蘭","en":"Ireland","entries":[{"id":237,"zh":"愛爾蘭","en":"Ireland","rate":336}]},{"zh":"西班牙","en":"Spain","entries":[{"id":238,"zh":"巴塞隆納","en":"Barcelona","rate":445},{"id":239,"zh":"馬德里","en":"Madrid","rate":458},{"id":240,"zh":"聖塞巴斯提安","en":"San Sebastian","seasons":[[[[4,1,10,31]],467]]},{"id":241,"zh":"瓦倫西亞","en":"Valencia","rate":334},{"id":242,"zh":"其他","en":"Other","rate":290}]},{"zh":"葡萄牙","en":"Portugal","entries":[{"id":243,"zh":"里斯本","en":"Lisbon","rate":320},{"id":244,"zh":"奧波多","en":"Oporto","rate":346},{"id":245,"zh":"其他","en":"Other","rate":207}]},{"zh":"直布羅陀","en":"Gibraltar","entries":[{"id":246,"zh":"直布羅陀","en":"Gibraltar","rate":207}]},{"zh":"聖馬利諾","en":"San Marino","entries":[{"id":247,"zh":"聖馬利諾","en":"San Marino","rate":242}]},{"zh":"義大利","en":"Italy","entries":[{"id":248,"zh":"波隆那","en":"Bologna","rate":360},{"id":249,"zh":"佛羅倫斯","en":"Florence","seasons":[[[[4,1,10,31]],429],[[[11,1,3,31]],348]]},{"id":250,"zh":"米蘭","en":"Milan","seasons":[[[[4,1,10,31]],550],[[[11,1,3,31]],488]]},{"id":251,"zh":"那不勒斯","en":"Naples","rate":450},{"id":252,"zh":"巴勒摩","en":"Palermo","rate":346},{"id":253,"zh":"羅馬","en":"Rome","seasons":[[[[4,1,10,31]],485],[[[11,1,3,31]],393]]},{"id":254,"zh":"杜林","en":"Turin","rate":350},{"id":255,"zh":"威尼斯","en":"Venice","seasons":[[[[4,1,10,31]],560],[[[11,1,3,31]],426]]},{"id":256,"zh":"其他","en":"Other","rate":242}]},{"zh":"馬爾他","en":"Malta","entries":[{"id":257,"zh":"馬爾他島","en":"Malta Island","seasons":[[[[1,1,3,31]],376],[[[4,1,6,30]],500],[[[7,1,9,30]],540],[[[10,1,12,31]],421]]},{"id":258,"zh":"哥佐島","en":"Gozo Island","rate":297}]},{"zh":"希臘","en":"Greece","entries":[{"id":259,"zh":"雅典","en":"Athens","rate":311},{"id":260,"zh":"塞薩羅尼基","en":"Thessaloniki","rate":220},{"id":261,"zh":"其他","en":"Other","rate":199}]},{"zh":"愛沙尼亞","en":"Estonia","entries":[{"id":262,"zh":"愛沙尼亞","en":"Estonia","rate":319}]},{"zh":"拉脫維亞","en":"Latvia","entries":[{"id":263,"zh":"里加","en":"Riga","seasons":[[[[5,1,9,30]],297],[[[10,1,4,30]],261]]},{"id":264,"zh":"其他","en":"Other","rate":192}]},{"zh":"立陶宛","en":"Lithuania","entries":[{"id":265,"zh":"維爾紐斯","en":"Vilnius","rate":228},{"id":266,"zh":"其他","en":"Other","rate":153}]},{"zh":"波蘭","en":"Poland","entries":[{"id":267,"zh":"華沙","en":"Warsaw","rate":236},{"id":268,"zh":"其他","en":"Other","rate":219}]},{"zh":"捷克","en":"Czech Republic","entries":[{"id":269,"zh":"布拉格","en":"Prauge","rate":248},{"id":270,"zh":"布爾諾","en":"Brno","rate":212},{"id":271,"zh":"克魯姆洛夫","en":"Cesky Krumlov","rate":207},{"id":272,"zh":"奧斯特拉瓦","en":"Ostrava","rate":172},{"id":273,"zh":"其他","en":"Other","rate":146}]},{"zh":"斯洛伐克","en":"Slovakia","entries":[{"id":274,"zh":"布拉提斯拉瓦","en":"Bratislava","rate":248},{"id":275,"zh":"其他","en":"Other","rate":214}]},{"zh":"羅馬尼亞","en":"Romania","entries":[{"id":276,"zh":"布加勒斯特","en":"Bucharest","rate":261},{"id":277,"zh":"蒂米什瓦拉","en":"Timisoara","rate":163},{"id":278,"zh":"其他","en":"Other","rate":129}]},{"zh":"保加利亞","en":"Bulgaria","entries":[{"id":279,"zh":"索菲亞","en":"Sofia","rate":223},{"id":280,"zh":"其他","en":"Other","rate":121}]},{"zh":"匈牙利","en":"Hungary","entries":[{"id":281,"zh":"布達佩斯","en":"Budapest","rate":261},{"id":282,"zh":"其他","en":"Other","rate":169}]},{"zh":"教廷","en":"Holy See, The","entries":[{"id":283,"zh":"教廷","en":"Holy See, The","rate":272}]},{"zh":"克羅埃西亞","en":"Croatia","entries":[{"id":284,"zh":"杜布羅夫尼克","en":"Dubrovnik","rate":328},{"id":285,"zh":"札格雷布","en":"Zagreb","rate":344},{"id":286,"zh":"其他","en":"Other","rate":209}]},{"zh":"塞浦路斯","en":"Cyprus","entries":[{"id":287,"zh":"尼古西亞","en":"Nicosia","rate":249},{"id":288,"zh":"其他","en":"Other","rate":151}]},{"zh":"斯洛維尼亞","en":"Slovenia","entries":[{"id":289,"zh":"斯洛維尼亞","en":"Slovenia","rate":297}]},{"zh":"波士尼亞赫塞哥維納","en":"Bosnia-Herzegovina","entries":[{"id":290,"zh":"塞拉耶佛","en":"Sarajevo","rate":188},{"id":291,"zh":"其他","en":"Other","rate":107}]},{"zh":"阿爾巴尼亞","en":"Albania","entries":[{"id":292,"zh":"地拉那","en":"Tirana","rate":164},{"id":293,"zh":"都拉斯","en":"Durres","rate":143},{"id":294,"zh":"科爾察","en":"Korca","rate":246},{"id":295,"zh":"薩蘭達","en":"Saranda","seasons":[[[[6,1,9,30]],298],[[[10,1,5,31]],213]]},{"id":296,"zh":"其他","en":"Other","rate":108}]}]},{"code":"D","zh":"北美洲地區","countries":[{"zh":"加拿大","en":"Canada","entries":[{"id":297,"zh":"卡爾加利","en":"Calgary","rate":296},{"id":298,"zh":"蒙特婁","en":"Montreal","rate":358},{"id":299,"zh":"渥太華","en":"Ottawa","rate":392},{"id":300,"zh":"多倫多","en":"Toronto","rate":392},{"id":301,"zh":"溫哥華","en":"Vancouver","rate":392},{"id":302,"zh":"其他","en":"Other","rate":281}]},{"zh":"美國","en":"U.S.A.","entries":[{"id":303,"zh":"舊金山","en":"San Francisco, California","rate":440},{"id":304,"zh":"洛杉磯","en":"Los Angeles, California","rate":372},{"id":305,"zh":"邁阿密","en":"Miami, Florida","rate":326},{"id":306,"zh":"夏威夷州","en":"State of Hawaii","rate":385},{"id":307,"zh":"芝加哥","en":"Chicago, Illinois","rate":339},{"id":308,"zh":"波士頓","en":"Boston, Massachuseetts","rate":395},{"id":309,"zh":"紐約市","en":"New York, New York","seasons":[[[[1,1,8,31]],510],[[[9,1,12,31]],580]]},{"id":310,"zh":"費城","en":"Philadelphia, Pennsylvania","rate":331},{"id":311,"zh":"華盛頓特區","en":"Washington","rate":403},{"id":312,"zh":"關島","en":"Guam","rate":266},{"id":313,"zh":"其他","en":"Other","rate":320}]}]},{"code":"E","zh":"拉丁美洲及加勒比海地區","countries":[{"zh":"墨西哥","en":"Mexico","entries":[{"id":314,"zh":"亞加普爾科","en":"Acapulco","rate":231},{"id":315,"zh":"坎昆","en":"Cancun","rate":261},{"id":316,"zh":"濟華花","en":"Chihuahua","rate":209},{"id":317,"zh":"華瑞茲城","en":"Ciudad Juarez","rate":209},{"id":318,"zh":"奎納瓦卡","en":"Cuernavaca","rate":219},{"id":319,"zh":"恩瑟納達","en":"Ensenada","rate":210},{"id":320,"zh":"瓜達拉哈拉","en":"Guadalajara","rate":216},{"id":321,"zh":"梅里達","en":"Merida","rate":188},{"id":322,"zh":"墨西哥城","en":"Mexico City","rate":367},{"id":323,"zh":"墨德勒","en":"Monterrey","rate":225},{"id":324,"zh":"拍布拉","en":"Puebla","rate":220},{"id":325,"zh":"瓦雅塔港","en":"Puerto Vallarta","rate":251},{"id":326,"zh":"其他","en":"Other","rate":141}]},{"zh":"瓜地馬拉","en":"Guatemala","entries":[{"id":327,"zh":"安地瓜","en":"Antigua","rate":247},{"id":328,"zh":"瓜地馬拉城","en":"Guatemala City","rate":229},{"id":329,"zh":"其他","en":"Other","rate":124}]},{"zh":"薩爾瓦多","en":"El Salvador","entries":[{"id":330,"zh":"聖薩爾瓦多","en":"San Salvador","rate":235},{"id":331,"zh":"其他","en":"Other","rate":144}]},{"zh":"宏都拉斯","en":"Honduras","entries":[{"id":332,"zh":"海灣島","en":"Bay Islands","rate":210},{"id":333,"zh":"汕埠","en":"San Pedro Sula","rate":234},{"id":334,"zh":"德古西加巴","en":"Tegucigalpa","rate":237},{"id":335,"zh":"其他","en":"Other","rate":133}]},{"zh":"巴哈馬","en":"Bahamas, The","entries":[{"id":336,"zh":"巴哈馬","en":"Bahamas, The","rate":590}]},{"zh":"尼加拉瓜","en":"Nicaragua","entries":[{"id":337,"zh":"馬拿瓜","en":"Managua","rate":171},{"id":338,"zh":"其他","en":"Other","rate":100}]},{"zh":"哥斯大黎加","en":"Costa Rica","entries":[{"id":339,"zh":"聖荷西","en":"San Jose","rate":219},{"id":340,"zh":"其他","en":"Other","rate":144}]},{"zh":"巴拿馬","en":"Panama","entries":[{"id":341,"zh":"巴拿馬市","en":"Panama City","rate":230},{"id":342,"zh":"其他","en":"Other","rate":156}]},{"zh":"海地","en":"Haiti","entries":[{"id":343,"zh":"太子港","en":"Port-au-Prince","rate":246},{"id":344,"zh":"其他","en":"Other","rate":173}]},{"zh":"多米尼克","en":"Dominica","entries":[{"id":345,"zh":"多米尼克","en":"Dominica","rate":444}]},{"zh":"多明尼加共和國","en":"Dominican Rep.","entries":[{"id":346,"zh":"拉羅馬拉","en":"La Romana","rate":182},{"id":347,"zh":"布拉達港","en":"Puerto Plata","rate":184},{"id":348,"zh":"聖多明哥","en":"Santo Domingo","rate":243},{"id":349,"zh":"迦納角","en":"Punta Cana","rate":334},{"id":350,"zh":"其他","en":"Other","rate":100}]},{"zh":"千里達及托貝哥","en":"Trinidad and Tobago","entries":[{"id":351,"zh":"千里達及托貝哥","en":"Trinidad and Tobago","rate":336}]},{"zh":"牙買加","en":"Jamaica","entries":[{"id":352,"zh":"牙買加","en":"Jamaica","rate":319}]},{"zh":"巴貝多","en":"Barbados","entries":[{"id":353,"zh":"巴貝多","en":"Barbados","seasons":[[[[4,16,12,15]],450],[[[12,16,4,15]],540]]}]},{"zh":"貝里斯","en":"Belize","entries":[{"id":354,"zh":"貝里斯市","en":"Belize City","rate":270},{"id":355,"zh":"聖佩卓","en":"San Pedro","rate":300},{"id":356,"zh":"其他","en":"Other","rate":201}]},{"zh":"百慕達","en":"Bermuda","entries":[{"id":357,"zh":"百慕達","en":"Bermuda","seasons":[[[[12,1,3,31]],582],[[[4,1,11,30]],708]]}]},{"zh":"聖文森","en":"Saint Vincent and the Grenadines","entries":[{"id":358,"zh":"聖文森","en":"Saint Vincent and the Grenadines","rate":326}]},{"zh":"聖露西亞","en":"Saint Lucia","entries":[{"id":359,"zh":"聖露西亞","en":"Saint Lucia","seasons":[[[[4,15,12,14]],496],[[[12,15,4,14]],530]]}]},{"zh":"古巴","en":"Cuba","entries":[{"id":360,"zh":"哈瓦那","en":"Havana","rate":256},{"id":361,"zh":"其他","en":"Other","rate":103}]},{"zh":"格瑞那達","en":"Grenada","entries":[{"id":362,"zh":"格瑞那達","en":"Grenada","seasons":[[[[12,15,4,15]],319],[[[4,16,12,14]],259]]}]},{"zh":"聖克里斯多福及尼維斯","en":"Saint Kitts and Nevis","entries":[{"id":363,"zh":"聖克里斯多福及尼維斯","en":"Saint Kitts and Nevis","seasons":[[[[4,15,12,14]],352],[[[12,15,4,14]],407]]}]},{"zh":"安地卡及巴布達","en":"Antigua and Barbuda","entries":[{"id":364,"zh":"安地卡及巴布達","en":"Antigua and Barbuda","seasons":[[[[1,1,6,1]],484],[[[6,2,12,31]],341]]}]},{"zh":"委內瑞拉","en":"Venezuela","entries":[{"id":365,"zh":"卡拉卡斯","en":"Caracas","rate":284},{"id":366,"zh":"馬拉開波","en":"Maracaibo","rate":127},{"id":367,"zh":"其他","en":"Other","rate":100}]},{"zh":"哥倫比亞","en":"Colombia","entries":[{"id":368,"zh":"波哥大","en":"Bogota","rate":133},{"id":369,"zh":"巴蘭幾亞","en":"Barranquilla","rate":129},{"id":370,"zh":"迦太基娜","en":"Cartagena","rate":175},{"id":371,"zh":"麥德林","en":"Medellin","rate":167},{"id":372,"zh":"其他","en":"Other","rate":100}]},{"zh":"蓋亞那","en":"Guyana","entries":[{"id":373,"zh":"佐治市","en":"Georgetown","rate":252},{"id":374,"zh":"其他","en":"Other","rate":148}]},{"zh":"厄瓜多爾","en":"Ecuador","entries":[{"id":375,"zh":"庫恩卡","en":"Cuenca","rate":183},{"id":376,"zh":"瓜亞基爾","en":"Guayaquil","rate":197},{"id":377,"zh":"曼塔","en":"Manta","rate":195},{"id":378,"zh":"基多","en":"Quito","rate":199},{"id":379,"zh":"拉巴島","en":"Galapagos","rate":322},{"id":380,"zh":"其他","en":"Other","rate":112}]},{"zh":"巴西","en":"Brazil","entries":[{"id":381,"zh":"巴西利亞","en":"Brasilia","rate":174},{"id":382,"zh":"古里提巴","en":"Curitiba","rate":137},{"id":383,"zh":"佛羅里安諾波里斯","en":"Florianopolis","rate":139},{"id":384,"zh":"里約熱內盧","en":"Rio de Janeiro","rate":233},{"id":385,"zh":"聖保羅","en":"Sao Paulo","rate":239},{"id":386,"zh":"其他","en":"Other","rate":126}]},{"zh":"秘魯","en":"Peru","entries":[{"id":387,"zh":"阿雷基帕","en":"Arequipa","rate":220},{"id":388,"zh":"庫斯科","en":"Cuzco","rate":237},{"id":389,"zh":"利馬","en":"Lima","rate":221},{"id":390,"zh":"特魯希略","en":"Trujillo","rate":230},{"id":391,"zh":"其他","en":"Other","rate":163}]},{"zh":"玻利維亞","en":"Bolivia","entries":[{"id":392,"zh":"拉巴斯","en":"LaPaz","rate":171},{"id":393,"zh":"聖塔克拉斯","en":"Santa Cruz","rate":121},{"id":394,"zh":"其他","en":"Other","rate":100}]},{"zh":"智利","en":"Chile","entries":[{"id":395,"zh":"聖地牙哥","en":"Santiago","rate":256},{"id":396,"zh":"其他","en":"Other","rate":244}]},{"zh":"阿根廷","en":"Argentina","entries":[{"id":397,"zh":"布宜諾斯艾利斯","en":"Buenos Aires","rate":368},{"id":398,"zh":"門多薩","en":"Mendoza","rate":413},{"id":399,"zh":"薩爾塔","en":"Salta","rate":185},{"id":400,"zh":"胡胡伊","en":"San Salvador de Jujuy","rate":188},{"id":401,"zh":"布蘭卡港及馬德普拉塔","en":"Bahia Blanca and Mar del Plata","rate":214},{"id":402,"zh":"巴里洛切","en":"Bariloche","rate":343},{"id":403,"zh":"內烏肯","en":"Neuquen","rate":281},{"id":404,"zh":"烏蘇懷亞","en":"Ushuaia","rate":305},{"id":405,"zh":"其他","en":"Other","rate":155}]},{"zh":"巴拉圭","en":"Paraguay","entries":[{"id":406,"zh":"亞松森","en":"Asuncion","rate":220},{"id":407,"zh":"東方市","en":"Ciudad del Este","rate":181},{"id":408,"zh":"其他","en":"Other","rate":120}]},{"zh":"烏拉圭","en":"Uruguay","entries":[{"id":409,"zh":"蒙特維多","en":"Montevideo","rate":231},{"id":410,"zh":"東岬","en":"Punta del Este","seasons":[[[[4,1,11,30]],206],[[[12,1,3,31]],340]]},{"id":411,"zh":"其他","en":"Other","rate":114}]},{"zh":"蘇利南","en":"Suriname","entries":[{"id":412,"zh":"巴拉馬利波","en":"Paramaribo","rate":260},{"id":413,"zh":"其他","en":"Other","rate":227}]}]},{"code":"F","zh":"非洲地區","countries":[{"zh":"埃及","en":"Egypt","entries":[{"id":414,"zh":"亞力山大港","en":"Alexandria","rate":272},{"id":415,"zh":"亞斯文","en":"Aswan","rate":276},{"id":416,"zh":"開羅","en":"Cairo","rate":305},{"id":417,"zh":"夏姆錫克","en":"Sharmel Sheikh","rate":259},{"id":418,"zh":"其他","en":"Other","rate":196}]},{"zh":"利比亞","en":"Libya","entries":[{"id":419,"zh":"的黎波里","en":"Tripoli","rate":191},{"id":420,"zh":"其他","en":"Other","rate":156}]},{"zh":"阿爾及利亞","en":"Algeria","entries":[{"id":421,"zh":"阿爾及爾","en":"Algiers","rate":267},{"id":422,"zh":"其他","en":"Other","rate":104}]},{"zh":"幾內亞","en":"Guinea","entries":[{"id":423,"zh":"科納克里","en":"Conakry","rate":239},{"id":424,"zh":"其他","en":"Other","rate":173}]},{"zh":"幾內亞比索","en":"Guinea-Bissau","entries":[{"id":425,"zh":"比索","en":"Bissau","rate":134},{"id":426,"zh":"其他","en":"Other","rate":100}]},{"zh":"獅子山國","en":"Sierra Leone","entries":[{"id":427,"zh":"自由城","en":"Freetown","rate":239},{"id":428,"zh":"其他","en":"Other","rate":105}]},{"zh":"賴比瑞亞","en":"Liberia","entries":[{"id":429,"zh":"蒙羅維亞","en":"Monrovia","rate":247},{"id":430,"zh":"其他","en":"Other","rate":128}]},{"zh":"象牙海岸","en":"Cote D'ivoire","entries":[{"id":431,"zh":"阿比尚","en":"Abidjan","rate":256},{"id":432,"zh":"雅穆索戈","en":"Yamoussoukro","rate":219},{"id":433,"zh":"其他","en":"Other","rate":149}]},{"zh":"迦納","en":"Ghana","entries":[{"id":434,"zh":"阿克拉","en":"Accra","rate":311},{"id":435,"zh":"其他","en":"Other","rate":204}]},{"zh":"多哥","en":"Togo","entries":[{"id":436,"zh":"洛梅","en":"Lome","rate":253},{"id":437,"zh":"其他","en":"Other","rate":108}]},{"zh":"貝南","en":"Benin","entries":[{"id":438,"zh":"柯多努","en":"Cotonou","rate":219},{"id":439,"zh":"其他","en":"Other","rate":102}]},{"zh":"布吉納法索","en":"Burkina Faso","entries":[{"id":440,"zh":"卜卜迪拉索","en":"Bobo-Dioulasso","rate":165},{"id":441,"zh":"瓦加杜古","en":"Ouagadougou","rate":249},{"id":442,"zh":"其他","en":"Other","rate":132}]},{"zh":"奈及利亞","en":"Nigeria","entries":[{"id":443,"zh":"阿布札","en":"Abuja","rate":213},{"id":444,"zh":"拉哥斯","en":"Lagos","rate":222},{"id":445,"zh":"哈科特港","en":"Port Harcourt","rate":158},{"id":446,"zh":"貝寧城","en":"Benin City","rate":186},{"id":447,"zh":"卡諾","en":"Kano","rate":111},{"id":448,"zh":"其他","en":"Other","rate":100}]},{"zh":"喀麥隆","en":"Cameroon","entries":[{"id":449,"zh":"杜阿拉","en":"Douala","rate":207},{"id":450,"zh":"雅恩德","en":"Yaounde","rate":224},{"id":451,"zh":"其他","en":"Other","rate":125}]},{"zh":"中非共和國","en":"Central African Rep","entries":[{"id":452,"zh":"班基","en":"Bangui","rate":235},{"id":453,"zh":"其他","en":"Other","rate":100}]},{"zh":"赤道幾內亞","en":"Equatorial Guinea","entries":[{"id":454,"zh":"馬拉布","en":"Malabo","rate":251},{"id":455,"zh":"其他","en":"Other","rate":230}]},{"zh":"加彭","en":"Gabon","entries":[{"id":456,"zh":"自由市","en":"Libreville","rate":351},{"id":457,"zh":"其他","en":"Other","rate":148}]},{"zh":"剛果共和國","en":"Republic of the Congo","entries":[{"id":458,"zh":"布拉薩市","en":"Brazzaville","rate":329},{"id":459,"zh":"其他","en":"Other","rate":135}]},{"zh":"剛果民主共和國","en":"Democratic Republic of the Congo","entries":[{"id":460,"zh":"布卡烏","en":"Bukavu","rate":199},{"id":461,"zh":"哥馬","en":"Goma","rate":205},{"id":462,"zh":"金夏沙","en":"Kinshasa","rate":373},{"id":463,"zh":"羅彭巴布","en":"Lubumbashi","rate":213},{"id":464,"zh":"木布吉馬伊,卡塞","en":"Mbuji Mayi, Kasai","rate":175},{"id":465,"zh":"其他","en":"Other","rate":141}]},{"zh":"安哥拉","en":"Angola","entries":[{"id":466,"zh":"羅安達","en":"Luanda","rate":382},{"id":467,"zh":"其他","en":"Other","rate":122}]},{"zh":"波札那","en":"Botswana","entries":[{"id":468,"zh":"嘉伯隆里","en":"Gaborone","rate":216},{"id":469,"zh":"卡薩尼","en":"Kasane","rate":260},{"id":470,"zh":"其他","en":"Other","rate":156}]},{"zh":"辛巴威","en":"Zimbabwe","entries":[{"id":471,"zh":"阿拉爾","en":"Harare","rate":258},{"id":472,"zh":"維多利亞瀑布城","en":"Victoria Falls","rate":281},{"id":473,"zh":"其他","en":"Other","rate":125}]},{"zh":"馬拉威","en":"Malawi","entries":[{"id":474,"zh":"布蘭岱","en":"Blantyre","rate":206},{"id":475,"zh":"里朗威","en":"Lilongwe","rate":157},{"id":476,"zh":"其他","en":"Other","rate":110}]},{"zh":"莫三比克","en":"Mozambique","entries":[{"id":477,"zh":"馬布多","en":"Maputo","rate":237},{"id":478,"zh":"貝拉","en":"Beira","rate":191},{"id":479,"zh":"其他","en":"Other","rate":172}]},{"zh":"尚比亞","en":"Zambia","entries":[{"id":480,"zh":"利文斯頓","en":"Livingstone","rate":337},{"id":481,"zh":"路沙卡","en":"Lusaka","rate":318},{"id":482,"zh":"其他","en":"Other","rate":126}]},{"zh":"坦尚尼亞","en":"Tanzania","entries":[{"id":483,"zh":"沙蘭港","en":"Dares Salaam","rate":225},{"id":484,"zh":"其他","en":"Other","rate":123}]},{"zh":"蒲隆地","en":"Burundi","entries":[{"id":485,"zh":"布松布拉","en":"Bujumbura","rate":273},{"id":486,"zh":"吉特加及恩戈齊","en":"Gitega and Ngozi","rate":126},{"id":487,"zh":"魯蒙蓋","en":"Rumonge","rate":279},{"id":488,"zh":"其他","en":"Other","rate":105}]},{"zh":"盧安達","en":"Rwanda","entries":[{"id":489,"zh":"吉佳利","en":"Kigali","rate":251},{"id":490,"zh":"魯亨蓋里","en":"Ruhengeri","rate":265},{"id":491,"zh":"其他","en":"Other","rate":155}]},{"zh":"烏干達","en":"Uganda","entries":[{"id":492,"zh":"安德比","en":"Entebbe","rate":232},{"id":493,"zh":"康培拉","en":"Kampala","rate":252},{"id":494,"zh":"其他","en":"Other","rate":100}]},{"zh":"肯亞","en":"Kenya","entries":[{"id":495,"zh":"蒙巴沙","en":"Mombasa","rate":217},{"id":496,"zh":"奈洛比","en":"Nairobi","rate":267},{"id":497,"zh":"其他","en":"Other","rate":102}]},{"zh":"索馬利亞","en":"Somalia","entries":[{"id":498,"zh":"摩加迪休","en":"Mogadishu","rate":191},{"id":499,"zh":"其他","en":"Other","rate":100}]},{"zh":"索馬利蘭共和國","en":"Republic of Somaliland","entries":[{"id":500,"zh":"索馬利蘭共和國","en":"Republic of Somaliland","rate":126}]},{"zh":"吉布地","en":"Djibouti","entries":[{"id":501,"zh":"吉布地","en":"Djibouti","rate":260},{"id":502,"zh":"其他","en":"Other","rate":115}]},{"zh":"衣索匹亞","en":"Ethiopia","entries":[{"id":503,"zh":"阿迪斯阿貝巴","en":"Addis Ababa","rate":209},{"id":504,"zh":"其他","en":"Other","rate":100}]},{"zh":"厄利垂亞","en":"Eritrea","entries":[{"id":505,"zh":"阿斯馬拉","en":"Asmara","rate":159},{"id":506,"zh":"其他","en":"Other","rate":115}]},{"zh":"蘇丹","en":"Sudan","entries":[{"id":507,"zh":"喀土木","en":"Khartoum","rate":208},{"id":508,"zh":"其他","en":"Other","rate":125}]},{"zh":"南蘇丹","en":"South Sudan","entries":[{"id":509,"zh":"朱巴","en":"Juba","rate":128},{"id":510,"zh":"其他","en":"Other","rate":100}]},{"zh":"模里西斯","en":"Mauritius","entries":[{"id":511,"zh":"模里西斯","en":"Mauritius","rate":276}]},{"zh":"馬達加斯加","en":"Madagascar","entries":[{"id":512,"zh":"安塔那那利佛","en":"Antananarivo","rate":206},{"id":513,"zh":"其他","en":"Other","rate":100}]},{"zh":"南非共和國","en":"South Africa Rep","entries":[{"id":514,"zh":"開普敦","en":"Cape Town","rate":263},{"id":515,"zh":"德班","en":"Durban","rate":244},{"id":516,"zh":"東倫敦","en":"East London","rate":160},{"id":517,"zh":"約翰尼斯堡","en":"Johannesburg","rate":237},{"id":518,"zh":"普利托里亞","en":"Pretoria","rate":169},{"id":519,"zh":"其他","en":"Other","rate":122}]},{"zh":"納密比亞","en":"Namibia","entries":[{"id":520,"zh":"文豪克","en":"Windhoek","rate":164},{"id":521,"zh":"其他","en":"Other","rate":100}]},{"zh":"史瓦帝尼","en":"Eswatini","entries":[{"id":522,"zh":"墨巴本","en":"Mbabane","rate":168},{"id":523,"zh":"其他","en":"Other","rate":138}]},{"zh":"賴索托","en":"Lesotho","entries":[{"id":524,"zh":"馬塞魯","en":"Maseru","rate":217},{"id":525,"zh":"其他","en":"Other","rate":100}]},{"zh":"查德","en":"Chad","entries":[{"id":526,"zh":"恩加美納","en":"Ndjamena","rate":246},{"id":527,"zh":"其他","en":"Other","rate":115}]},{"zh":"葛摩","en":"Comoros","entries":[{"id":528,"zh":"莫洛尼","en":"Moroni","rate":283},{"id":529,"zh":"其他","en":"Other","rate":232}]},{"zh":"甘比亞","en":"Gambia","entries":[{"id":530,"zh":"班竹","en":"Banjul","rate":194},{"id":531,"zh":"其他","en":"Other","rate":100}]},{"zh":"茅利塔尼亞","en":"Mauritania","entries":[{"id":532,"zh":"諾克少","en":"Nouakchott","rate":147},{"id":533,"zh":"其他","en":"Other","rate":100}]},{"zh":"馬利","en":"Mali","entries":[{"id":534,"zh":"巴馬科","en":"Bamako","rate":228},{"id":535,"zh":"其他","en":"Other","rate":113}]},{"zh":"尼日","en":"Niger","entries":[{"id":536,"zh":"尼阿美","en":"Niamey","rate":182},{"id":537,"zh":"其他","en":"Other","rate":112}]},{"zh":"塞內加爾","en":"Senegal","entries":[{"id":538,"zh":"達卡","en":"Dakar","rate":276},{"id":539,"zh":"其他","en":"Other","rate":187}]},{"zh":"突尼西亞","en":"Tunisia","entries":[{"id":540,"zh":"突尼斯","en":"Tunis","rate":217},{"id":541,"zh":"其他","en":"Other","rate":140}]},{"zh":"維德角","en":"Cabo Verde","entries":[{"id":542,"zh":"培亞","en":"Praia","rate":217},{"id":543,"zh":"其他","en":"Other","rate":148}]},{"zh":"摩洛哥","en":"Morocco","entries":[{"id":544,"zh":"卡薩布蘭加","en":"Casablanca","rate":274},{"id":545,"zh":"馬拉喀什","en":"Marrakech","rate":275},{"id":546,"zh":"拉巴特","en":"Rabat","rate":277},{"id":547,"zh":"丹吉爾","en":"Tangier","rate":273},{"id":548,"zh":"其他","en":"Other","rate":222}]},{"zh":"塞席爾","en":"Seychelles","entries":[{"id":549,"zh":"塞席爾","en":"Seychelles","rate":403}]},{"zh":"聖多美普林西比","en":"Sao Tome and Principe","entries":[{"id":550,"zh":"聖多美","en":"Sao Tome","rate":199},{"id":551,"zh":"普林西比","en":"Principe","rate":132}]}]}];
+
+// 不在日支表內的地區：港澳及大陸另有日支表，需手動輸入
+DATA.push({code:"G", zh:"港澳及大陸地區（另有日支表）", countries:[
+  {zh:"香港", en:"Hong Kong", entries:[{id:0, zh:"香港", en:"", manual:true}]},
+  {zh:"澳門", en:"Macau", entries:[{id:0, zh:"澳門", en:"", manual:true}]},
+  {zh:"中國大陸", en:"China", entries:[{id:0, zh:"中國大陸", en:"", manual:true}]}
+]});
+
+// 機場建議（城市優先，其次國家）
+var CITY_AP = {
+ "東京":[["NRT","成田"],["HND","羽田"]],"橫濱":[["HND","羽田"],["NRT","成田"]],"大阪":[["KIX","關西"]],"京都":[["KIX","關西"]],"神戶":[["KIX","關西"],["UKB","神戶"]],
+ "名古屋":[["NGO","中部"]],"福岡":[["FUK","福岡"]],"首爾":[["ICN","仁川"],["GMP","金浦"]],"仁川":[["ICN","仁川"]],"濟州":[["CJU","濟州"]],
+ "曼谷":[["BKK","素萬那普"],["DMK","廊曼"]],"清邁":[["CNX","清邁"]],"普吉":[["HKT","普吉"]],"芭達雅":[["BKK","素萬那普"]],
+ "新加坡":[["SIN","樟宜"]],"吉隆坡":[["KUL","吉隆坡"]],"沙巴":[["BKI","亞庇"]],"雅加達":[["CGK","蘇卡諾哈達"]],"巴里島":[["DPS","登巴薩"]],
+ "大馬尼拉都會區":[["MNL","馬尼拉"]],"宿霧":[["CEB","宿霧"]],"胡志明市":[["SGN","新山一"]],"河內":[["HAN","內排"]],"蜆港":[["DAD","峴港"]],
+ "金邊":[["PNH","金邊"]],"暹粒":[["REP","暹粒"]],"永珍":[["VTE","永珍"]],"仰光":[["RGN","仰光"]],"德里國家首都轄區／國家首都區":[["DEL","德里"]],
+ "孟買":[["BOM","孟買"]],"邦加羅爾":[["BLR","邦加羅爾"]],"清奈":[["MAA","清奈"]],"加爾各答":[["CCU","加爾各答"]],
+ "雪梨":[["SYD","雪梨"]],"墨爾本":[["MEL","墨爾本"]],"布里斯本":[["BNE","布里斯本"]],"坎培拉":[["CBR","坎培拉"]],"奧克蘭":[["AKL","奧克蘭"]],"威靈頓":[["WLG","威靈頓"]],
+ "杜拜":[["DXB","杜拜"]],"阿布達比":[["AUH","阿布達比"]],"伊斯坦堡":[["IST","伊斯坦堡"]],"安卡拉":[["ESB","安卡拉"]],
+ "巴黎":[["CDG","戴高樂"],["ORY","奧利"]],"柏林":[["BER","柏林"]],"慕尼黑":[["MUC","慕尼黑"]],"漢堡":[["HAM","漢堡"]],"布魯塞爾":[["BRU","布魯塞爾"]],
+ "倫敦":[["LHR","希斯洛"],["LGW","蓋威克"]],"馬德里":[["MAD","馬德里"]],"巴塞隆納":[["BCN","巴塞隆納"]],"里斯本":[["LIS","里斯本"]],
+ "羅馬":[["FCO","羅馬"]],"米蘭":[["MXP","馬爾彭薩"]],"威尼斯":[["VCE","威尼斯"]],"佛羅倫斯":[["FLR","佛羅倫斯"]],"那不勒斯":[["NAP","那不勒斯"]],
+ "布拉格":[["PRG","布拉格"]],"華沙":[["WAW","華沙"]],"布達佩斯":[["BUD","布達佩斯"]],"維也納":[["VIE","維也納"]],"雅典":[["ATH","雅典"]],
+ "赫爾辛基":[["HEL","赫爾辛基"]],"斯德哥爾摩":[["ARN","阿蘭達"]],"舊金山":[["SFO","舊金山"]],"洛杉磯":[["LAX","洛杉磯"]],"芝加哥":[["ORD","歐海爾"]],
+ "紐約市":[["JFK","甘迺迪"],["EWR","紐華克"]],"波士頓":[["BOS","波士頓"]],"華盛頓特區":[["IAD","杜勒斯"],["DCA","雷根"]],"邁阿密":[["MIA","邁阿密"]],
+ "夏威夷州":[["HNL","檀香山"]],"費城":[["PHL","費城"]],"關島":[["GUM","關島"]],"溫哥華":[["YVR","溫哥華"]],"多倫多":[["YYZ","多倫多"]],
+ "蒙特婁":[["YUL","蒙特婁"]],"渥太華":[["YOW","渥太華"]],"卡爾加利":[["YYC","卡爾加利"]],"墨西哥城":[["MEX","墨西哥城"]],"坎昆":[["CUN","坎昆"]],
+ "聖保羅":[["GRU","瓜魯柳斯"]],"里約熱內盧":[["GIG","加利昂"]],"布宜諾斯艾利斯":[["EZE","埃塞薩"]],"聖地牙哥":[["SCL","聖地牙哥"]],"利馬":[["LIM","利馬"]],
+ "波哥大":[["BOG","波哥大"]],"開羅":[["CAI","開羅"]],"約翰尼斯堡":[["JNB","約翰尼斯堡"]],"開普敦":[["CPT","開普敦"]],"奈洛比":[["NBO","奈洛比"]],
+ "香港":[["HKG","香港"]],"澳門":[["MFM","澳門"]],"中國大陸":[["PVG","上海浦東"],["PEK","北京首都"],["CAN","廣州"],["SZX","深圳"],["CTU","成都"]]
+};
+var COUNTRY_AP = {
+ "日本":[["NRT","東京成田"],["HND","東京羽田"],["KIX","大阪關西"],["FUK","福岡"],["CTS","札幌"],["OKA","沖繩"],["NGO","名古屋"]],
+ "南韓":[["ICN","首爾仁川"],["GMP","首爾金浦"],["PUS","釜山"],["CJU","濟州"]],"泰國":[["BKK","曼谷"],["DMK","曼谷廊曼"],["CNX","清邁"],["HKT","普吉"]],
+ "越南":[["SGN","胡志明市"],["HAN","河內"],["DAD","峴港"]],"菲律賓":[["MNL","馬尼拉"],["CEB","宿霧"]],"馬來西亞":[["KUL","吉隆坡"],["PEN","檳城"]],
+ "印尼":[["CGK","雅加達"],["DPS","峇里島"]],"印度":[["DEL","德里"],["BOM","孟買"]],"澳大利亞":[["SYD","雪梨"],["MEL","墨爾本"]],"紐西蘭":[["AKL","奧克蘭"]],
+ "美國":[["LAX","洛杉磯"],["SFO","舊金山"],["SEA","西雅圖"],["JFK","紐約"],["IAH","休士頓"],["ORD","芝加哥"],["IAD","華盛頓"],["HNL","檀香山"]],
+ "加拿大":[["YVR","溫哥華"],["YYZ","多倫多"]],"英國":[["LHR","倫敦"]],"法國":[["CDG","巴黎"]],"德國":[["FRA","法蘭克福"],["MUC","慕尼黑"]],
+ "荷蘭":[["AMS","阿姆斯特丹"]],"奧地利":[["VIE","維也納"]],"義大利":[["FCO","羅馬"],["MXP","米蘭"]],"瑞士":[["ZRH","蘇黎世"],["GVA","日內瓦"]],
+ "捷克":[["PRG","布拉格"]],"西班牙":[["MAD","馬德里"],["BCN","巴塞隆納"]],"葡萄牙":[["LIS","里斯本"]],"土耳其":[["IST","伊斯坦堡"]],
+ "阿拉伯聯合大公國":[["DXB","杜拜"],["AUH","阿布達比"]],"比利時":[["BRU","布魯塞爾"]],"波蘭":[["WAW","華沙"]],"匈牙利":[["BUD","布達佩斯"]],
+ "希臘":[["ATH","雅典"]],"丹麥":[["CPH","哥本哈根"]],"瑞典":[["ARN","斯德哥爾摩"]],"挪威":[["OSL","奧斯陸"]],"芬蘭":[["HEL","赫爾辛基"]],
+ "愛爾蘭":[["DUB","都柏林"]],"冰島":[["KEF","凱夫拉維克"]],"墨西哥":[["MEX","墨西哥城"],["CUN","坎昆"]],"巴西":[["GRU","聖保羅"],["GIG","里約"]],
+ "阿根廷":[["EZE","布宜諾斯艾利斯"]],"智利":[["SCL","聖地牙哥"]],"秘魯":[["LIM","利馬"]],"埃及":[["CAI","開羅"]],"南非共和國":[["JNB","約翰尼斯堡"],["CPT","開普敦"]],
+ "肯亞":[["NBO","奈洛比"]],"柬埔寨":[["PNH","金邊"],["REP","暹粒"]],"寮國":[["VTE","永珍"]],"緬甸":[["RGN","仰光"]],"斯里蘭卡":[["CMB","可倫坡"]],
+ "尼泊爾":[["KTM","加德滿都"]],"蒙古":[["ULN","烏蘭巴托"]],"汶萊":[["BWN","汶萊"]],"帛琉共和國":[["ROR","帛琉"]],"新加坡":[["SIN","新加坡"]],
+ "盧森堡":[["LUX","盧森堡"]],"摩洛哥":[["CMN","卡薩布蘭加"]],"以色列":[["TLV","台拉維夫"]],"卡達":[["DOH","杜哈"]],"沙烏地阿拉伯":[["RUH","利雅德"],["JED","吉達"]]
+};
 
 var $ = function (id) { return document.getElementById(id); };
 var store = {
   get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
   set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 };
-
 function fmt(n) { return Math.round(n).toLocaleString("zh-TW"); }
 function num(id) { var v = parseFloat($(id).value); return isNaN(v) ? 0 : v; }
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
 
-// --- 初始化選單
-var cs = $("country");
-DEST.forEach(function (d, i) {
-  var o = document.createElement("option"); o.value = i; o.textContent = d[0]; cs.appendChild(o);
+// ---------- 三層選單 ----------
+var regionSel = $("region"), countrySel = $("country"), citySel = $("city");
+DATA.forEach(function (r, i) {
+  var o = document.createElement("option"); o.value = i;
+  o.textContent = (r.code === "G" ? "" : r.code + "　") + r.zh; regionSel.appendChild(o);
 });
+function label(x) { return x.zh + (x.en ? "（" + x.en + "）" : ""); }
+function fillCountries() {
+  countrySel.innerHTML = "";
+  DATA[regionSel.value].countries.forEach(function (c, i) {
+    var o = document.createElement("option"); o.value = i; o.textContent = label(c); countrySel.appendChild(o);
+  });
+  fillCities();
+}
+function fillCities() {
+  citySel.innerHTML = "";
+  var c = DATA[regionSel.value].countries[countrySel.value];
+  c.entries.forEach(function (e, i) {
+    var o = document.createElement("option"); o.value = i; o.textContent = label(e); citySel.appendChild(o);
+  });
+  fillAirports();
+}
+function cur() {
+  var c = DATA[regionSel.value].countries[countrySel.value];
+  return { region: DATA[regionSel.value], country: c, entry: c.entries[citySel.value] };
+}
 function fillAirports() {
-  var to = $("to"); to.innerHTML = "";
-  DEST[cs.value][1].forEach(function (a) {
-    var o = document.createElement("option"); o.value = a[0]; o.textContent = a[1] + " " + a[0]; to.appendChild(o);
+  var s = cur(), list = CITY_AP[s.entry.zh] || COUNTRY_AP[s.country.zh] || [];
+  var dl = $("toList"); dl.innerHTML = "";
+  list.forEach(function (a) {
+    var o = document.createElement("option"); o.value = a[0]; o.label = a[1]; o.textContent = a[0] + " " + a[1]; dl.appendChild(o);
+  });
+  $("to").value = list.length ? list[0][0] : "";
+}
+
+// ---------- 日期工具 ----------
+function parseISO(s) { var p = s.split("-"); return Date.UTC(+p[0], +p[1] - 1, +p[2]); }
+function addDays(ms, n) { return new Date(ms + n * 86400000); }
+function isoOf(d) { return d.toISOString().slice(0, 10); }
+function tripDays() {
+  if (!$("d1").value || !$("d2").value) return 0;
+  var a = parseISO($("d1").value), b = parseISO($("d2").value);
+  return b < a ? 0 : Math.round((b - a) / 86400000) + 1;
+}
+function mmdd(m, d) { return String(m).padStart(2, "0") + "/" + String(d).padStart(2, "0"); }
+function inRanges(ranges, m, d) {
+  var x = m * 100 + d;
+  return ranges.some(function (r) {
+    var s = r[0] * 100 + r[1], e = r[2] * 100 + r[3];
+    return s <= e ? (x >= s && x <= e) : (x >= s || x <= e);
   });
 }
-fillAirports();
 
-// 預設日期：一個月後出發，停留 5 天
-(function () {
-  var t = new Date(); t.setDate(t.getDate() + 30);
-  var r = new Date(t); r.setDate(r.getDate() + 4);
-  var iso = function (d) { return d.toISOString().slice(0, 10); };
-  $("d1").value = iso(t); $("d2").value = iso(r);
-})();
-
-// --- 日數
-function tripDays() {
-  var a = new Date($("d1").value), b = new Date($("d2").value);
-  if (isNaN(a) || isNaN(b) || b < a) return 0;
-  return Math.round((b - a) / 86400000) + 1;
-}
-
-// --- 查價連結
-function ymd(s) { return s.slice(2, 4) + s.slice(5, 7) + s.slice(8, 10); }
-function buildLinks() {
-  var f = $("from").value, t = $("to").value, d1 = $("d1").value, d2 = $("d2").value;
-  var box = $("links"); box.innerHTML = "";
-  var cabinWord = $("cabin").value === "b" ? " business class" : "";
-  function add(label, url) {
-    var a = document.createElement("a");
-    a.href = url; a.target = "_blank"; a.rel = "noopener"; a.textContent = label;
-    box.appendChild(a);
+// ---------- 日支數額（逐日） ----------
+function rateOnDate(s, dt) {
+  var e = s.entry;
+  if (e.manual) return { usd: 0, src: "manual" };
+  if (e.rate != null) return { usd: e.rate, src: "flat" };
+  var m = dt.getUTCMonth() + 1, d = dt.getUTCDate();
+  for (var i = 0; i < e.seasons.length; i++) {
+    if (inRanges(e.seasons[i][0], m, d)) return { usd: e.seasons[i][1], src: "season" };
   }
-  add("長榮航空官網", "https://www.evaair.com/zh-tw/index.html");
-  add("中華航空官網", "https://www.china-airlines.com/tw/zh");
-  if (d1 && d2) {
-    var q = function (air) {
-      return "https://www.google.com/travel/flights?q=" + encodeURIComponent(
-        "Flights from " + f + " to " + t + " on " + d1 + " through " + d2 + (air ? " on " + air : "") + cabinWord);
-    };
-    add("Google Flights（全部）", q(""));
-    add("Google Flights（長榮）", q("EVA Air"));
-    add("Google Flights（華航）", q("China Airlines"));
-    var cab = $("cabin").value === "b" ? "business" : "economy";
-    add("Skyscanner", "https://www.skyscanner.com.tw/transport/flights/" + f.toLowerCase() + "/" + t.toLowerCase() + "/" + ymd(d1) + "/" + ymd(d2) + "/?adultsv2=" + Math.max(1, num("pax")) + "&cabinclass=" + cab);
+  var other = s.country.entries.filter(function (x) { return x.zh === "其他"; })[0];
+  if (other && other.rate != null) return { usd: other.rate, src: "fallback" };
+  return { usd: 0, src: "none" };
+}
+function factorAt(i) {
+  if (!$("longStay").checked) return 1;
+  return i < 30 ? 1 : (i < 90 ? 0.8 : 0.7);
+}
+
+function seasonsCoverYear(e) {
+  var md = [31,28,31,30,31,30,31,31,30,31,30,31];
+  for (var m = 1; m <= 12; m++) for (var d = 1; d <= md[m - 1]; d++) {
+    var ok = e.seasons.some(function (x) { return inRanges(x[0], m, d); });
+    if (!ok) return false;
   }
+  return true;
+}
+function renderRateInfo(s) {
+  var e = s.entry, h = "";
+  var name = esc(s.country.zh + (e.zh !== s.country.zh ? "・" + e.zh : ""));
+  if (e.manual) {
+    h = name + "：此地區不在本日支數額表內，請在下方「手動覆寫」填入該地區適用的數額。";
+  } else if (e.rate != null) {
+    h = name + "：<strong>US$ " + e.rate + "</strong>／人／日";
+  } else {
+    h = name + "：數額依日期分季節<ul style='margin:6px 0 0;padding-left:20px'>";
+    e.seasons.forEach(function (x) {
+      h += "<li>" + x[0].map(function (r) { return mmdd(r[0], r[1]) + "–" + mmdd(r[2], r[3]); }).join("、") + "：US$ " + x[1] + "</li>";
+    });
+    var other = s.country.entries.filter(function (z) { return z.zh === "其他"; })[0];
+    h += "</ul>" + (other && !seasonsCoverYear(e) ? "<div class='note'>表中未列載的期間，依附註按該國「其他」US$ " + other.rate + " 支給。</div>" : "");
+  }
+  $("rateInfo").innerHTML = h;
 }
 
-// --- 日支記憶
-function pdKey() { return "pd:" + DEST[cs.value][0] + "|" + $("city").value.trim(); }
-function loadPD() {
-  var v = store.get(pdKey());
-  $("perdiem").value = v || "";
-  var r = store.get("rate"); if (r && !$("rate").value) $("rate").value = r;
-}
-function savePD() {
-  if ($("perdiem").value) store.set(pdKey(), $("perdiem").value);
-  if ($("rate").value) store.set("rate", $("rate").value);
+var lastSummary = "";
+var payTouched = false;
+function calc() {
+  var s = cur(), days = tripDays(), pax = Math.max(1, num("pax"));
+  $("daysInfo").textContent = days
+    ? "共 " + days + " 天（含出發與返國當日），" + Math.max(0, days - 1) + " 晚。"
+    : "請確認返國日期不早於出發日期。";
+  if (!payTouched) $("payDays").value = days || "";
+  var payDays = Math.max(0, Math.floor(num("payDays")));
+  var rate = num("rate"), override = num("override");
+  renderRateInfo(s);
+
+  // 逐日計算，並把相同數額與折算的連續日合併成一列
+  var runs = [], usdOne = 0, usedFallback = false, noData = false;
+  if ($("d1").value) {
+    var t0 = parseISO($("d1").value);
+    for (var i = 0; i < payDays; i++) {
+      var dt = addDays(t0, i), r;
+      if (override > 0) r = { usd: override, src: "override" }; else r = rateOnDate(s, dt);
+      if (r.src === "fallback") usedFallback = true;
+      if (r.src === "none" || r.src === "manual") noData = true;
+      var f = factorAt(i), last = runs[runs.length - 1];
+      if (last && last.usd === r.usd && last.f === f) { last.n++; last.end = isoOf(dt); }
+      else runs.push({ start: isoOf(dt), end: isoOf(dt), n: 1, usd: r.usd, f: f });
+    }
+  }
+  var rows = "";
+  runs.forEach(function (r) {
+    var sub = r.n * r.usd * r.f; usdOne += sub;
+    rows += "<tr><td>" + r.start + (r.end !== r.start ? " ～ " + r.end : "") + "</td><td class='r'>" + r.n +
+      "</td><td class='r'>" + r.usd + "</td><td class='r'>" + (r.f === 1 ? "100%" : Math.round(r.f * 100) + "%") +
+      "</td><td class='r'>" + sub.toFixed(2) + "</td></tr>";
+  });
+  if (!runs.length) rows = "<tr><td colspan='5' class='note'>請先選好出發日期與計支日數。</td></tr>";
+  $("runRows").innerHTML = rows;
+  usdOne = Math.ceil(usdOne - 1e-9) || 0;        // 附註 4：尾數不足 1 元進位
+  var twdOne = usdOne * rate;
+
+  var pd = "";
+  [["住宿（70%）", .7], ["膳食（20%）", .2], ["零用（10%）", .1]].forEach(function (x) {
+    pd += "<tr><td>" + x[0] + "</td><td class='r'>" + fmt(usdOne * x[1]) + "</td><td class='r'>" + fmt(twdOne * x[1]) + "</td></tr>";
+  });
+  pd += "<tr><td><strong>每人日支合計</strong></td><td class='r'><strong>" + fmt(usdOne) + "</strong></td><td class='r'><strong>" + fmt(twdOne) + "</strong></td></tr>";
+  $("pdRows").innerHTML = pd;
+
+  // 警示
+  var warns = [];
+  if ($("d1").value && $("d1").value < "2026-01-01") warns.push("此日支數額表自 2026-01-01 起生效，出發日早於此日請改用當時適用的舊表。");
+  if (usedFallback) warns.push("行程中有日期不在該城市的季節表內，已依附註改用該國「其他」數額。");
+  if (noData && override <= 0) warns.push("此行程缺少日支數額，請手動覆寫。");
+  if (!rate) warns.push("尚未填入匯率，日支新台幣金額暫以 0 計。");
+  var w = $("warnBox");
+  if (!w) { w = document.createElement("div"); w.id = "warnBox"; w.className = "warn"; $("rateInfo").after(w); }
+  w.style.display = warns.length ? "" : "none"; w.innerHTML = warns.map(esc).join("<br>");
+
+  // 機票
+  var fare = fareChosen(), buf = Math.max(0, num("buffer")) / 100;
+  var fareTotal = fare * pax * (1 + buf);
+  var pdTotal = twdOne * pax;
+  var gift = num("oGift") * payDays * pax;
+  var base = num("oVisa") + num("oIns") + num("oTrans") + num("oMisc");
+  var grand = fareTotal + pdTotal + base + gift;
+
+  var out = "";
+  function line(label, val, sub) { out += "<tr><td>" + label + (sub ? "<div class='note'>" + sub + "</div>" : "") + "</td><td class='r'>" + fmt(val) + "</td></tr>"; }
+  line("機票", fareTotal, fare ? "NT$ " + fmt(fare) + " × " + pax + " 人" + (buf ? " × (1 + " + Math.round(buf * 100) + "% 緩衝)" : "") : "尚未填入票價");
+  line("日支生活費", pdTotal, usdOne && rate ? "US$ " + fmt(usdOne) + " × 匯率 " + rate + " × " + pax + " 人" : "請確認日支數額與匯率");
+  line("簽證／保險／交通／其他", base, "");
+  line("禮品交際及雜費", gift, num("oGift") ? "NT$ " + fmt(num("oGift")) + " × " + payDays + " 日 × " + pax + " 人" : "");
+  out += "<tr><td><strong>合計</strong></td><td class='r'><strong>NT$ " + fmt(grand) + "</strong></td></tr>";
+  $("sumRows").innerHTML = out;
+  $("grand").textContent = "NT$ " + fmt(grand);
+
+  lastSummary = [
+    "出國經費試算",
+    "目的地：" + s.country.zh + (s.entry.zh !== s.country.zh ? "・" + s.entry.zh : ""),
+    "日期：" + $("d1").value + " ～ " + $("d2").value + "（" + days + " 天，" + pax + " 人）",
+    "機票：NT$ " + fmt(fareTotal),
+    "日支生活費：NT$ " + fmt(pdTotal) + "（每人 US$ " + fmt(usdOne) + "，計支 " + payDays + " 日）",
+    "其他費用：NT$ " + fmt(base + gift),
+    "合計：NT$ " + fmt(grand),
+    "（概估，正式報支以規定為準）"
+  ].join("\n");
 }
 
-// --- 計算
 function fareChosen() {
   var br = num("fareBR"), ci = num("fareCI"), ot = num("fareOther");
   var mode = document.querySelector('input[name="fareMode"]:checked').value;
@@ -325,94 +437,64 @@ function fareChosen() {
   return mode === "max" ? Math.max.apply(null, filled) : Math.min.apply(null, filled);
 }
 
-function pdFactorSum(days) {
-  // 回傳「等效滿額日數」
-  if (!$("longStay").checked) return days;
-  var full = Math.min(days, 30);
-  var mid = Math.max(0, Math.min(days, 90) - 30);
-  var low = Math.max(0, days - 90);
-  return full + mid * 0.8 + low * 0.7;
+// ---------- 查價連結 ----------
+function ymd(s) { return s.slice(2, 4) + s.slice(5, 7) + s.slice(8, 10); }
+function buildLinks() {
+  var f = $("from").value, t = $("to").value.trim().toUpperCase(), d1 = $("d1").value, d2 = $("d2").value;
+  var box = $("links"); box.innerHTML = "";
+  function add(label, url) {
+    var a = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener"; a.textContent = label; box.appendChild(a);
+  }
+  add("長榮航空官網", "https://www.evaair.com/zh-tw/index.html");
+  add("中華航空官網", "https://www.china-airlines.com/tw/zh");
+  if (!/^[A-Z]{3}$/.test(t) || !d1 || !d2) {
+    var p = document.createElement("span"); p.className = "note"; p.textContent = "填入 3 碼抵達機場代碼與日期後，會出現帶好條件的 Google Flights 與 Skyscanner 連結。"; box.appendChild(p); return;
+  }
+  var cabinWord = $("cabin").value === "b" ? " business class" : "";
+  var q = function (air) {
+    return "https://www.google.com/travel/flights?q=" + encodeURIComponent(
+      "Flights from " + f + " to " + t + " on " + d1 + " through " + d2 + (air ? " on " + air : "") + cabinWord);
+  };
+  add("Google Flights（全部）", q(""));
+  add("Google Flights（長榮）", q("EVA Air"));
+  add("Google Flights（華航）", q("China Airlines"));
+  var cab = $("cabin").value === "b" ? "business" : "economy";
+  add("Skyscanner", "https://www.skyscanner.com.tw/transport/flights/" + f.toLowerCase() + "/" + t.toLowerCase() + "/" + ymd(d1) + "/" + ymd(d2) + "/?adultsv2=" + Math.max(1, num("pax")) + "&cabinclass=" + cab);
 }
 
-var lastSummary = "";
-function calc() {
-  var days = tripDays(), pax = Math.max(1, num("pax"));
-  $("daysInfo").textContent = days
-    ? "共 " + days + " 天（含出發與返國當日），" + Math.max(0, days - 1) + " 晚。"
-    : "請確認返國日期不早於出發日期。";
-
-  if (document.activeElement !== $("payDays")) $("payDays").value = days || "";
-  var payDays = num("payDays");
-  var perdiem = num("perdiem"), rate = num("rate");
-
-  var fare = fareChosen();
-  var fareTotal = fare * pax;
-
-  var eq = pdFactorSum(payDays);
-  var pdUsdOne = perdiem * eq;
-  var pdTwdOne = pdUsdOne * rate;
-  var pdTotal = pdTwdOne * pax;
-
-  var rows = "";
-  function r(label, usd, twd, sub) {
-    rows += "<tr><td>" + label + "</td><td class='r'>" + (usd == null ? "" : fmt(usd)) + "</td><td class='r'>" + fmt(twd) + "</td></tr>";
-  }
-  var dailyUsd = perdiem;
-  [["住宿（70%）", .7], ["膳食（20%）", .2], ["零用（10%）", .1]].forEach(function (x) {
-    rows += "<tr><td>" + x[0] + "</td><td class='r'>" + fmt(pdUsdOne * x[1]) + "</td><td class='r'>" + fmt(pdTwdOne * x[1]) + "</td></tr>";
-  });
-  rows += "<tr><td><strong>每人日支合計</strong></td><td class='r'><strong>" + fmt(pdUsdOne) + "</strong></td><td class='r'><strong>" + fmt(pdTwdOne) + "</strong></td></tr>";
-  $("pdRows").innerHTML = rows;
-
-  var gift = num("oGift") * payDays * pax;
-  var others = num("oVisa") + num("oIns") + num("oTrans") + gift + num("oMisc");
-  var grand = fareTotal + pdTotal + others;
-
-  var s = "";
-  function line(label, val, sub) {
-    s += "<tr><td>" + label + (sub ? "<div class='note'>" + sub + "</div>" : "") + "</td><td class='r'>" + fmt(val) + "</td></tr>";
-  }
-  line("機票", fareTotal, fare ? "NT$ " + fmt(fare) + " × " + pax + " 人" : "尚未填入票價");
-  line("日支生活費", pdTotal, perdiem && rate ? "US$ " + perdiem + " × " + (Math.round(eq * 10) / 10) + " 日 × 匯率 " + rate + " × " + pax + " 人" : "請填入日支數額與匯率");
-  line("簽證／保險／交通／其他", num("oVisa") + num("oIns") + num("oTrans") + num("oMisc"), "");
-  line("禮品交際及雜費", gift, num("oGift") ? "NT$ " + fmt(num("oGift")) + " × " + payDays + " 日 × " + pax + " 人" : "");
-  s += "<tr><td><strong>合計</strong></td><td class='r'><strong>NT$ " + fmt(grand) + "</strong></td></tr>";
-  $("sumRows").innerHTML = s;
-  $("grand").textContent = "NT$ " + fmt(grand);
-
-  lastSummary = [
-    "出國經費試算",
-    "目的地：" + DEST[cs.value][0] + ($("city").value ? "（" + $("city").value + "）" : ""),
-    "日期：" + $("d1").value + " ～ " + $("d2").value + "（" + days + " 天，" + pax + " 人）",
-    "機票：NT$ " + fmt(fareTotal),
-    "日支生活費：NT$ " + fmt(pdTotal),
-    "其他費用：NT$ " + fmt(others),
-    "合計：NT$ " + fmt(grand),
-    "（概估，正式報支以規定為準）"
-  ].join("\n");
-}
+// ---------- 初始化日期 ----------
+(function () {
+  var t = new Date(); t.setDate(t.getDate() + 30);
+  var r = new Date(t); r.setDate(r.getDate() + 4);
+  var iso = function (d) { return d.toISOString().slice(0, 10); };
+  $("d1").value = iso(t); $("d2").value = iso(r);
+})();
 
 function refresh() { buildLinks(); calc(); }
 
-cs.addEventListener("change", function () { fillAirports(); loadPD(); refresh(); });
-$("city").addEventListener("input", function () { loadPD(); calc(); });
-["from", "to", "d1", "d2", "pax", "cabin"].forEach(function (id) {
-  $(id).addEventListener("input", function () { $("payDays").value = ""; refresh(); });
+regionSel.addEventListener("change", function () { fillCountries(); refresh(); });
+countrySel.addEventListener("change", function () { fillCities(); refresh(); });
+citySel.addEventListener("change", function () { fillAirports(); refresh(); });
+["from", "to", "pax", "cabin"].forEach(function (id) { $(id).addEventListener("input", refresh); });
+["d1", "d2"].forEach(function (id) { $(id).addEventListener("input", function () { payTouched = false; refresh(); }); });
+$("payDays").addEventListener("input", function () { payTouched = true; calc(); });
+["fareBR", "fareCI", "fareOther", "override", "oVisa", "oIns", "oTrans", "oGift", "oMisc", "buffer", "longStay"].forEach(function (id) {
+  $(id).addEventListener("input", calc);
 });
-["fareBR", "fareCI", "fareOther", "perdiem", "rate", "payDays", "oVisa", "oIns", "oTrans", "oGift", "oMisc", "longStay"].forEach(function (id) {
-  $(id).addEventListener("input", function () { savePD(); calc(); });
-});
+$("rate").addEventListener("input", function () { if ($("rate").value) store.set("rate", $("rate").value); calc(); });
 document.querySelectorAll('input[name="fareMode"]').forEach(function (e) { e.addEventListener("change", calc); });
 
-// --- 自動查價（選用）
+// ---------- 自動查價（選用） ----------
 $("api").value = store.get("api") || "";
 $("apiBtn").addEventListener("click", function () {
   var base = $("api").value.trim(), msg = $("apiMsg");
   if (!base) { msg.textContent = "請先填入查價服務網址。"; return; }
+  if (!/^https?:\/\//i.test(base)) { base = "https://" + base; $("api").value = base; }
+  var to = $("to").value.trim().toUpperCase();
+  if (!/^[A-Z]{3}$/.test(to)) { msg.textContent = "請先填入 3 碼的抵達機場代碼。"; return; }
   store.set("api", base);
   var url = base + (base.indexOf("?") > -1 ? "&" : "?") +
-    "from=" + $("from").value + "&to=" + $("to").value +
-    "&depart=" + $("d1").value + "&return=" + $("d2").value + "&cabin=" + $("cabin").value;
+    "from=" + $("from").value + "&to=" + to + "&depart=" + $("d1").value + "&return=" + $("d2").value + "&cabin=" + $("cabin").value;
   msg.textContent = "查詢中…";
   fetch(url).then(function (res) {
     if (!res.ok) throw new Error("HTTP " + res.status);
@@ -420,25 +502,31 @@ $("apiBtn").addEventListener("click", function () {
   }).then(function (j) {
     if (j.BR) $("fareBR").value = Math.round(j.BR);
     if (j.CI) $("fareCI").value = Math.round(j.CI);
-    msg.textContent = (j.BR || j.CI) ? "已填入查到的票價，請與官網核對。" : "服務回應中沒有長榮或華航的票價。";
+    msg.textContent = (j.BR || j.CI) ? "已填入查到的票價（Google Flights 最低價組合），請與官網核對。" : "服務回應中沒有長榮或華航的票價。";
     calc();
   }).catch(function (e) {
     msg.textContent = "查價失敗：" + e.message + "。請檢查網址與服務端是否允許跨來源請求（CORS）。";
   });
 });
 
-// --- 匯出
+// ---------- 匯出 ----------
 $("copyBtn").addEventListener("click", function () {
   var m = $("copyMsg");
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(lastSummary).then(
-      function () { m.textContent = "已複製摘要。"; },
-      function () { m.textContent = "無法複製，請手動選取結果表格。"; });
+    navigator.clipboard.writeText(lastSummary).then(function () { m.textContent = "已複製摘要。"; }, function () { m.textContent = "無法複製，請手動選取結果表格。"; });
   } else { m.textContent = "此瀏覽器不支援一鍵複製，請手動選取結果表格。"; }
 });
 $("printBtn").addEventListener("click", function () { window.print(); });
 
-loadPD();
+var r0 = store.get("rate"); if (r0) $("rate").value = r0;
+// 預設選日本・東京
+(function () {
+  regionSel.value = 0; fillCountries();
+  var cs = DATA[0].countries; for (var i = 0; i < cs.length; i++) if (cs[i].zh === "日本") countrySel.value = i;
+  fillCities();
+  var es = cur().country.entries; for (var j = 0; j < es.length; j++) if (es[j].zh === "東京") citySel.value = j;
+  fillAirports();
+})();
 refresh();
 </script>
 </body>

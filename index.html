@@ -38,7 +38,10 @@ h1 { font-size: 1.6rem; margin: 8px 0 4px; letter-spacing: .02em; }
 section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
 h2 { font-size: 1.05rem; margin: 0 0 12px; }
 .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
-.grid.three { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.grid { align-items: start; }
+.grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 640px) { .grid.three, .grid.two { grid-template-columns: minmax(0, 1fr); } }
 label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: 4px; }
 input, select, button { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; width: 100%; }
 input[type="radio"], input[type="checkbox"] { width: auto; }
@@ -47,6 +50,7 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 .links { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
 .links a { display: inline-block; text-decoration: none; color: var(--accent); border: 1px solid var(--accent); border-radius: 8px; padding: 8px 12px; font-size: .92rem; }
 .links a:hover { background: var(--accent); color: var(--accent-ink); }
+.linkbtn { background: none; border: 0; color: var(--accent); padding: 0 0 0 8px; width: auto; font-size: .8rem; cursor: pointer; text-decoration: underline; }
 .note { font-size: .85rem; color: var(--muted); margin: 8px 0 0; }
 .warn { background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 10px 12px; font-size: .88rem; margin-top: 10px; }
 .btn { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); cursor: pointer; font-weight: 500; }
@@ -83,28 +87,31 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       <div><label for="country">國家</label><select id="country"></select></div>
       <div><label for="city">城市</label><select id="city"></select></div>
     </div>
-    <div class="grid" style="margin-top:12px">
+    <div class="grid two" style="margin-top:12px">
       <div><label for="from">出發機場</label>
         <select id="from">
           <option value="TPE">桃園 TPE</option><option value="TSA">松山 TSA</option>
           <option value="KHH">高雄 KHH</option><option value="RMQ">台中 RMQ</option>
         </select></div>
-      <div><label for="to">抵達機場（3 碼代碼，可自行輸入）</label>
-        <input id="to" list="toList" maxlength="3" autocomplete="off" placeholder="例如 NRT"
-               style="text-transform:uppercase"><datalist id="toList"></datalist></div>
-      <div><label for="d1">出發日期</label><input type="date" id="d1"></div>
-      <div><label for="d2">返國日期</label><input type="date" id="d2"></div>
-      <div><label for="pax">人數</label><input type="number" id="pax" min="1" value="1" class="num"></div>
-      <div><label for="cabin">艙等</label>
-        <select id="cabin"><option value="e">經濟艙</option><option value="b">商務艙</option></select></div>
+      <div><label for="toSel">抵達機場</label>
+        <select id="toSel"></select>
+        <input id="toOther" autocomplete="off" maxlength="3" placeholder="輸入 3 碼代碼，例如 NRT"
+               style="display:none;margin-top:8px;text-transform:uppercase"></div>
+    </div>
+    <div class="grid two" style="margin-top:12px">
+      <div><label for="d1">出發日期（台灣起飛）</label><input type="date" id="d1"></div>
+      <div><label for="d2">回程日期（當地起飛）</label><input type="date" id="d2"></div>
     </div>
     <p class="note" id="daysInfo"></p>
+    <p class="note">票價與預算皆以 1 人、經濟艙計算。</p>
   </section>
 
   <section aria-labelledby="s2">
     <h2 id="s2">2. 機票查價</h2>
-    <div class="links" id="links"></div>
-    <div class="grid">
+    <div class="row"><button class="btn" id="apiBtn" type="button">自動查價</button></div>
+    <p class="note" id="apiMsg" role="status"></p>
+    <p class="note">自動查價取得的是 Google Flights 顯示的最低價組合，不是航空公司官網價格。訂票前請到官網核對，並把實際價格填入「其他／自訂票價」。</p>
+    <div class="grid" style="margin-top:12px">
       <div><label for="fareBR">長榮 BR 每人票價（NT$）</label><input id="fareBR" type="number" min="0" class="num" placeholder="查到後填入"></div>
       <div><label for="fareCI">華航 CI 每人票價（NT$）</label><input id="fareCI" type="number" min="0" class="num" placeholder="查到後填入"></div>
       <div><label for="fareOther">其他／自訂票價（NT$）</label><input id="fareOther" type="number" min="0" class="num"></div>
@@ -116,59 +123,59 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       <label><input type="radio" name="fareMode" value="other"> 自訂</label>
       <label><input type="radio" name="fareMode" value="max"> 採用已填的最高價（保守估）</label>
     </div>
-    <p class="note">自動查價取得的是 Google Flights 顯示的最低價組合，不是航空公司官網價格。訂票前請到官網核對，並把實際價格填入「其他／自訂票價」。</p>
-
-    <details>
-      <summary>進階：接上自動查價服務</summary>
-      <p class="note">在此填入你的 Cloudflare Worker 網址（需含 https://）。頁面會以 GET 呼叫
-        <code>?from=TPE&amp;to=NRT&amp;depart=2026-11-01&amp;return=2026-11-05&amp;cabin=e</code>，
-        並預期回傳 <code>{"BR": 12345, "CI": 13456}</code>（每人來回、新台幣）。</p>
-      <div class="row">
-        <div><label for="api">查價服務網址</label><input id="api" placeholder="https://flight-fare.your-name.workers.dev"></div>
-        <button class="btn" id="apiBtn" type="button">自動查價</button>
-      </div>
-      <p class="note" id="apiMsg" role="status"></p>
-    </details>
   </section>
 
   <section aria-labelledby="s3">
     <h2 id="s3">3. 日支生活費</h2>
     <div class="rate" id="rateInfo" aria-live="polite"></div>
-    <div class="grid" style="margin-top:12px">
-      <div><label for="override">手動覆寫日支數額（US$／人／日，留空則依表）</label><input id="override" type="number" min="0" step="0.01" class="num"></div>
+    <p class="note"><strong>計算方式：</strong>看每天有沒有在當地留宿。留宿當地的日子按該地區日支數額 100%；在飛機上、沒有留宿的日子（出發日到抵達前，以及離開當地到返抵台灣）按 30%。日期都以所在地的當地日期為準，每一天的比例都可以手動調整。</p>
+    <p class="note" id="flightNote"></p>
+    <details id="manualDates">
+      <summary>手動修改抵達日期</summary>
+      <div class="grid two" style="margin-top:8px">
+        <div><label for="a1">抵達當地日期（當地日期）</label><input type="date" id="a1"></div>
+        <div><label for="a2">返抵台灣日期（台灣日期）</label><input type="date" id="a2"></div>
+      </div>
+    </details>
+    <div class="grid two" style="margin-top:12px">
+      <div><label for="override">手動覆寫日支數額（US$／日，留空則依表）</label><input id="override" type="number" min="0" step="0.01" class="num"></div>
       <div><label for="rate">美元兌台幣匯率</label><input id="rate" type="number" min="0" step="0.001" class="num" placeholder="依規定匯率填入"></div>
-      <div><label for="payDays">計支日數</label><input id="payDays" type="number" min="0" class="num"></div>
     </div>
     <div class="choices">
       <label><input type="checkbox" id="longStay" checked> 同地駐留超過 1 個月時依要點折算（第 2–3 個月 80%、第 4 個月起 70%，以 30 天為 1 個月概算）</label>
     </div>
-    <div class="warn">數額依各日期所處的季節逐日套用；總計後尾數不足 1 元者進位為 1 元。供膳宿、返國當日、跨區出差等扣減請依要點逐項核對，此處以「日數 × 日支數額」概算。</div>
     <div class="scroll" style="margin-top:12px">
       <table>
-        <thead><tr><th>期間</th><th class="r">日數</th><th class="r">日支 US$</th><th class="r">折算</th><th class="r">小計 US$</th></tr></thead>
-        <tbody id="runRows"></tbody>
+        <thead><tr><th>日期</th><th>狀態</th><th>日支比例</th><th class="r">日支 US$</th></tr></thead>
+        <tbody id="dayRows"></tbody>
       </table>
     </div>
+    <div class="actions"><button class="btn ghost" id="resetPct" type="button">恢復自動計算</button></div>
     <div class="scroll" style="margin-top:12px">
       <table>
         <thead><tr><th>每人（住宿 70%、膳食 20%、零用 10%）</th><th class="r">US$</th><th class="r">NT$</th></tr></thead>
         <tbody id="pdRows"></tbody>
       </table>
     </div>
-    <p class="note">資料來源：行政院 114 年 10 月 31 日院授主預字第 1140103430 號函修正之日支數額表，自 115 年 1 月 1 日生效。香港、澳門及大陸地區另有日支數額表，請在上方手動覆寫。</p>
+    <p class="note">資料來源：行政院 114 年 10 月 31 日院授主預字第 1140103430 號函修正之日支數額表，自 115 年 1 月 1 日生效。總計後尾數不足 1 元者進位為 1 元。供膳宿、跨區出差等其他扣減情形請依要點核對。香港、澳門及大陸地區另有日支表，請在上方手動覆寫。</p>
   </section>
 
   <section aria-labelledby="s4">
-    <h2 id="s4">4. 其他費用（NT$，全部人員合計）</h2>
+    <h2 id="s4">4. 其他費用（NT$）</h2>
     <div class="grid">
       <div><label for="oVisa">簽證／證件費</label><input id="oVisa" type="number" min="0" class="num" value="0"></div>
-      <div><label for="oIns">保險費</label><input id="oIns" type="number" min="0" class="num" value="0"></div>
+      <div><label for="insType">保險種類</label>
+        <select id="insType"><option value="general">一般險</option><option value="schengen">申根險</option></select></div>
+      <div><label for="oIns">保險費<button type="button" class="linkbtn" data-reset="oIns" style="display:none">恢復自動</button></label>
+        <input id="oIns" type="number" min="0" class="num"></div>
       <div><label for="oTrans">當地交通（機場往返、市區）</label><input id="oTrans" type="number" min="0" class="num" value="0"></div>
-      <div><label for="oGift">禮品交際及雜費（每人每日）</label><input id="oGift" type="number" min="0" class="num" value="0"></div>
+      <div><label for="oGift">禮品交際及雜費<button type="button" class="linkbtn" data-reset="oGift" style="display:none">恢復自動</button></label>
+        <input id="oGift" type="number" min="0" class="num"></div>
       <div><label for="oMisc">其他</label><input id="oMisc" type="number" min="0" class="num" value="0"></div>
       <div><label for="buffer">票價緩衝（%）</label><input id="buffer" type="number" min="0" max="100" class="num" value="0"></div>
     </div>
-    <p class="note">依要點，非隨同司處長級以上出差者，禮品交際及雜費得按日數每人每日 NT$600 內檢附原始單據報支。票價緩衝只加在機票上，用來涵蓋 Google Flights 與官網的價差。</p>
+    <p class="note" id="autoNote"></p>
+    <p class="note">保險費依保費表（1–30 天）帶入，申根國家預設選申根險；禮品交際及雜費預設為每日 NT$1,100 × 出國天數。兩項都可以直接修改，改過後按「恢復自動」會回到自動帶入。票價緩衝只加在機票上，用來涵蓋 Google Flights 與官網的價差。</p>
   </section>
 
   <section aria-labelledby="s5">
@@ -194,48 +201,17 @@ DATA.push({code:"G", zh:"港澳及大陸地區（另有日支表）", countries:
   {zh:"中國大陸", en:"China", entries:[{id:0, zh:"中國大陸", en:"", manual:true}]}
 ]});
 
-// 機場建議（城市優先，其次國家）
-var CITY_AP = {
- "東京":[["NRT","成田"],["HND","羽田"]],"橫濱":[["HND","羽田"],["NRT","成田"]],"大阪":[["KIX","關西"]],"京都":[["KIX","關西"]],"神戶":[["KIX","關西"],["UKB","神戶"]],
- "名古屋":[["NGO","中部"]],"福岡":[["FUK","福岡"]],"首爾":[["ICN","仁川"],["GMP","金浦"]],"仁川":[["ICN","仁川"]],"濟州":[["CJU","濟州"]],
- "曼谷":[["BKK","素萬那普"],["DMK","廊曼"]],"清邁":[["CNX","清邁"]],"普吉":[["HKT","普吉"]],"芭達雅":[["BKK","素萬那普"]],
- "新加坡":[["SIN","樟宜"]],"吉隆坡":[["KUL","吉隆坡"]],"沙巴":[["BKI","亞庇"]],"雅加達":[["CGK","蘇卡諾哈達"]],"巴里島":[["DPS","登巴薩"]],
- "大馬尼拉都會區":[["MNL","馬尼拉"]],"宿霧":[["CEB","宿霧"]],"胡志明市":[["SGN","新山一"]],"河內":[["HAN","內排"]],"蜆港":[["DAD","峴港"]],
- "金邊":[["PNH","金邊"]],"暹粒":[["REP","暹粒"]],"永珍":[["VTE","永珍"]],"仰光":[["RGN","仰光"]],"德里國家首都轄區／國家首都區":[["DEL","德里"]],
- "孟買":[["BOM","孟買"]],"邦加羅爾":[["BLR","邦加羅爾"]],"清奈":[["MAA","清奈"]],"加爾各答":[["CCU","加爾各答"]],
- "雪梨":[["SYD","雪梨"]],"墨爾本":[["MEL","墨爾本"]],"布里斯本":[["BNE","布里斯本"]],"坎培拉":[["CBR","坎培拉"]],"奧克蘭":[["AKL","奧克蘭"]],"威靈頓":[["WLG","威靈頓"]],
- "杜拜":[["DXB","杜拜"]],"阿布達比":[["AUH","阿布達比"]],"伊斯坦堡":[["IST","伊斯坦堡"]],"安卡拉":[["ESB","安卡拉"]],
- "巴黎":[["CDG","戴高樂"],["ORY","奧利"]],"柏林":[["BER","柏林"]],"慕尼黑":[["MUC","慕尼黑"]],"漢堡":[["HAM","漢堡"]],"布魯塞爾":[["BRU","布魯塞爾"]],
- "倫敦":[["LHR","希斯洛"],["LGW","蓋威克"]],"馬德里":[["MAD","馬德里"]],"巴塞隆納":[["BCN","巴塞隆納"]],"里斯本":[["LIS","里斯本"]],
- "羅馬":[["FCO","羅馬"]],"米蘭":[["MXP","馬爾彭薩"]],"威尼斯":[["VCE","威尼斯"]],"佛羅倫斯":[["FLR","佛羅倫斯"]],"那不勒斯":[["NAP","那不勒斯"]],
- "布拉格":[["PRG","布拉格"]],"華沙":[["WAW","華沙"]],"布達佩斯":[["BUD","布達佩斯"]],"維也納":[["VIE","維也納"]],"雅典":[["ATH","雅典"]],
- "赫爾辛基":[["HEL","赫爾辛基"]],"斯德哥爾摩":[["ARN","阿蘭達"]],"舊金山":[["SFO","舊金山"]],"洛杉磯":[["LAX","洛杉磯"]],"芝加哥":[["ORD","歐海爾"]],
- "紐約市":[["JFK","甘迺迪"],["EWR","紐華克"]],"波士頓":[["BOS","波士頓"]],"華盛頓特區":[["IAD","杜勒斯"],["DCA","雷根"]],"邁阿密":[["MIA","邁阿密"]],
- "夏威夷州":[["HNL","檀香山"]],"費城":[["PHL","費城"]],"關島":[["GUM","關島"]],"溫哥華":[["YVR","溫哥華"]],"多倫多":[["YYZ","多倫多"]],
- "蒙特婁":[["YUL","蒙特婁"]],"渥太華":[["YOW","渥太華"]],"卡爾加利":[["YYC","卡爾加利"]],"墨西哥城":[["MEX","墨西哥城"]],"坎昆":[["CUN","坎昆"]],
- "聖保羅":[["GRU","瓜魯柳斯"]],"里約熱內盧":[["GIG","加利昂"]],"布宜諾斯艾利斯":[["EZE","埃塞薩"]],"聖地牙哥":[["SCL","聖地牙哥"]],"利馬":[["LIM","利馬"]],
- "波哥大":[["BOG","波哥大"]],"開羅":[["CAI","開羅"]],"約翰尼斯堡":[["JNB","約翰尼斯堡"]],"開普敦":[["CPT","開普敦"]],"奈洛比":[["NBO","奈洛比"]],
- "香港":[["HKG","香港"]],"澳門":[["MFM","澳門"]],"中國大陸":[["PVG","上海浦東"],["PEK","北京首都"],["CAN","廣州"],["SZX","深圳"],["CTU","成都"]]
-};
-var COUNTRY_AP = {
- "日本":[["NRT","東京成田"],["HND","東京羽田"],["KIX","大阪關西"],["FUK","福岡"],["CTS","札幌"],["OKA","沖繩"],["NGO","名古屋"]],
- "南韓":[["ICN","首爾仁川"],["GMP","首爾金浦"],["PUS","釜山"],["CJU","濟州"]],"泰國":[["BKK","曼谷"],["DMK","曼谷廊曼"],["CNX","清邁"],["HKT","普吉"]],
- "越南":[["SGN","胡志明市"],["HAN","河內"],["DAD","峴港"]],"菲律賓":[["MNL","馬尼拉"],["CEB","宿霧"]],"馬來西亞":[["KUL","吉隆坡"],["PEN","檳城"]],
- "印尼":[["CGK","雅加達"],["DPS","峇里島"]],"印度":[["DEL","德里"],["BOM","孟買"]],"澳大利亞":[["SYD","雪梨"],["MEL","墨爾本"]],"紐西蘭":[["AKL","奧克蘭"]],
- "美國":[["LAX","洛杉磯"],["SFO","舊金山"],["SEA","西雅圖"],["JFK","紐約"],["IAH","休士頓"],["ORD","芝加哥"],["IAD","華盛頓"],["HNL","檀香山"]],
- "加拿大":[["YVR","溫哥華"],["YYZ","多倫多"]],"英國":[["LHR","倫敦"]],"法國":[["CDG","巴黎"]],"德國":[["FRA","法蘭克福"],["MUC","慕尼黑"]],
- "荷蘭":[["AMS","阿姆斯特丹"]],"奧地利":[["VIE","維也納"]],"義大利":[["FCO","羅馬"],["MXP","米蘭"]],"瑞士":[["ZRH","蘇黎世"],["GVA","日內瓦"]],
- "捷克":[["PRG","布拉格"]],"西班牙":[["MAD","馬德里"],["BCN","巴塞隆納"]],"葡萄牙":[["LIS","里斯本"]],"土耳其":[["IST","伊斯坦堡"]],
- "阿拉伯聯合大公國":[["DXB","杜拜"],["AUH","阿布達比"]],"比利時":[["BRU","布魯塞爾"]],"波蘭":[["WAW","華沙"]],"匈牙利":[["BUD","布達佩斯"]],
- "希臘":[["ATH","雅典"]],"丹麥":[["CPH","哥本哈根"]],"瑞典":[["ARN","斯德哥爾摩"]],"挪威":[["OSL","奧斯陸"]],"芬蘭":[["HEL","赫爾辛基"]],
- "愛爾蘭":[["DUB","都柏林"]],"冰島":[["KEF","凱夫拉維克"]],"墨西哥":[["MEX","墨西哥城"],["CUN","坎昆"]],"巴西":[["GRU","聖保羅"],["GIG","里約"]],
- "阿根廷":[["EZE","布宜諾斯艾利斯"]],"智利":[["SCL","聖地牙哥"]],"秘魯":[["LIM","利馬"]],"埃及":[["CAI","開羅"]],"南非共和國":[["JNB","約翰尼斯堡"],["CPT","開普敦"]],
- "肯亞":[["NBO","奈洛比"]],"柬埔寨":[["PNH","金邊"],["REP","暹粒"]],"寮國":[["VTE","永珍"]],"緬甸":[["RGN","仰光"]],"斯里蘭卡":[["CMB","可倫坡"]],
- "尼泊爾":[["KTM","加德滿都"]],"蒙古":[["ULN","烏蘭巴托"]],"汶萊":[["BWN","汶萊"]],"帛琉共和國":[["ROR","帛琉"]],"新加坡":[["SIN","新加坡"]],
- "盧森堡":[["LUX","盧森堡"]],"摩洛哥":[["CMN","卡薩布蘭加"]],"以色列":[["TLV","台拉維夫"]],"卡達":[["DOH","杜哈"]],"沙烏地阿拉伯":[["RUH","利雅德"],["JED","吉達"]]
-};
+var AP = {"e":{"1":[["FUK","福岡"]],"2":[["KIX","關西"],["UKB","神戶"]],"4":[["NGO","中部"]],"5":[["KIX","關西"],["ITM","伊丹"]],"6":[["NRT","成田"],["HND","羽田"]],"9":[["FNJ","Pyongyang Sunan"]],"13":[["ICN","仁川"]],"16":[["ICN","仁川"],["GMP","金浦"]],"17":[["RSU","Yeosu"]],"19":[["UBN","Ulaanbaatar Chinggis Khaan"]],"22":[["CEB","宿霧"]],"23":[["DVO","Davao Francisco Bangoy"]],"26":[["CRK","Mabalacat Clark / Clark Air Base"]],"29":[["TKK","Weno Island Chuuk"]],"30":[["PNI","Pohnpei Island Pohnpei"]],"31":[["YAP","Yap Island Yap"]],"33":[["BWN","汶萊"]],"34":[["BKK","素萬那普"],["DMK","廊曼"]],"35":[["CNX","清邁"]],"36":[["HHQ","Hua Hin"]],"37":[["BKK","素萬那普"]],"38":[["HKT","普吉"]],"39":[["UTP","U-Tapao–Rayong–Pattaya"]],"40":[["USM","Na Thon Samui"]],"43":[["KUL","吉隆坡"]],"44":[["KCH","Kuching"]],"47":[["SIN","樟宜"]],"49":[["BDO","Bandung Husein Sastranegara"]],"51":[["CGK","蘇卡諾哈達"]],"53":[["SUB","Surabaya Juanda"]],"54":[["YIA","Yogyakarta"],["JOG","Yogyakarta Adisutjipto"]],"57":[["NYT","Naypyitaw Nay Pyi Taw"]],"58":[["MDL","Mandalay"]],"61":[["PBU","Putao"]],"65":[["CCU","加爾各答"]],"66":[["MAA","清奈"]],"67":[["GOI","Vasco da Gama Goa Dabolim"]],"68":[["HYD","Hyderabad Rajiv Gandhi"]],"69":[["BOM","孟買"]],"71":[["PNQ","Pune"]],"73":[["CMB","可倫坡"],["RML","Colombo Ratmalana"]],"77":[["KTM","加德滿都"]],"78":[["PHH","Pokhara"],["PKR","Pokhara Domestic"]],"80":[["CBR","坎培拉"]],"81":[["MEL","墨爾本"]],"82":[["SYD","雪梨"]],"83":[["BNE","布里斯本"]],"85":[["AKL","奧克蘭"]],"86":[["WLG","威靈頓"]],"88":[["NAN","Nadi"]],"93":[["INU","Yaren Nauru"]],"94":[["HIR","Honiara"]],"96":[["POM","Port Moresby Jacksons"]],"97":[["BUA","Buka Island Buka"]],"98":[["RAB","Kokopo Tokua"]],"99":[["LAE","Lae Nadzab Tomodachi"]],"102":[["PNH","金邊"]],"106":[["KBL","Kabul"]],"108":[["DAC","Dhaka Hazrat Shahjalal"]],"110":[["RAR","Avarua Rarotonga"]],"112":[["VTE","永珍"]],"114":[["MLE","Malé Velana"]],"123":[["HAN","內排"]],"124":[["SGN","新山一"]],"131":[["MAJ","Majuro Atoll Marshall Islands"]],"133":[["VLI","Port Vila Bauerfield"]],"137":[["LYP","Faisalabad"]],"138":[["ISB","Attock Islamabad"]],"139":[["KHI","Karachi Jinnah"]],"140":[["LHE","Lahore Allama Iqbal"]],"141":[["UET","Quetta"]],"143":[["IKA","Tehran Imam Khomeini"],["THR","Tehran Mehrabad"]],"145":[["BGW","Baghdad / New Al Muthana Air Base"]],"147":[["AMM","Amman Queen Alia"],["ADJ","Marka (Amman Civil)"]],"148":[["AQJ","Aqaba King Hussein"]],"151":[["KWI","Kuwait City Kuwait"]],"152":[["BAH","Manama Bahrain"]],"154":[["AUH","阿布達比"]],"155":[["DXB","杜拜"]],"157":[["DAM","Damascus"]],"159":[["BEY","Beirut Rafic Hariri"]],"161":[["MCT","Muscat"]],"163":[["ADE","Aden"]],"164":[["SAH","Sanaa"]],"166":[["JED","吉達"]],"167":[["RUH","利雅德"]],"170":[["HFA","Uri Michaeli Haifa"]],"171":[["TLV","台拉維夫"]],"173":[["ESB","安卡拉"]],"174":[["AYT","Antalya"]],"175":[["IST","伊斯坦堡"]],"178":[["ZIA","Moscow Zhukovsky"],["DME","Moscow Domodedovo"],["SVO","Moscow Sheremetyevo"],["VKO","Moscow Vnukovo"]],"180":[["VVO","Artyom Vladivostok"]],"182":[["GYD","Baku Heydar Aliyev"]],"184":[["MSQ","Minsk National"]],"186":[["EVN","Yerevan Zvartnots"]],"188":[["TBS","Tbilisi"]],"190":[["BSZ","Bishkek Manas"]],"192":[["ALA","Almaty"]],"193":[["NQZ","Astana Nursultan Nazarbayev"]],"195":[["DYU","Dushanbe"]],"197":[["ASB","Ashgabat"]],"202":[["TAS","Tashkent"],["TVT","Tashkent-Khumo"]],"204":[["RMO","Chişinău"]],"206":[["CDG","戴高樂"],["ORY","奧利"]],"208":[["BER","柏林"]],"209":[["HAM","漢堡"]],"210":[["MUC","慕尼黑"]],"213":[["BRU","布魯塞爾"]],"215":[["LUX","盧森堡"]],"217":[["SKP","Ilinden Skopje"]],"219":[["BEG","Belgrade Nikola Tesla"]],"221":[["TGD","Podgorica / Podgorica Golubovci Airbase"]],"231":[["ARN","阿蘭達"]],"233":[["HEL","赫爾辛基"]],"235":[["LHR","希斯洛"],["LGW","蓋威克"],["STN","斯坦斯特德"]],"237":[["NOC","Charlestown Ireland West Knock"]],"238":[["BCN","巴塞隆納"]],"239":[["MAD","馬德里"]],"240":[["EAS","Hondarribia San Sebastián"]],"241":[["VLC","Valencia"]],"243":[["LIS","里斯本"]],"246":[["GIB","Gibraltar"]],"248":[["BLQ","Bologna Guglielmo Marconi"]],"249":[["FLR","佛羅倫斯"]],"250":[["MXP","馬爾彭薩"],["LIN","利納特"]],"251":[["NAP","那不勒斯"]],"252":[["PMO","Palermo Falcone–Borsellino"]],"253":[["FCO","羅馬"]],"254":[["TRN","Caselle Torinese Turin"]],"255":[["VCE","威尼斯"]],"259":[["ATH","雅典"]],"260":[["SKG","Thessaloniki Macedonia"]],"263":[["RIX","Riga"]],"265":[["VNO","Vilnius"]],"267":[["WAW","華沙"]],"270":[["BRQ","Brno-Tuřany"]],"272":[["OSR","Mošnov Leoš Janáček Ostrava"]],"274":[["BTS","Bratislava M. R. Štefánik"]],"276":[["BBU","Bucharest Băneasa Aurel Vlaicu"],["OTP","Otopeni Bucharest Henri Coandă"]],"277":[["TSR","Timișoara Traian Vuia"]],"279":[["SOF","Sofia"]],"281":[["BUD","布達佩斯"]],"284":[["DBV","Dubrovnik Ruđer Bošković"]],"285":[["ZAG","Velika Gorica Zagreb Franjo Tuđman"]],"290":[["SJJ","Sarajevo"]],"292":[["TIA","Rinas Tirana Mother Teresa"]],"297":[["YYC","卡爾加利"]],"298":[["YUL","蒙特婁"]],"299":[["YOW","渥太華"]],"300":[["YYZ","多倫多"]],"301":[["YVR","溫哥華"]],"303":[["SFO","舊金山"]],"304":[["LAX","洛杉磯"]],"305":[["MIA","邁阿密"]],"307":[["ORD","歐海爾"],["MDW","中途島"]],"308":[["BOS","波士頓"]],"309":[["JFK","甘迺迪"],["EWR","紐華克（紐澤西）"],["LGA","拉瓜迪亞（多為美國國內線）"]],"310":[["PHL","費城"]],"311":[["IAD","杜勒斯"],["DCA","雷根國家"],["BWI","巴爾的摩"]],"314":[["ACA","Acapulco General Juan N. Álvarez"]],"315":[["CUN","坎昆"]],"316":[["CUU","Chihuahua General Roberto Fierro Villalobos"]],"317":[["CJS","Ciudad Juárez Abraham González"]],"320":[["GDL","Guadalajara"]],"321":[["MID","Mérida Manuel Crescencio Rejón"]],"322":[["MEX","墨西哥城"]],"323":[["MTY","Monterrey"]],"324":[["PBC","Puebla Hermanos Serdán"]],"325":[["PVR","Puerto Vallarta"]],"328":[["GUA","Guatemala City La Aurora"]],"330":[["SAL","San Salvador El Salvador Saint Óscar Arnulfo Romero y Galdámez"],["ILS","San Salvador Ilopango"]],"333":[["SAP","San Pedro Sula Ramón Villeda Morales"]],"334":[["TGU","Tegucigalpa Toncontín"]],"337":[["MGA","Augusto C. Sandino (Managua)"]],"339":[["SJO","San José Juan Santamaría"],["SYQ","San Jose Tobías Bolaños"]],"341":[["BLB","Panamá City Panamá Pacífico"]],"343":[["PAP","Port-au-Prince Toussaint Louverture"]],"346":[["LRM","La Romana Casa De Campo"]],"347":[["POP","Puerto Plata Gregorio Luperon"]],"348":[["SDQ","Santo Domingo Las Américas"]],"349":[["PUJ","Punta Cana"]],"354":[["BZE","Belize City Philip S. W. Goldson"],["TZA","Belize City Sir Barry Bowen Municipal"]],"355":[["SPR","San Pedro John Greif II"]],"360":[["HAV","Havana José Martí"]],"366":[["MAR","Maracaibo La Chinita"]],"368":[["BOG","波哥大"]],"369":[["BAQ","Barranquilla Ernesto Cortissoz"]],"370":[["CTG","Cartagena Rafael Nuñez"]],"371":[["MDE","Medellín Jose Maria Córdova"],["EOH","Medellín Enrique Olaya Herrera"]],"373":[["GEO","Georgetown Cheddi Jagan"]],"375":[["CUE","Cuenca Mariscal Lamar"]],"376":[["GYE","Guayaquil José Joaquín de Olmedo"]],"377":[["MEC","Manta Eloy Alfaro"]],"378":[["UIO","Quito Mariscal Sucre"]],"379":[["GPS","Isla Baltra Seymour Galapagos Ecological"]],"381":[["BSB","Brasília Presidente Juscelino Kubitschek"]],"382":[["CWB","Curitiba-Afonso Pena"]],"383":[["FLN","Florianópolis Hercílio Luz"]],"384":[["GIG","加利昂"]],"385":[["GRU","瓜魯柳斯"]],"387":[["AQP","Arequipa Rodríguez Ballón"]],"389":[["LIM","利馬"]],"390":[["TRU","Trujillo Capitán FAP Carlos Martínez de Pinillos"]],"393":[["VVI","Santa Cruz Viru Viru"],["SRZ","Santa Cruz El Trompillo"]],"395":[["SCL","聖地牙哥"]],"397":[["EZE","埃塞薩"]],"398":[["MDZ","Mendoza Governor Francisco Gabrielli"]],"399":[["SLA","Salta Martín Miguel de Güemes"]],"400":[["JUJ","San Salvador de Jujuy Gobernador Horacio Guzman"]],"402":[["BRC","San Carlos de Bariloche Teniente Luis Candelaria"]],"403":[["NQN","Neuquén Presidente Perón"]],"404":[["USH","Ushuaia - Malvinas Argentinas"]],"406":[["ASU","Asunción Silvio Pettirossi"]],"407":[["AGT","Ciudad del Este Guaraní"]],"410":[["PDP","Punta del Este Capitan Corbeta CA Curbelo"]],"412":[["PBM","Paramaribo Johan Adolf Pengel"],["ORG","Paramaribo Zorg en Hoop"]],"414":[["HBE","Alexandria"]],"415":[["ASW","Aswan"]],"416":[["CAI","開羅"]],"419":[["MJI","Tripoli Mitiga"]],"421":[["ALG","Algiers Houari Boumediene"]],"423":[["CKY","Conakry Ahmed Sékou Touré"]],"425":[["OXB","Bissau Osvaldo Vieira"]],"427":[["FNA","Freetown Lungi"]],"429":[["ROB","Monrovia Roberts"],["MLW","Monrovia Spriggs Payne"]],"431":[["ABJ","Abidjan Félix-Houphouët-Boigny"]],"434":[["ACC","Accra Kotoka"]],"436":[["LFW","Lomé–Tokoin"]],"438":[["COO","Cotonou Cadjehoun"]],"441":[["OUA","Ouagadougou Thomas Sankara"]],"443":[["ABV","Abuja Nnamdi Azikiwe"]],"444":[["LOS","Lagos Murtala Muhammed"]],"445":[["PHC","Port Harcourt"],["PHG","Port Harcourt City / Port Harcourt Air Force Base"]],"447":[["KAN","Mallam Aminu Kano"]],"449":[["DLA","Douala"]],"450":[["NSI","Yaoundé Nsimalen"]],"452":[["BGF","Bangui M'Poko"]],"454":[["SSG","Malabo"]],"456":[["LBV","Libreville Leon M'ba"]],"458":[["BZV","Brazzaville Maya-Maya"]],"461":[["GOM","Goma"]],"462":[["FIH","Kinshasa Ndjili"]],"463":[["FBM","Lubumbashi"]],"464":[["MJM","Mbuji Mayi"]],"466":[["NBJ","Luanda Dr. Antonio Agostinho Neto"],["LAD","Luanda Quatro de Fevereiro"]],"468":[["GBE","Gaborone Sir Seretse Khama"]],"469":[["BBK","Kasane"]],"471":[["HRE","Harare Robert Gabriel Mugabe"]],"472":[["VFA","Victoria Falls"]],"474":[["BLZ","Blantyre Chileka"]],"477":[["MPM","Maputo"]],"478":[["BEW","Beira"]],"480":[["LVI","Livingstone Harry Mwanga Nkumbula"]],"481":[["LUN","Lusaka Kenneth Kaunda"]],"485":[["BJM","Bujumbura Melchior Ndadaye"]],"489":[["KGL","Kigali"]],"492":[["EBB","Entebbe"]],"495":[["MBA","Mombasa Moi"]],"496":[["NBO","奈洛比"]],"498":[["MGQ","Mogadishu Aden Adde"]],"501":[["JIB","Djibouti City Djibouti-Ambouli"]],"503":[["ADD","Addis Ababa Bole"]],"505":[["ASM","Asmara"]],"507":[["KRT","Khartoum"]],"509":[["JUB","Juba"]],"512":[["TNR","Antananarivo Ivato"]],"514":[["CPT","開普敦"]],"515":[["DUR","Durban King Shaka"]],"516":[["ELS","East London King Phalo"]],"517":[["JNB","約翰尼斯堡"]],"520":[["WDH","Windhoek Hosea Kutako"],["ERS","Windhoek Eros"]],"524":[["MSU","Maseru Moshoeshoe I"]],"528":[["HAH","Moroni Prince Said Ibrahim"]],"530":[["BJL","Banjul"]],"532":[["NKC","Nouakchott–Oumtounsy"]],"534":[["BKO","Bamako Modibo Keita"]],"536":[["NIM","Niamey Diori Hamani"]],"538":[["DSS","Dakar Blaise Diagne"]],"540":[["TUN","Tunis Carthage"]],"542":[["RAI","Praia Nelson Mandela"]],"544":[["CMN","卡薩布蘭加"]],"546":[["RBA","Rabat-Salé"]],"547":[["TNG","Tangier Ibn Battuta"]],"549":[["SEZ","Victoria Seychelles"]],"550":[["TMS","São Tomé"],["PCP","São Tomé & Príncipe Principe"]],"551":[["PCP","São Tomé & Príncipe Principe"]],"3":[["KIX","關西"]],"7":[["HND","羽田"],["NRT","成田"]],"11":[["CJU","濟州"]],"24":[["MNL","馬尼拉"]],"42":[["BKI","亞庇"]],"48":[["DPS","登巴薩"]],"56":[["RGN","仰光"]],"64":[["BLR","邦加羅爾"]],"70":[["DEL","德里"]],"103":[["REP","暹粒"]],"122":[["DAD","峴港"]],"269":[["PRG","布拉格"]],"306":[["HNL","檀香山"]],"312":[["GUM","關島"]]},"c":{"日本":[["NRT","東京成田"],["HND","東京羽田"],["KIX","大阪關西"],["FUK","福岡"],["CTS","札幌"],["OKA","沖繩"],["NGO","名古屋"],["UKB","神戶"],["ITM","伊丹"],["IBR","Omitama Ibaraki"]],"北韓":[["FNJ","Pyongyang Sunan"],["RGO","Hoemun-ri Orang (Chongjin)"],["DSO","Sŏndŏng-ni Sondok"],["WOS","Wonsan Kalma"]],"南韓":[["ICN","首爾仁川"],["GMP","首爾金浦"],["PUS","釜山"],["CJU","濟州"],["MWX","Muan"],["YNY","Gonghang-ro Yangyang"],["TAE","Daegu"],["CJJ","Cheongju /Cheongju Air Base (K-59/G-513)"]],"蒙古":[["ULN","烏蘭巴托"],["UBN","Ulaanbaatar Chinggis Khaan"]],"菲律賓":[["MNL","馬尼拉"],["CEB","宿霧"],["DVO","Davao Francisco Bangoy"],["CRK","Mabalacat Clark / Clark Air Base"],["SFS","Olongapo Subic Bay / Naval Air Station Cubi Point"],["LAO","Laoag City Laoag"],["DRP","Legazpi Bicol"],["GES","General Santos"],["CGY","Laguindingan"],["ZAM","Zamboanga"]],"密克羅尼西亞":[["TKK","Weno Island Chuuk"],["PNI","Pohnpei Island Pohnpei"],["YAP","Yap Island Yap"],["KSA","Okat Kosrae"]],"薩摩亞":[["APW","Apia Faleolo"]],"汶萊":[["BWN","汶萊"]],"泰國":[["BKK","曼谷"],["DMK","曼谷廊曼"],["CNX","清邁"],["HKT","普吉"],["UTP","U-Tapao–Rayong–Pattaya"],["USM","Na Thon Samui"],["CEI","Mae Fah Luang - Chiang Rai"],["KBV","Krabi"],["HDY","Hat Yai"]],"馬來西亞":[["KUL","吉隆坡"],["PEN","檳城"],["KCH","Kuching"],["BKI","亞庇"],["IPH","Ipoh Sultan Azlan Shah"],["JHB","Johor Bahru Senai"],["LGK","Langkawi"],["SZB","Subang Sultan Abdul Aziz Shah"]],"新加坡":[["SIN","新加坡"]],"印尼":[["CGK","雅加達"],["DPS","峇里島"],["HLP","Jakarta Halim Perdanakusuma"],["SUB","Surabaya Juanda"],["YIA","Yogyakarta"],["UPG","Makassar Sultan Hasanuddin"],["LOP","Mataram Lombok"],["DJJ","Sentani Dortheys Hiyo Eluay"]],"緬甸":[["RGN","仰光"],["NYT","Naypyitaw Nay Pyi Taw"],["MDL","Mandalay"]],"印度":[["DEL","德里"],["BOM","孟買"],["CCU","加爾各答"],["MAA","清奈"],["GOI","Vasco da Gama Goa Dabolim"],["HYD","Hyderabad Rajiv Gandhi"],["NMI","Navi Mumbai"],["PNQ","Pune"],["DXN","Gautam Buddha Nagar Noida"],["AMD","Ahmedabad Sardar Vallabh Patel"]],"斯里蘭卡":[["CMB","可倫坡"],["RML","Colombo Ratmalana"],["JAF","Jaffna"]],"不丹":[["PBH","Paro"],["BUT","Jakar Bathpalathang"],["YON","Yongphulla"]],"尼泊爾":[["KTM","加德滿都"],["PHH","Pokhara"],["BWA","Siddharthanagar Gautam Buddha"]],"澳大利亞":[["SYD","雪梨"],["MEL","墨爾本"],["AVV","Geelong Melbourne Avalon"],["BNE","布里斯本"],["OOL","Gold Coast"],["CNS","Cairns"],["BME","Broome"]],"紐西蘭":[["AKL","奧克蘭"],["WLG","威靈頓"],["CHC","Christchurch"],["ZQN","Queenstown"]],"斐濟":[["NAN","Nadi"],["SUV","Nausori"],["LBS","Labasa"],["ICI","Cicia"],["PTF","Malolo Lailai Island"],["KDV","Vunisea"],["MNF","Mana Island"],["MFJ","Moala"],["LEV","Bureta Levuka"],["NGI","Ngau"]],"東加王國":[["TBU","Nuku'alofa Fua'amotu"],["VAV","Vava'u Island Vava'u"],["HPA","Lifuka Island"],["EUA","Eua Island Kaufana"],["NTT","Niuatoputapu Kuini Lavenia"]],"諾魯":[["INU","Yaren Nauru"]],"索羅門群島":[["HIR","Honiara"],["MUA","Munda"],["AKS","Auki Gwaunaru'u"],["BNY","Bellona/Anua"],["CHY","Choiseul Bay"],["BAS","Ballalae"],["FRE","Fera Island Fera/Maringe"],["IRA","Kirakira Ngorangora"],["SCZ","Santa Cruz/Graciosa Bay/Luova"],["GZO","Gizo Nusatupe"]],"巴布亞紐幾內亞":[["POM","Port Moresby Jacksons"],["BUA","Buka Island Buka"],["RAB","Kokopo Tokua"],["LAE","Lae Nadzab Tomodachi"],["VMU","Baimuru"],["OPU","Balimo"],["CMU","Kundiawa Chimbu"],["DAU","Daru"],["GKA","Goronka Goroka"],["GUR","Gurney"]],"柬埔寨":[["PNH","金邊"],["REP","暹粒"],["KTI","Phnom Penh Techo"],["DSY","Ta Noun Dara Sakor"],["SAI","Siem Reap-Angkor"],["KOS","Preah Sihanouk Sihanouk"]],"阿富汗":[["KBL","Kabul"],["HEA","Guzara Herat - Khwaja Abdullah Ansari"],["KDH","Kandahar Ahmad Shah Baba"],["MZR","Mazar-i-Sharif"],["KHT","Khost"],["FBD","Fayzabad"]],"孟加拉":[["DAC","Dhaka Hazrat Shahjalal"],["CGP","Chattogram Shah Amanat"],["ZYL","Sylhet Osmany"],["BZL","Barisal"],["CXB","Cox's Bazar"],["JSR","Jashore Jessore"],["RJH","Rajshahi Shah Makhdum"],["SPD","Saidpur"]],"庫克群島":[["RAR","Avarua Rarotonga"],["AIT","Aitutaki"],["AIU","Atiu Island Enua"],["MHX","Manihiki Island"],["MUK","Mauke Island Mauke"],["MOI","Mitiaro Island"]],"寮國":[["VTE","永珍"],["LPQ","Luang Phabang"],["PKZ","Pakse"]],"馬爾地夫":[["MLE","Malé Velana"],["GAN","Gan"],["HAQ","Haa Dhaalu Atoll Hanimaadhoo"],["NMF","Noonu Atoll Maafaru"],["KDO","Kadhdhoo"],["KDM","Huvadhu Atoll Kaadedhdhoo"],["VAM","Villa Maamigili"],["FND","Funadhoo"],["FMT","Faresmaathodaa Faresmaathoda"],["HRF","Hoarafushi"]],"托克勞群島":[["APW","薩摩亞阿皮亞（鄰近）"]],"吉里巴斯共和國":[["TRW","South Tarawa Bonriki"],["CXI","Kiritimati Cassidy"],["BBG","Butaritari"],["AAK","Buariki Aranuka"]],"吐瓦魯":[["FUN","Funafuti"]],"帛琉共和國":[["ROR","帛琉"]],"越南":[["SGN","胡志明市"],["HAN","河內"],["DAD","峴港"],["HPH","Haiphong Cat Bi"],["CXR","Nha Trang Cam Ranh / Cam Ranh Air Base"],["VCA","Can Tho"],["HUI","Huế Phu Bai"],["PQC","Phu Quoc Island Phú Quốc"]],"法屬新喀里多尼亞島":[["NOU","Nouméa La Tontouta"],["TGJ","Tiga"],["KNQ","Koné"],["ILP","Île des Pins"],["LIF","Lifou"],["GEA","Nouméa Magenta"],["MEE","Maré"],["TOU","Touho"],["UVE","Ouvéa"],["BMY","Île Art - Waala"]],"馬紹爾群島":[["MAJ","Majuro Atoll Marshall Islands"],["KWA","Kwajalein Bucholz Army Air Field"],["UTK","Utirik Island Utirik"],["EJT","Enejit Island Enejit"],["UJE","Ujae Atoll"],["AUL","Aur Atoll Aur Island"],["JEJ","Ailinglapalap Atoll Jeh"],["LIK","Likiep Island Likiep"],["MJE","Majkin"],["RNP","Rongelap Island"]],"萬那杜":[["VLI","Port Vila Bauerfield"],["SON","Luganville Santo Pekoa"],["TAH","Tanna Island Whitegrass"],["SLH","Sola"],["CCV","Craig Cove"],["LOD","Longana"],["SSR","Pentecost Island Sara"],["PBJ","Paama Island Tavie"],["LPM","Lamap"],["LNB","Lamen Bay"]],"巴基斯坦":[["LYP","Faisalabad"],["ISB","Attock Islamabad"],["KHI","Karachi Jinnah"],["LHE","Lahore Allama Iqbal"],["UET","Quetta"],["GWD","Gurandani New Gwadar"],["MUX","Multan"],["PEW","Peshawar Bacha Khan"],["KDU","Skardu"],["SKT","Sialkot"]],"伊朗":[["IKA","Tehran Imam Khomeini"],["THR","Tehran Mehrabad"],["ABD","Abadan Ayatollah Jami"],["AWZ","Ahvaz Qasem Soleimani"],["KIH","Kish Island Kish"],["IFN","Isfahan Shahid Beheshti"],["PYK","Karaj Payam"],["BND","Bandar Abbas"],["KER","Kerman Ayatollah Hashemi Rafsanjani"],["GSM","Qeshm"]],"伊拉克":[["BGW","Baghdad / New Al Muthana Air Base"],["EBL","Arbil Erbil"],["KIK","Kirkuk"],["BSR","Basra"],["NJF","Al Najaf"],["ISU","Sulaymaniyah Jalal Talabani"]],"約旦":[["AMM","Amman Queen Alia"],["ADJ","Marka (Amman Civil)"],["AQJ","Aqaba King Hussein"]],"科威特":[["KWI","Kuwait City Kuwait"]],"巴林":[["BAH","Manama Bahrain"]],"卡達":[["DOH","杜哈"],["DIA","Doha"]],"阿拉伯聯合大公國":[["DXB","杜拜"],["AUH","阿布達比"],["DWC","Dubai Al Maktoum"],["AAN","Al Ain"],["FJR","Fujairah"],["RKT","Ras Al Khaimah"],["SHJ","Sharjah"]],"敘利亞":[["DAM","Damascus"],["ALP","Aleppo"],["KAC","Qamishli"],["LTK","Latakia"]],"黎巴嫩":[["BEY","Beirut Rafic Hariri"]],"阿曼":[["MCT","Muscat"],["DQM","Duqm"],["SLL","Salalah"],["OHS","Suhar"],["KHS","Khasab"]],"葉門":[["ADE","Aden"],["SAH","Sanaa"],["RIY","Mukalla Riyan"],["GXF","Seiyun Hadhramaut"],["AAY","Al Ghaydah"],["SCT","Mori Socotra"],["TAI","Taiz"]],"沙烏地阿拉伯":[["RUH","利雅德"],["JED","吉達"],["AHB","Abha"],["HOF","Hofuf Al-Ahsa"],["ULH","Al-Ula"],["DMM","Ad Dammam King Fahd"],["ELQ","Qassim Prince Naif bin Abdulaziz"],["HAS","Hail"],["MED","Medina Prince Mohammad Bin Abdulaziz"],["NUM","Sharma Neom Bay"]],"耶路撒冷":[["TLV","台拉維夫（鄰近）"]],"以色列":[["TLV","台拉維夫"],["ETM","Eilat Ramon"]],"土耳其":[["IST","伊斯坦堡"],["ESB","安卡拉"],["AYT","Antalya"],["SAW","Pendik Istanbul Sabiha Gökçen"],["GZT","Gaziantep Oğuzeli"],["KYA","Konya"],["ASR","Kayseri Erkilet"],["NAV","Nevşehir Kapadokya"],["ADB","Gaziemir Adnan Menderes"],["DLM","Dalaman"]],"俄羅斯":[["ZIA","Moscow Zhukovsky"],["DME","Moscow Domodedovo"],["SVO","Moscow Sheremetyevo"],["VKO","Moscow Vnukovo"],["VVO","Artyom Vladivostok"],["YKS","Platon Oyunsky Yakutsk"],["PKC","Petropavlovsk-Kamchatsky Yelizovo"],["UUS","Yuzhno-Sakhalinsk"],["HTA","Chita-Kadala"],["IKT","Irkutsk"]],"亞塞拜然":[["GYD","Baku Heydar Aliyev"],["GNJ","Ganja"],["NAJ","Nakhchivan"],["GBB","Gabala"],["LHL","Lachin"],["LLK","Lankaran"]],"白俄羅斯":[["MSQ","Minsk National"],["BQT","Brest"],["GME","Gomel"],["MVQ","Mogilev"]],"亞美尼亞":[["EVN","Yerevan Zvartnots"],["LWN","Gyumri Shirak"]],"喬治亞":[["TBS","Tbilisi"],["KUT","Kopitnari David the Builder Kutaisi"],["BUS","Alexander Kartveli Batumi"],["SUI","Sukhumi Vladislav Ardzinba Sukhum"]],"吉爾吉斯":[["BSZ","Bishkek Manas"],["OSS","Osh"],["IKU","Tamchy Issyk-Kul"],["IKG","Karakol"]],"哈薩克":[["ALA","Almaty"],["NQZ","Astana Nursultan Nazarbayev"],["KOV","Kokshetau"],["PPK","Petropavl"],["DMB","Taraz"],["CIT","Shymkent"],["HSA","Turkıstan Hazrat Sultan"],["DZN","Zhezkazgan National"],["KGF","Karaganda Sary-Arka"],["BXY","Baikonur Krayniy"]],"塔吉克":[["DYU","Dushanbe"],["TJU","Kulob"],["LBD","Khujand"],["KQT","Bokhtar"]],"土庫曼":[["ASB","Ashgabat"],["TAZ","Daşoguz Dashoguz"],["CRZ","Türkmenabat"],["BKN","Balkanabat"],["KRW","Turkmenbaşy"],["MYP","Mary"]],"烏克蘭":[],"烏茲別克":[["TAS","Tashkent"],["TVT","Tashkent-Khumo"],["NMA","Namangan"],["NCU","Nukus"],["UGC","Urgench"],["BHK","Bukhara"],["SKD","Samarkand"],["AZN","Andijan"],["FEG","Fergana"],["NVI","Navoi"]],"摩爾多瓦":[["RMO","Chişinău"]],"法國":[["CDG","巴黎"],["ORY","奧利"],["BOD","Bordeaux–Mérignac"],["TLS","Toulouse-Blagnac"],["BIA","Bastia-Poretta"],["FSC","Figari Sud-Corse"],["CFE","Clermont-Ferrand Auvergne"],["LYS","Colombier-Saugnieu Lyon Saint-Exupéry"],["MRS","Marignane Marseille Provence"],["NCE","Nice-Côte d'Azur"]],"德國":[["FRA","法蘭克福"],["MUC","慕尼黑"],["BER","柏林"],["HAM","漢堡"],["DRS","Dresden"],["ERF","Erfurt-Weimar"],["FMO","Greven Münster Osnabrück"],["CGN","Köln Cologne Bonn"],["DUS","Düsseldorf"],["NUE","Nuremberg"]],"荷蘭":[["AMS","阿姆斯特丹"],["MST","Maastricht Aachen"],["EIN","Eindhoven"],["GRQ","Groningen Eelde"],["RTM","Rotterdam The Hague"]],"比利時":[["BRU","布魯塞爾"],["CRL","Brussels South Charleroi"],["OST","Oostende Ostend-Bruges"]],"盧森堡":[["LUX","盧森堡"]],"瑞士":[["ZRH","蘇黎世"],["GVA","日內瓦"]],"北馬其頓共和國":[["SKP","Ilinden Skopje"],["OHD","Ohrid St. Paul the Apostle"]],"塞爾維亞":[["BEG","Belgrade Nikola Tesla"],["INI","Niš Constantine the Great"],["KVO","Kraljevo Morava"]],"蒙特內哥羅":[["TGD","Podgorica / Podgorica Golubovci Airbase"],["TIV","Tivat"]],"科索沃":[["PRN","Prishtina Priština Adem Jashari"]],"列支敦斯登":[["ZRH","蘇黎世（鄰近）"]],"奧地利":[["VIE","維也納"],["GRZ","Feldkirchen bei Graz Graz"],["INN","Innsbruck"],["KLU","Klagenfurt am Wörthersee Klagenfurt"],["LNZ","Linz-Hörsching"],["SZG","Salzburg"]],"安道爾拉":[["BCN","巴塞隆納（鄰近）"],["TLS","土魯斯（鄰近）"]],"摩納哥":[["NCE","尼斯（鄰近）"]],"丹麥":[["CPH","哥本哈根"],["AAR","Aarhus"],["BLL","Billund"],["ODE","Odense Hans Christian Andersen"],["AAL","Aalborg"]],"冰島":[["KEF","凱夫拉維克"],["AEY","Akureyri"]],"挪威":[["OSL","奧斯陸"],["AES","Ålesund"],["BOO","Bodø"],["BGO","Bergen , Flesland"],["KRS","Kristiansand"],["EVE","Evenes Harstad/Narvik"],["TOS","Tromsø"],["TRF","Sandefjord , Torp"],["TRD","Trondheim , Værnes"],["SVG","Stavanger , Sola"]],"瑞典":[["ARN","斯德哥爾摩"],["NYO","Nyköping Stockholm Skavsta"],["VST","Stockholm Västerås"],["GOT","Göteborg Landvetter"],["SCR","Malung-Sälen Scandinavian Mountains"],["MMX","Malmö Sturup"],["KRN","Kiruna"],["UME","Umeå"],["LLA","Luleå"]],"芬蘭":[["HEL","赫爾辛基"],["IVL","Ivalo"],["KTT","Kittilä"],["KUO","Kuopio"],["LPP","Lappeenranta"],["OUL","Oulu"],["RVN","Rovaniemi"],["TMP","Tampere-Pirkkala"],["TKU","Turku"],["VAA","Vaasa"]],"英國":[["LHR","倫敦"],["LTN","London Luton"],["LGW","蓋威克"],["STN","斯坦斯特德"],["BFS","Belfast"],["BHX","Birmingham"],["MAN","Manchester"],["CWL","Cardiff"],["BRS","Bristol"],["LPL","Liverpool John Lennon"]],"愛爾蘭":[["DUB","都柏林"],["NOC","Charlestown Ireland West Knock"],["ORK","Cork"],["SNN","Shannon"]],"西班牙":[["MAD","馬德里"],["BCN","巴塞隆納"],["VLC","Valencia"],["FUE","El Matorral Fuerteventura"],["LPA","Gran Canaria Island Gran Canaria"],["ACE","San Bartolomé César Manrique-Lanzarote"],["TFS","Tenerife Sur"],["TFN","Tenerife Norte-Ciudad de La Laguna"],["ALC","Alicante-Elche Miguel Hernández"]],"葡萄牙":[["LIS","里斯本"],["FAO","Faro - Gago Coutinho"],["FNC","Funchal Cristiano Ronaldo"],["PDL","Ponta Delgada João Paulo II"],["OPO","Porto Francisco de Sá Carneiro"]],"直布羅陀":[["GIB","Gibraltar"]],"聖馬利諾":[["RMI","里米尼（鄰近）"],["BLQ","波隆那（鄰近）"]],"義大利":[["FCO","羅馬"],["MXP","米蘭"],["BLQ","Bologna Guglielmo Marconi"],["FLR","佛羅倫斯"],["NAP","那不勒斯"],["PMO","Palermo Falcone–Borsellino"],["CIA","Rome Ciampino–G. B. Pastine"],["TRN","Caselle Torinese Turin"],["VCE","威尼斯"],["BRI","Bari Karol Wojtyła"]],"馬爾他":[["MLA","Valletta Malta"]],"希臘":[["ATH","雅典"],["SKG","Thessaloniki Macedonia"],["HER","Heraklion Nikos Kazantzakis"],["KGS","Kos Island Kos \"Ippokratis\""],["CFU","Kerkyra Corfu Ioannis Kapodistrias"],["KVA","Kavala Alexander the Great"],["RHO","Rhodes \"Diagoras\""],["CHQ","Souda Chania"],["JTR","Santorini Island Santorini"]],"愛沙尼亞":[["TLL","Lennart Meri Tallinn"],["KDL","Kärdla"],["URE","Kuressaare"],["EPU","Pärnu"],["TAY","Tartu"]],"拉脫維亞":[["RIX","Riga"]],"立陶宛":[["VNO","Vilnius"],["KUN","Kaunas"],["PLQ","Palanga"]],"波蘭":[["WAW","華沙"],["WMI","Nowy Dwór Mazowiecki Warsaw Modlin"],["GDN","Gdańsk Lech Wałęsa"],["KRK","Balice Kraków John Paul II"],["KTW","Katowice Wojciech Korfanty"],["LUZ","Lublin"],["LCJ","Łódź Władysław Reymont"],["POZ","Poznań-Ławica"],["RZE","Rzeszów-Jasionka"]],"捷克":[["PRG","布拉格"],["OSR","Mošnov Leoš Janáček Ostrava"],["JCL","České Budějovice South Bohemian"],["KLV","Karlovy Vary"],["PED","Pardubice"]],"斯洛伐克":[["BTS","Bratislava M. R. Štefánik"],["KSC","Košice"],["SLD","Sliač"],["TAT","Poprad-Tatry"]],"羅馬尼亞":[["BBU","Bucharest Băneasa Aurel Vlaicu"],["OTP","Otopeni Bucharest Henri Coandă"],["TSR","Timișoara Traian Vuia"],["BCM","Bacău George Enescu"],["GHV","Brașov-Ghimbav"],["CND","Constanța Mihail Kogălniceanu"],["CLJ","Cluj-Napoca Avram Iancu Cluj"],["CRA","Craiova"],["IAS","Iaşi"],["OMR","Oradea"]],"保加利亞":[["SOF","Sofia"],["BOJ","Burgas"],["PDV","Plovdiv"],["VAR","Varna"]],"匈牙利":[["BUD","布達佩斯"],["DEB","Debrecen"],["PEV","Pécs-Pogány"]],"教廷":[["FCO","羅馬（鄰近）"]],"克羅埃西亞":[["DBV","Dubrovnik Ruđer Bošković"],["ZAG","Velika Gorica Zagreb Franjo Tuđman"],["PUY","Pula"],["RJK","Rijeka"],["SPU","Split Saint Jerome"],["ZAD","Zadar"],["OSI","Osijek"],["BWK","Gornji Humac Brač"]],"塞浦路斯":[["ECN","Tymbou Ercan"],["LCA","Larnaca"],["PFO","Paphos"]],"斯洛維尼亞":[["LJU","Zgornji Brnik Ljubljana Jože Pučnik"],["MBX","Maribor Edvard Rusjan"]],"波士尼亞赫塞哥維納":[["SJJ","Sarajevo"],["BNX","Mahovljani Banja Luka"],["OMO","Mostar"],["TZL","Dubrave Gornje Tuzla"]],"阿爾巴尼亞":[["TIA","Rinas Tirana Mother Teresa"]],"加拿大":[["YVR","溫哥華"],["YYZ","多倫多"],["YYC","卡爾加利"],["YUL","蒙特婁"],["YOW","渥太華"]],"美國":[["LAX","洛杉磯"],["SFO","舊金山"],["SEA","西雅圖"],["JFK","紐約"],["IAH","休士頓"],["ORD","芝加哥"],["IAD","華盛頓"],["HNL","檀香山"],["OAK","Oakland San Francisco Bay"],["MIA","邁阿密"]],"墨西哥":[["MEX","墨西哥城"],["CUN","坎昆"],["ACA","Acapulco General Juan N. Álvarez"],["CUU","Chihuahua General Roberto Fierro Villalobos"],["CJS","Ciudad Juárez Abraham González"],["GDL","Guadalajara"],["MID","Mérida Manuel Crescencio Rejón"],["NLU","Mexico City Felipe Ángeles"],["MTY","Monterrey"],["PBC","Puebla Hermanos Serdán"]],"瓜地馬拉":[["GUA","Guatemala City La Aurora"],["PBR","Puerto Barrios"],["RER","Retalhuleu"],["FRS","San Benito Mundo Maya"],["HUG","Huehuetenango"],["AAZ","Quezaltenango"]],"薩爾瓦多":[["SAL","San Salvador El Salvador Saint Óscar Arnulfo Romero y Galdámez"],["ILS","San Salvador Ilopango"]],"宏都拉斯":[["SAP","San Pedro Sula Ramón Villeda Morales"],["TGU","Tegucigalpa Toncontín"],["RTB","Coxen Hole Juan Manuel Gálvez"],["XPL","Palmerola"],["LCE","La Ceiba Golosón"],["GJA","Guanaja La Laguna"],["PEU","Puerto Lempira"],["UII","Utila Island Utila"]],"巴哈馬":[["FPO","Freeport Grand Bahama"],["NAS","Nassau Lynden Pindling"],["ZSA","San Salvador"],["ASD","Andros Town"],["TZN","Andros Congo Town"],["MHH","Marsh Harbour Leonard M. Thompson"],["SAQ","Andros Island San Andros"],["AXP","Spring Point"],["TCB","Treasure Cay"],["CCZ","Chub Cay"]],"尼加拉瓜":[["MGA","Augusto C. Sandino (Managua)"],["BEF","Bluefields"],["PUZ","Puerto Cabezas"],["RNI","Corn Island"]],"哥斯大黎加":[["SJO","San José Juan Santamaría"],["SYQ","San Jose Tobías Bolaños"],["LIR","Liberia Daniel Oduber Quirós"],["FON","La Fortuna Arenal"],["GLF","Golfito"],["LIO","Limón"],["NOB","Nicoya Nosara"],["PJM","Puerto Jimenez"],["XQP","Quepos Managua"]],"巴拿馬":[["BLB","Panamá City Panamá Pacífico"],["PTY","Tocumen"],["BOC","Bocas del Toro \"Isla Colón\""],["CTD","Chitré Alonso Valderrama"],["CHX","Changuinola Captain Manuel Niño"],["DAV","David Enrique Malek"],["ONX","Colón Enrique Adolfo Jimenez"],["PAC","Albrook Marcos A. Gelabert"],["PDM","Pedasí Capt. J. Montenegro"],["RIH","Río Hato Scarlett Martinez"]],"海地":[["PAP","Port-au-Prince Toussaint Louverture"],["CAP","Cap Haitien"],["CYA","Les Cayes Antoine-Simon"],["JEE","Carrefour Sanon Jérémie"]],"多米尼克":[["DCF","Canefield"],["DOM","Marigot Douglas-Charles"]],"多明尼加共和國":[["LRM","La Romana Casa De Campo"],["POP","Puerto Plata Gregorio Luperon"],["SDQ","Santo Domingo Las Américas"],["PUJ","Punta Cana"],["STI","Santiago Cibao"],["BRX","Barahona Maria Montez"],["AZS","Samaná El Catey"],["JBQ","La Isabela"]],"千里達及托貝哥":[["TAB","Scarborough A.N.R. Robinson"],["POS","Port of Spain Piarco"]],"牙買加":[["KIN","Kingston Norman Manley"],["MBJ","Montego Bay Sangster"],["OCJ","Boscobel Ian Fleming"],["KTP","Tinson Pen"]],"巴貝多":[["BGI","Bridgetown Grantley Adams"]],"貝里斯":[["BZE","Belize City Philip S. W. Goldson"],["TZA","Belize City Sir Barry Bowen Municipal"],["SPR","San Pedro John Greif II"],["CUK","Caye Caulker"],["CYC","Caye Chapel"],["CZH","Corozal"],["DGA","Dangriga"],["PLJ","Placencia"],["BGK","Big Creek"],["INB","Independence"]],"百慕達":[["BDA","Hamilton L.F. Wade"]],"聖文森":[["SVD","Kingstown Argyle"],["BQU","Bequia J F Mitchell"],["CIW","Canouan"],["MQS","Lovell Mustique"],["UNI","Union Island"]],"聖露西亞":[["UVF","Vieux Fort Hewanorra"],["SLU","Castries George F. L. Charles"]],"古巴":[["HAV","Havana José Martí"],["CMW","Camaguey Ignacio Agramonte"],["SCU","Santiago Antonio Maceo"],["HOG","Holguin Frank Pais"],["SNU","Santa Clara Abel Santamaria"],["VRA","Matanzas Juan Gualberto Gomez"],["BCA","Baracoa Gustavo Rizo"],["BYM","Bayamo Carlos Manuel de Cespedes"],["CCC","Cayo Coco Jardines Del Rey"],["CFG","Cienfuegos Jaime Gonzalez"]],"格瑞那達":[["GND","Saint George's Maurice Bishop"],["CRU","Carriacou Island Lauriston"]],"聖克里斯多福及尼維斯":[["SKB","Basseterre Robert L. Bradshaw"],["NEV","Charlestown Vance W. Amory"]],"安地卡及巴布達":[["ANU","Osbourn V. C. Bird"],["BBQ","Codrington Burton-Nibbs"]],"委內瑞拉":[["MAR","Maracaibo La Chinita"],["BLA","Barcelona General José Antonio Anzoategui"],["BRM","Barquisimeto Jacinto Lara"],["PMV","Isla Margarita Del Caribe Santiago Mariño"],["CCS","Maiquetía Simón Bolívar"],["PZO","Guyana City General Manuel Carlos Piar"],["VLN","Valencia Arturo Michelena"],["BNS","Barinas"],["CAJ","Canaima"],["CUP","Carúpano General Francisco Bermúdez"]],"哥倫比亞":[["BOG","波哥大"],["BAQ","Barranquilla Ernesto Cortissoz"],["CTG","Cartagena Rafael Nuñez"],["MDE","Medellín Jose Maria Córdova"],["EOH","Medellín Enrique Olaya Herrera"],["CLO","Cali Alfonso Bonilla Aragon"],["ADZ","San Andrés Gustavo Rojas Pinilla"],["AXM","Armenia El Eden"],["PUU","Puerto Asís Tres De Mayo"],["BGA","Bucaramanga Palonegro"]],"蓋亞那":[["GEO","Georgetown Cheddi Jagan"],["OGL","Ogle Eugene F. Correia"],["KAI","Kaieteur Falls Kaieteur"],["LTM","Lethem"]],"厄瓜多爾":[["CUE","Cuenca Mariscal Lamar"],["GYE","Guayaquil José Joaquín de Olmedo"],["MEC","Manta Eloy Alfaro"],["UIO","Quito Mariscal Sucre"],["GPS","Isla Baltra Seymour Galapagos Ecological"],["SNC","Salinas General Ulpiano Paez"],["ESM","Tachina Carlos Concha Torres"],["OCC","Coca Francisco De Orellana"],["LTX","Latacunga Cotopaxi"],["XMS","Macas Coronel E Carvajal"]],"巴西":[["GRU","聖保羅"],["GIG","里約"],["BSB","Brasília Presidente Juscelino Kubitschek"],["CWB","Curitiba-Afonso Pena"],["FLN","Florianópolis Hercílio Luz"],["SDU","Rio de Janeiro Santos Dumont"],["CGH","São Paulo Congonhas–Deputado Freitas Nobre"],["BEL","Belém Val de Cans/Júlio Cezar Ribeiro"],["BVB","Boa Vista Atlas Brasil Cantanhede"],["CNF","Belo Horizonte Tancredo Neves"]],"秘魯":[["LIM","利馬"],["AQP","Arequipa Rodríguez Ballón"],["TRU","Trujillo Capitán FAP Carlos Martínez de Pinillos"],["PCL","Pucallpa Cap FAP David Abenzur Rengifo"],["CIX","Chiclayo Capitán FAP José A. Quiñones González"],["JUL","Juliaca Inca Manco Capac"],["IQT","Iquitos Coronel FAP Francisco Secada Vignetta"],["CUZ","Cusco Alejandro Velasco Astete"]],"玻利維亞":[["VVI","Santa Cruz Viru Viru"],["SRZ","Santa Cruz El Trompillo"],["SRE","Sucre Alcantarí"],["CBB","Cochabamba Jorge Wilsterman"],["LPB","La Paz El Alto"],["ORU","Oruro Juan Mendoza"],["UYU","Quijarro Joya Andina"],["CIJ","Cobija Capitán Aníbal Arab"],["GYA","Guayaramerín"],["PSZ","Puerto Suárez Capitán Av. Salvador Ogaya G."]],"智利":[["SCL","聖地牙哥"],["PUQ","Punta Arenas President Carlos Ibáñez"],["IQQ","Iquique Diego Aracena"],["ANF","Antofagasta Andrés Sabella Gálvez"],["CCP","Concepcion Carriel Sur"],["IPC","Isla De Pascua Mataveri"],["ZCO","Temuco La Araucanía"],["PMC","Puerto Montt El Tepual"]],"阿根廷":[["EZE","布宜諾斯艾利斯"],["AEP","Buenos Aires Aeroparque Jorge Newbery"],["MDZ","Mendoza Governor Francisco Gabrielli"],["SLA","Salta Martín Miguel de Güemes"],["JUJ","San Salvador de Jujuy Gobernador Horacio Guzman"],["BRC","San Carlos de Bariloche Teniente Luis Candelaria"],["NQN","Neuquén Presidente Perón"],["ROS","Rosario Islas Malvinas"],["COR","Cordoba Ingeniero Aeronáutico Ambrosio L.V. Taravella"]],"巴拉圭":[["ASU","Asunción Silvio Pettirossi"],["AGT","Ciudad del Este Guaraní"],["ENO","Encarnación Teniente Ramon A. Ayub Gonzalez"]],"烏拉圭":[["PDP","Punta del Este Capitan Corbeta CA Curbelo"],["MVD","Ciudad de la Costa Carrasco General Cesáreo L. Berisso"],["RVY","Rivera Pres. Gral. Óscar D. Gestido Binational"]],"蘇利南":[["PBM","Paramaribo Johan Adolf Pengel"],["ORG","Paramaribo Zorg en Hoop"],["DRJ","Drietabbetje"],["MOJ","Moengo Airstrip"],["AGI","Wageningen Airstrip"],["EAX","Kwatta Eduard Alexander Gummels"]],"埃及":[["CAI","開羅"],["HBE","Alexandria"],["ASW","Aswan"],["DBB","El Alamein"],["AAC","El Arish"],["ATZ","Asyut"],["HRG","Hurghada"],["LXR","Luxor"],["RMF","Marsa Alam"]],"利比亞":[["MJI","Tripoli Mitiga"],["BEN","Benina"],["LAQ","Al Albraq Al Abraq"],["AKF","Kufra"],["SEB","Sabha"],["LTD","Ghadames"],["MRA","Misrata"]],"阿爾及利亞":[["ALG","Algiers Houari Boumediene"],["BJA","Béjaïa Soummam–Abane Ramdane"],["DJG","Tiska Djanet"],["TMR","Tamanrasset Aguenar – Hadj Bey Akhamok"],["GJL","Tahir Jijel Ferhat Abbas"],["AAE","Annaba Rabah Bitat"],["CZL","Constantine Mohamed Boudiaf"],["BLJ","Batna Mostefa Ben Boulaid"],["CFK","Chlef Aboubakr Belkaid"],["TLM","Zenata – Messali El Hadj"]],"幾內亞":[["CKY","Conakry Ahmed Sékou Touré"]],"幾內亞比索":[["OXB","Bissau Osvaldo Vieira"]],"獅子山國":[["FNA","Freetown Lungi"]],"賴比瑞亞":[["ROB","Monrovia Roberts"],["MLW","Monrovia Spriggs Payne"]],"象牙海岸":[["ABJ","Abidjan Félix-Houphouët-Boigny"],["BYK","Bouaké"],["HGO","Korhogo"],["SPY","San Pedro"]],"迦納":[["ACC","Accra Kotoka"],["TML","Tamale Yakubu Tali"],["KMS","Kumasi Prempeh I"],["NYI","Sunyani"],["TKD","Sekondi-Takoradi Takoradi"]],"多哥":[["LFW","Lomé–Tokoin"]],"貝南":[["COO","Cotonou Cadjehoun"]],"布吉納法索":[["OUA","Ouagadougou Thomas Sankara"],["BOY","Bobo Dioulasso"]],"奈及利亞":[["ABV","Abuja Nnamdi Azikiwe"],["LOS","Lagos Murtala Muhammed"],["PHC","Port Harcourt"],["PHG","Port Harcourt City / Port Harcourt Air Force Base"],["KAN","Mallam Aminu Kano"],["ABB","Asaba"],["BCU","Sir Abubakar Tafawa Balewa Bauchi State"],["ENU","Enegu Akanu Ibiam"],["ILR","Ilorin General Tunde Idiagbon"],["KAD","Kaduna"]],"喀麥隆":[["DLA","Douala"],["NSI","Yaoundé Nsimalen"],["GOU","Garoua"],["MVR","Maroua Salak"],["NGE","N'Gaoundéré"]],"中非共和國":[["BGF","Bangui M'Poko"]],"赤道幾內亞":[["SSG","Malabo"],["BSG","Bata"],["OCS","Corisco Island Corisco"],["GEM","Mengomeyén President Obiang Nguema"],["NBN","San Antonio de Palé Annobón"]],"加彭":[["LBV","Libreville Leon M'ba"],["POG","Port Gentil"],["OYE","Oyem"],["MKU","Makokou"],["MVB","Franceville M'Vengue El Hadj Omar Bongo Ondimba"],["GAX","Gamba"]],"剛果共和國":[["BZV","Brazzaville Maya-Maya"],["PNR","Pointe Noire Antonio Agostinho-Neto"]],"剛果民主共和國":[["GOM","Goma"],["FIH","Kinshasa Ndjili"],["FBM","Lubumbashi"],["MJM","Mbuji Mayi"],["FKI","Kisangani Bangoka"],["FDU","Bandundu"],["KKW","Kikwit"],["MDK","Mbandaka"],["BDT","Gbadolite"],["GMA","Gemena"]],"安哥拉":[["NBJ","Luanda Dr. Antonio Agostinho Neto"],["LAD","Luanda Quatro de Fevereiro"],["SSY","Mbanza Congo"],["CAB","Cabinda"],["CBT","Catumbela"],["DUE","Chitato Dundo"],["VPE","Ngiva Ngjiva Pereira"],["NOV","Huambo Albano Machado"],["MEG","Malanje"],["SPP","Menongue"]],"波札那":[["GBE","Gaborone Sir Seretse Khama"],["BBK","Kasane"],["FRW","Francistown Phillip Gaonwe Matante"],["MUB","Maun"],["SWX","Shakawe"]],"辛巴威":[["HRE","Harare Robert Gabriel Mugabe"],["VFA","Victoria Falls"],["BUQ","Bulawayo Joshua Mqabuko Nkomo"],["KAB","Kariba"]],"馬拉威":[["BLZ","Blantyre Chileka"],["LLW","Lumbadzi Kamuzu"]],"莫三比克":[["MPM","Maputo"],["BEW","Beira"],["APL","Nampula"],["TET","Tete"],["VPY","Chimoio"],["INH","Inhambane"],["VXC","Lichinga"],["MNC","Nacala"],["POL","Pemba"],["UEL","Quelimane"]],"尚比亞":[["LVI","Livingstone Harry Mwanga Nkumbula"],["LUN","Lusaka Kenneth Kaunda"],["MFU","Mfuwe"],["NLA","Ndola Simon Mwansa Kapwepwe"],["KAA","Kasama"],["SLI","Solwesi"]],"坦尚尼亞":[["DAR","Dar es Salaam Julius Nyerere"],["JRO","Arusha Kilimanjaro"],["MWZ","Mwanza"],["ZNZ","Zanzibar Abeid Amani Karume"],["ARK","Arusha"],["DOD","Dodoma"],["MBI","Mbeya Songwe"],["MYW","Mtwara"],["TGT","Tanga"],["BKZ","Bukoba"]],"蒲隆地":[["BJM","Bujumbura Melchior Ndadaye"],["GID","Gitega"],["KRE","Kirundo"]],"盧安達":[["KGL","Kigali"],["KME","Kamembe"]],"烏干達":[["EBB","Entebbe"],["RUA","Arua"],["ULU","Gulu"],["SRT","Soroti"],["KHX","Kihihi Savannah Airstrip"],["KXO","Kisoro"]],"肯亞":[["NBO","奈洛比"],["MBA","Mombasa Moi"],["EDL","Eldoret"],["KIS","Kisumu"]],"索馬利亞":[["MGQ","Mogadishu Aden Adde"],["BSA","Bosaso Bender Qassim"],["HGA","Hargeisa Egal"],["BBO","Berbera"],["BLW","Beledweyne"],["GLK","Galcaio"],["GGR","Garowe"]],"索馬利蘭共和國":[["HGA","哈爾格薩"]],"吉布地":[["JIB","Djibouti City Djibouti-Ambouli"]],"衣索匹亞":[["ADD","Addis Ababa Bole"],["DIR","Dire Dawa Aba Tenna Dejazmach Yilma"],["JIJ","Jijiga Gerad Wilwal"],["AWA","Hawassa"],["AMH","Arba Minch"],["AXU","Axum"],["BJR","Bahir Dar"],["GMB","Gambela"],["GDQ","Azezo Gondar"],["GDE","Gode"]],"厄利垂亞":[["ASM","Asmara"]],"蘇丹":[["KRT","Khartoum"],["PZU","Port Sudan New"],["DOG","Dongola"],["ELF","El Fasher"],["KSL","Kassala"],["UYL","Nyala"],["EBD","El-Obeid"]],"南蘇丹":[["JUB","Juba"],["MAK","Malakal"],["WUU","Wau"]],"模里西斯":[["MRU","Plaine Magnien Sir Seewoosagur Ramgoolam"],["RRG","Port Mathurin Sir Charles Gaetan Duval"]],"馬達加斯加":[["TNR","Antananarivo Ivato"],["TMM","Toamasina Ambalamanasy"],["MJN","Mahajanga Amborovy"],["NOS","Nosy Be"],["SMS","Vohilava Sainte Marie"],["MOQ","Morondava"],["DIE","Antisiranana Arrachart"],["BPY","Besalampy"],["WMN","Maroantsetra"],["SVB","Sambava"]],"南非共和國":[["JNB","約翰尼斯堡"],["CPT","開普敦"],["DUR","Durban King Shaka"],["ELS","East London King Phalo"],["HLA","Johannesburg Lanseria"],["BFN","Bloemfontein Bram Fischer"],["GRJ","George"],["KIM","Kimberley"],["MQP","Mbombela Kruger Mpumalanga"],["PLZ","Gqeberha Chief Dawid Stuurman"]],"納密比亞":[["WDH","Windhoek Hosea Kutako"],["ERS","Windhoek Eros"],["WVB","Walvis Bay"],["MPA","Mpacha Katima Mulilo"],["LUD","Luderitz"],["OND","Ondangwa"],["OMD","Oranjemund"],["NDU","Rundu"],["HAL","Halali"]],"史瓦帝尼":[["SHO","Mpaka King Mswati III"]],"賴索托":[["MSU","Maseru Moshoeshoe I"]],"查德":[["NDJ","N'Djamena"]],"葛摩":[["HAH","Moroni Prince Said Ibrahim"],["AJN","Ouani"]],"甘比亞":[["BJL","Banjul"]],"茅利塔尼亞":[["NKC","Nouakchott–Oumtounsy"],["NDB","Nouadhibou"],["OUZ","Zouérate Tazadit"]],"馬利":[["BKO","Bamako Modibo Keita"],["TOM","Timbuktu Tombouktou"],["GAQ","Gao"],["KYS","Kayes Dag Dag"],["MZI","Sévaré Mopti"]],"尼日":[["NIM","Niamey Diori Hamani"],["ZND","Zinder"]],"塞內加爾":[["DSS","Dakar Blaise Diagne"],["ZIG","Ziguinchor"],["CSK","Cap Skirring"]],"突尼西亞":[["TUN","Tunis Carthage"],["DJE","Mellita Djerba Zarzis"],["TBJ","Tabarka-Aïn Draham"],["MIR","Monastir Habib Bourguiba"],["NBE","Enfidha - Hammamet"],["SFA","Sfax Thyna"],["TOE","Tozeur Nefta"]],"維德角":[["RAI","Praia Nelson Mandela"],["SID","Espargos Amílcar Cabral"],["BVC","Rabil Aristides Pereira"],["VXE","São Pedro Cesaria Evora"],["MMO","Vila do Maio Maio"],["SNE","Preguiça"],["SFL","São Filipe"]],"摩洛哥":[["CMN","卡薩布蘭加"],["RBA","Rabat-Salé"],["TNG","Tangier Ibn Battuta"],["AGA","Agadir Al Massira"],["OZG","Zagora"],["FEZ","Fes Saïss"],["OUD","Ahl Angad Oujda Angads"],["BEM","Oulad Yaich Beni Mellal"],["NDR","Nador Al Aaroui"],["RAK","Marrakesh Menara"]],"塞席爾":[["SEZ","Victoria Seychelles"],["PRI","Praslin Island"]],"聖多美普林西比":[["TMS","São Tomé"],["PCP","São Tomé & Príncipe Principe"]],"香港":[["HKG","香港"]],"澳門":[["MFM","澳門"]],"中國大陸":[["PVG","上海浦東"],["PEK","北京首都"],["CAN","廣州"],["SZX","深圳"],["CTU","成都"]]}};   // 抵達機場：e = 依城市編號，c = 依國家
 
+var INS = {   // 保費表：陣列第 i 項 = 第 i+1 天（目前提供 1–30 天）
+  general:  [175,185,199,210,224,234,248,259,273,283,294,308,318,332,343,357,367,381,392,406,416,427,441,451,465,476,490,500,514,525],
+  schengen: [200,212,228,240,256,268,284,296,312,324,336,352,364,380,392,408,420,436,448,464,476,488,504,516,532,544,560,572,588,600]
+};
+var SCHENGEN = ["法國","德國","荷蘭","比利時","盧森堡","瑞士","列支敦斯登","奧地利","丹麥","冰島","挪威","瑞典","芬蘭","西班牙","葡萄牙","義大利","馬爾他","希臘","愛沙尼亞","拉脫維亞","立陶宛","波蘭","捷克","斯洛伐克","匈牙利","克羅埃西亞","斯洛維尼亞","羅馬尼亞","保加利亞"];
+var GIFT_PER_DAY = 1100;
+var manualF = { oIns: false, oGift: false }, insTypeManual = false;
 var $ = function (id) { return document.getElementById(id); };
+var AP_RE = /^[A-Z]{3}(,[A-Z]{3})*$/;
 var store = {
   get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
   set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -246,37 +222,60 @@ function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {"&"
 
 // ---------- 三層選單 ----------
 var regionSel = $("region"), countrySel = $("country"), citySel = $("city");
-DATA.forEach(function (r, i) {
-  var o = document.createElement("option"); o.value = i;
-  o.textContent = (r.code === "G" ? "" : r.code + "　") + r.zh; regionSel.appendChild(o);
-});
+function ph(sel, text) {
+  sel.innerHTML = "";
+  var o = document.createElement("option"); o.value = ""; o.textContent = text; sel.appendChild(o); sel.value = "";
+}
 function label(x) { return x.zh + (x.en ? "（" + x.en + "）" : ""); }
+function fillRegions() {
+  ph(regionSel, "請選擇地區");
+  DATA.forEach(function (r, i) {
+    var o = document.createElement("option"); o.value = i;
+    o.textContent = (r.code === "G" ? "" : r.code + "　") + r.zh; regionSel.appendChild(o);
+  });
+}
 function fillCountries() {
-  countrySel.innerHTML = "";
+  if (regionSel.value === "") { ph(countrySel, "請先選擇地區"); fillCities(); return; }
+  ph(countrySel, "請選擇國家");
   DATA[regionSel.value].countries.forEach(function (c, i) {
     var o = document.createElement("option"); o.value = i; o.textContent = label(c); countrySel.appendChild(o);
   });
   fillCities();
 }
 function fillCities() {
-  citySel.innerHTML = "";
+  if (regionSel.value === "" || countrySel.value === "") { ph(citySel, "請先選擇國家"); fillAirports(); return; }
+  ph(citySel, "請選擇城市");
   var c = DATA[regionSel.value].countries[countrySel.value];
   c.entries.forEach(function (e, i) {
     var o = document.createElement("option"); o.value = i; o.textContent = label(e); citySel.appendChild(o);
   });
+  if (c.entries.length === 1) citySel.value = "0";   // 只有一筆（例如新加坡）就直接選好
   fillAirports();
 }
 function cur() {
+  if (regionSel.value === "" || countrySel.value === "" || citySel.value === "") return null;
   var c = DATA[regionSel.value].countries[countrySel.value];
   return { region: DATA[regionSel.value], country: c, entry: c.entries[citySel.value] };
 }
+fillRegions(); fillCountries();
+
 function fillAirports() {
-  var s = cur(), list = CITY_AP[s.entry.zh] || COUNTRY_AP[s.country.zh] || [];
-  var dl = $("toList"); dl.innerHTML = "";
-  list.forEach(function (a) {
-    var o = document.createElement("option"); o.value = a[0]; o.label = a[1]; o.textContent = a[0] + " " + a[1]; dl.appendChild(o);
-  });
-  $("to").value = list.length ? list[0][0] : "";
+  var sel = $("toSel"), other = $("toOther");
+  sel.innerHTML = ""; other.value = ""; other.style.display = "none";
+  function add(v, txt) { var o = document.createElement("option"); o.value = v; o.textContent = txt; sel.appendChild(o); return o; }
+  var s = cur();
+  if (!s) { add("", "請先選擇城市"); return; }
+  var id = s.entry.id, cityList = id ? AP.e[String(id)] : null;
+  var list = cityList || AP.c[s.country.zh] || [];
+  add("", "請選擇機場");
+  list.forEach(function (a) { add(a[0], a[0] + "　" + a[1]); });
+  add("__other", "其他（自行輸入代碼）");
+  if (!list.length) { sel.value = "__other"; other.style.display = ""; }
+  else if (cityList || list.length === 1) sel.value = list[0][0];   // 該城市的機場直接選好第一個；國家層級的清單由使用者自己挑
+}
+function getTo() {
+  var v = $("toSel").value;
+  return (v === "__other" ? $("toOther").value : v).trim().toUpperCase().replace(/\s+/g, "");
 }
 
 // ---------- 日期工具 ----------
@@ -324,6 +323,7 @@ function seasonsCoverYear(e) {
   return true;
 }
 function renderRateInfo(s) {
+  if (!s) { $("rateInfo").textContent = "請先選擇地區、國家與城市。"; return; }
   var e = s.entry, h = "";
   var name = esc(s.country.zh + (e.zh !== s.country.zh ? "・" + e.zh : ""));
   if (e.manual) {
@@ -342,40 +342,74 @@ function renderRateInfo(s) {
 }
 
 var lastSummary = "";
-var payTouched = false;
+var manualPct = {};          // 使用者手動改過的日期 -> 比例
+var autoFilled = false;      // 抵達日期是否由自動查價填入
+var autoInfo = "";
+var WD = ["日", "一", "二", "三", "四", "五", "六"];
+var PCTS = [100, 70, 30, 10, 0];
+function wdOf(iso) { return WD[new Date(parseISO(iso)).getUTCDay()]; }
+function dayDiff(a, b) { return Math.round((parseISO(b) - parseISO(a)) / 86400000); }
+function clearManual() { manualPct = {}; }
+function clearAuto() {
+  if (autoFilled) { $("a1").value = ""; $("a2").value = ""; autoFilled = false; autoInfo = ""; }
+}
+
 function calc() {
-  var s = cur(), days = tripDays(), pax = Math.max(1, num("pax"));
-  $("daysInfo").textContent = days
-    ? "共 " + days + " 天（含出發與返國當日），" + Math.max(0, days - 1) + " 晚。"
-    : "請確認返國日期不早於出發日期。";
-  if (!payTouched) $("payDays").value = days || "";
-  var payDays = Math.max(0, Math.floor(num("payDays")));
+  var s = cur(), pax = 1;
   var rate = num("rate"), override = num("override");
+  var d1 = $("d1").value, r1 = $("d2").value, a1 = $("a1").value, a2 = $("a2").value;
+  var validRange = !!(d1 && r1 && r1 >= d1);
+  var est = [];
+  if (validRange) {
+    if (!a1) { a1 = d1; est.push("抵達當地日期"); }
+    if (!a2) { a2 = r1; est.push("返抵台灣日期"); }
+  }
   renderRateInfo(s);
 
-  // 逐日計算，並把相同數額與折算的連續日合併成一列
-  var runs = [], usdOne = 0, usedFallback = false, noData = false;
-  if ($("d1").value) {
-    var t0 = parseISO($("d1").value);
-    for (var i = 0; i < payDays; i++) {
-      var dt = addDays(t0, i), r;
-      if (override > 0) r = { usd: override, src: "override" }; else r = rateOnDate(s, dt);
+  // 逐日列出：出發日 ～ 返抵台灣日（以當地日期）
+  var days = [], usdOne = 0, equiv = 0, usedFallback = false, noData = false, orderBad = false;
+  if (validRange) {
+    if (a1 > r1) orderBad = true;
+    var start = a1 < d1 ? a1 : d1, end = a2 > r1 ? a2 : r1;
+    var t0 = parseISO(start);
+    for (var k = 0; k < 400 && t0 + k * 86400000 <= parseISO(end); k++) {
+      var dt = addDays(t0, k), iso = isoOf(dt);
+      var kind = iso >= r1 ? "ret" : (iso >= a1 ? "stay" : "out");
+      var auto = kind === "stay" ? 100 : 30;
+      var pct = manualPct[iso] != null ? manualPct[iso] : auto;
+      var r = override > 0 ? { usd: override, src: "override" } : (s ? rateOnDate(s, dt) : { usd: 0, src: "none" });
       if (r.src === "fallback") usedFallback = true;
-      if (r.src === "none" || r.src === "manual") noData = true;
-      var f = factorAt(i), last = runs[runs.length - 1];
-      if (last && last.usd === r.usd && last.f === f) { last.n++; last.end = isoOf(dt); }
-      else runs.push({ start: isoOf(dt), end: isoOf(dt), n: 1, usd: r.usd, f: f });
+      if (s && (r.src === "none" || r.src === "manual")) noData = true;
+      var idx = iso >= a1 ? dayDiff(a1, iso) : 0;
+      var f = $("longStay").checked ? factorAt(idx) : 1;
+      var usd = r.usd * pct / 100 * f;
+      usdOne += usd; equiv += pct / 100 * f;
+      var label = kind === "out" ? "飛行中，未留宿"
+        : kind === "stay" ? (iso === a1 ? "抵達並留宿當地" : "留宿當地")
+        : (iso === r1 ? "當地起飛，返程" : (iso === a2 ? "返抵台灣" : "返程飛行中，未留宿"));
+      if (iso === r1 && iso === a2) label = "當地起飛並返抵台灣";
+      if (f < 1) label += "（駐留超過 1 個月，數額 × " + Math.round(f * 100) + "%）";
+      days.push({ iso: iso, label: label, pct: pct, usd: usd, edited: manualPct[iso] != null });
     }
   }
   var rows = "";
-  runs.forEach(function (r) {
-    var sub = r.n * r.usd * r.f; usdOne += sub;
-    rows += "<tr><td>" + r.start + (r.end !== r.start ? " ～ " + r.end : "") + "</td><td class='r'>" + r.n +
-      "</td><td class='r'>" + r.usd + "</td><td class='r'>" + (r.f === 1 ? "100%" : Math.round(r.f * 100) + "%") +
-      "</td><td class='r'>" + sub.toFixed(2) + "</td></tr>";
+  days.forEach(function (d) {
+    var opts = PCTS.map(function (p) { return "<option value='" + p + "'" + (p === d.pct ? " selected" : "") + ">" + p + "%</option>"; }).join("");
+    rows += "<tr><td>" + d.iso + "（" + wdOf(d.iso) + "）</td><td>" + esc(d.label) + (d.edited ? "　<span class='note'>已手動調整</span>" : "") +
+      "</td><td><select class='pct' data-d='" + d.iso + "' aria-label='" + d.iso + " 日支比例' style='width:auto'>" + opts + "</select></td><td class='r'>" + d.usd.toFixed(2) + "</td></tr>";
   });
-  if (!runs.length) rows = "<tr><td colspan='5' class='note'>請先選好出發日期與計支日數。</td></tr>";
-  $("runRows").innerHTML = rows;
+  if (!days.length) rows = "<tr><td colspan='4' class='note'>" + (validRange ? "請先選擇目的地。" : "請先選好出發日期與回程日期。") + "</td></tr>";
+  $("dayRows").innerHTML = rows;
+  $("resetPct").style.display = Object.keys(manualPct).length ? "" : "none";
+
+  var startIso = days.length ? days[0].iso : "", endIso = days.length ? days[days.length - 1].iso : "";
+  $("daysInfo").textContent = days.length
+    ? "出差期間 " + startIso + " 至 " + endIso + "，共 " + days.length + " 天。"
+    : (d1 && r1 ? "請確認回程日期不早於出發日期。" : "請選擇出發日期與回程日期。");
+  $("flightNote").textContent = autoInfo ? autoInfo
+    : (est.length ? "抵達與返抵日期會在按上方「自動查價」後自動帶入；在此之前，暫以抵達、返抵當日估算。"
+    : ($("a1").value || $("a2").value ? "抵達與返抵日期為手動輸入。" : ""));
+
   usdOne = Math.ceil(usdOne - 1e-9) || 0;        // 附註 4：尾數不足 1 元進位
   var twdOne = usdOne * rate;
 
@@ -383,44 +417,61 @@ function calc() {
   [["住宿（70%）", .7], ["膳食（20%）", .2], ["零用（10%）", .1]].forEach(function (x) {
     pd += "<tr><td>" + x[0] + "</td><td class='r'>" + fmt(usdOne * x[1]) + "</td><td class='r'>" + fmt(twdOne * x[1]) + "</td></tr>";
   });
-  pd += "<tr><td><strong>每人日支合計</strong></td><td class='r'><strong>" + fmt(usdOne) + "</strong></td><td class='r'><strong>" + fmt(twdOne) + "</strong></td></tr>";
+  pd += "<tr><td><strong>每人日支合計（相當於 " + (Math.round(equiv * 10) / 10) + " 個整日）</strong></td><td class='r'><strong>" + fmt(usdOne) + "</strong></td><td class='r'><strong>" + fmt(twdOne) + "</strong></td></tr>";
   $("pdRows").innerHTML = pd;
 
   // 警示
   var warns = [];
-  if ($("d1").value && $("d1").value < "2026-01-01") warns.push("此日支數額表自 2026-01-01 起生效，出發日早於此日請改用當時適用的舊表。");
+  if (s && days.length && days[0].iso < "2026-01-01") warns.push("此日支數額表自 2026-01-01 起生效，出差期間早於此日請改用當時適用的舊表。");
   if (usedFallback) warns.push("行程中有日期不在該城市的季節表內，已依附註改用該國「其他」數額。");
-  if (noData && override <= 0) warns.push("此行程缺少日支數額，請手動覆寫。");
-  if (!rate) warns.push("尚未填入匯率，日支新台幣金額暫以 0 計。");
+  if (s && noData && override <= 0) warns.push("此行程缺少日支數額，請手動覆寫。");
+  if (orderBad) warns.push("抵達當地日期晚於回程日期，請檢查日期。");
+  if (s && !rate) warns.push("尚未填入匯率，日支新台幣金額暫以 0 計。");
   var w = $("warnBox");
   if (!w) { w = document.createElement("div"); w.id = "warnBox"; w.className = "warn"; $("rateInfo").after(w); }
   w.style.display = warns.length ? "" : "none"; w.innerHTML = warns.map(esc).join("<br>");
 
-  // 機票
+  // 機票與合計
   var fare = fareChosen(), buf = Math.max(0, num("buffer")) / 100;
   var fareTotal = fare * pax * (1 + buf);
   var pdTotal = twdOne * pax;
-  var gift = num("oGift") * payDays * pax;
-  var base = num("oVisa") + num("oIns") + num("oTrans") + num("oMisc");
-  var grand = fareTotal + pdTotal + base + gift;
+  var tripN = days.length;
+
+  // 保險費、禮品交際及雜費：自動帶入（使用者改過就保留其輸入）
+  if (!insTypeManual && s) $("insType").value = SCHENGEN.indexOf(s.country.zh) > -1 ? "schengen" : "general";
+  var insType = $("insType").value, insName = insType === "schengen" ? "申根險" : "一般險";
+  var insAuto = (tripN >= 1 && tripN <= 30) ? INS[insType][tripN - 1] : 0;
+  var giftAuto = GIFT_PER_DAY * tripN;
+  if (!manualF.oIns) $("oIns").value = insAuto || "";
+  if (!manualF.oGift) $("oGift").value = giftAuto || "";
+  document.querySelectorAll("[data-reset]").forEach(function (b) { b.style.display = manualF[b.getAttribute("data-reset")] ? "" : "none"; });
+  $("autoNote").textContent = tripN > 30 ? "出國天數 " + tripN + " 天，超過保費表的 30 天，請手動輸入保險費。"
+    : (tripN ? "出國天數 " + tripN + " 天：保險費依" + insName + "帶入，禮品交際及雜費 = NT$" + fmt(GIFT_PER_DAY) + " × " + tripN + " 日。"
+    : "選好日期後，會自動帶入保險費與禮品交際及雜費。");
+
+  var ins = num("oIns"), gift = num("oGift");
+  var base = num("oVisa") + num("oTrans") + num("oMisc");
+  var grand = fareTotal + pdTotal + ins + gift + base;
 
   var out = "";
   function line(label, val, sub) { out += "<tr><td>" + label + (sub ? "<div class='note'>" + sub + "</div>" : "") + "</td><td class='r'>" + fmt(val) + "</td></tr>"; }
-  line("機票", fareTotal, fare ? "NT$ " + fmt(fare) + " × " + pax + " 人" + (buf ? " × (1 + " + Math.round(buf * 100) + "% 緩衝)" : "") : "尚未填入票價");
-  line("日支生活費", pdTotal, usdOne && rate ? "US$ " + fmt(usdOne) + " × 匯率 " + rate + " × " + pax + " 人" : "請確認日支數額與匯率");
-  line("簽證／保險／交通／其他", base, "");
-  line("禮品交際及雜費", gift, num("oGift") ? "NT$ " + fmt(num("oGift")) + " × " + payDays + " 日 × " + pax + " 人" : "");
+  line("機票", fareTotal, fare ? "NT$ " + fmt(fare) + (buf ? " × (1 + " + Math.round(buf * 100) + "% 緩衝)" : "") : "尚未填入票價");
+  line("日支生活費", pdTotal, usdOne && rate ? "US$ " + fmt(usdOne) + " × 匯率 " + rate : "請確認日支數額與匯率");
+  line("保險費", ins, manualF.oIns ? "手動輸入" : (insAuto ? insName + "　" + tripN + " 日" : (tripN > 30 ? "超過 30 天，請手動輸入" : "")));
+  line("禮品交際及雜費", gift, manualF.oGift ? "手動輸入" : (tripN ? "NT$ " + fmt(GIFT_PER_DAY) + " × " + tripN + " 日" : ""));
+  line("簽證／當地交通／其他", base, "");
   out += "<tr><td><strong>合計</strong></td><td class='r'><strong>NT$ " + fmt(grand) + "</strong></td></tr>";
   $("sumRows").innerHTML = out;
   $("grand").textContent = "NT$ " + fmt(grand);
 
   lastSummary = [
     "出國經費試算",
-    "目的地：" + s.country.zh + (s.entry.zh !== s.country.zh ? "・" + s.entry.zh : ""),
-    "日期：" + $("d1").value + " ～ " + $("d2").value + "（" + days + " 天，" + pax + " 人）",
+    "目的地：" + (s ? s.country.zh + (s.entry.zh !== s.country.zh ? "・" + s.entry.zh : "") : "（尚未選擇）"),
+    "期間：" + (startIso || "-") + " ～ " + (endIso || "-") + "（" + tripN + " 天）",
     "機票：NT$ " + fmt(fareTotal),
-    "日支生活費：NT$ " + fmt(pdTotal) + "（每人 US$ " + fmt(usdOne) + "，計支 " + payDays + " 日）",
-    "其他費用：NT$ " + fmt(base + gift),
+    "日支生活費：NT$ " + fmt(pdTotal) + "（每人 US$ " + fmt(usdOne) + "，相當於 " + (Math.round(equiv * 10) / 10) + " 個整日）",
+    "保險費：NT$ " + fmt(ins) + "　禮品交際及雜費：NT$ " + fmt(gift),
+    "其他費用：NT$ " + fmt(base),
     "合計：NT$ " + fmt(grand),
     "（概估，正式報支以規定為準）"
   ].join("\n");
@@ -437,76 +488,70 @@ function fareChosen() {
   return mode === "max" ? Math.max.apply(null, filled) : Math.min.apply(null, filled);
 }
 
-// ---------- 查價連結 ----------
-function ymd(s) { return s.slice(2, 4) + s.slice(5, 7) + s.slice(8, 10); }
-function buildLinks() {
-  var f = $("from").value, t = $("to").value.trim().toUpperCase(), d1 = $("d1").value, d2 = $("d2").value;
-  var box = $("links"); box.innerHTML = "";
-  function add(label, url) {
-    var a = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener"; a.textContent = label; box.appendChild(a);
-  }
-  add("長榮航空官網", "https://www.evaair.com/zh-tw/index.html");
-  add("中華航空官網", "https://www.china-airlines.com/tw/zh");
-  if (!/^[A-Z]{3}$/.test(t) || !d1 || !d2) {
-    var p = document.createElement("span"); p.className = "note"; p.textContent = "填入 3 碼抵達機場代碼與日期後，會出現帶好條件的 Google Flights 與 Skyscanner 連結。"; box.appendChild(p); return;
-  }
-  var cabinWord = $("cabin").value === "b" ? " business class" : "";
-  var q = function (air) {
-    return "https://www.google.com/travel/flights?q=" + encodeURIComponent(
-      "Flights from " + f + " to " + t + " on " + d1 + " through " + d2 + (air ? " on " + air : "") + cabinWord);
-  };
-  add("Google Flights（全部）", q(""));
-  add("Google Flights（長榮）", q("EVA Air"));
-  add("Google Flights（華航）", q("China Airlines"));
-  var cab = $("cabin").value === "b" ? "business" : "economy";
-  add("Skyscanner", "https://www.skyscanner.com.tw/transport/flights/" + f.toLowerCase() + "/" + t.toLowerCase() + "/" + ymd(d1) + "/" + ymd(d2) + "/?adultsv2=" + Math.max(1, num("pax")) + "&cabinclass=" + cab);
-}
+function refresh() { calc(); }
 
-// ---------- 初始化日期 ----------
-(function () {
-  var t = new Date(); t.setDate(t.getDate() + 30);
-  var r = new Date(t); r.setDate(r.getDate() + 4);
-  var iso = function (d) { return d.toISOString().slice(0, 10); };
-  $("d1").value = iso(t); $("d2").value = iso(r);
-})();
-
-function refresh() { buildLinks(); calc(); }
-
-regionSel.addEventListener("change", function () { fillCountries(); refresh(); });
-countrySel.addEventListener("change", function () { fillCities(); refresh(); });
-citySel.addEventListener("change", function () { fillAirports(); refresh(); });
-["from", "to", "pax", "cabin"].forEach(function (id) { $(id).addEventListener("input", refresh); });
-["d1", "d2"].forEach(function (id) { $(id).addEventListener("input", function () { payTouched = false; refresh(); }); });
-$("payDays").addEventListener("input", function () { payTouched = true; calc(); });
-["fareBR", "fareCI", "fareOther", "override", "oVisa", "oIns", "oTrans", "oGift", "oMisc", "buffer", "longStay"].forEach(function (id) {
+function onTripChange() { clearAuto(); clearManual(); insTypeManual = false; refresh(); }
+regionSel.addEventListener("change", function () { fillCountries(); onTripChange(); });
+countrySel.addEventListener("change", function () { fillCities(); onTripChange(); });
+citySel.addEventListener("change", function () { fillAirports(); onTripChange(); });
+$("from").addEventListener("input", function () { clearAuto(); refresh(); });
+$("toSel").addEventListener("change", function () {
+  var isOther = $("toSel").value === "__other";
+  $("toOther").style.display = isOther ? "" : "none";
+  if (isOther) $("toOther").focus();
+  clearAuto(); refresh();
+});
+$("toOther").addEventListener("input", function () { clearAuto(); refresh(); });
+["d1", "d2"].forEach(function (id) { $(id).addEventListener("input", onTripChange); });
+["a1", "a2"].forEach(function (id) { $(id).addEventListener("input", function () { autoFilled = false; autoInfo = ""; clearManual(); calc(); }); });
+$("dayRows").addEventListener("change", function (e) {
+  var el = e.target;
+  if (el && el.classList && el.classList.contains("pct")) { manualPct[el.getAttribute("data-d")] = +el.value; calc(); }
+});
+$("resetPct").addEventListener("click", function () { clearManual(); calc(); });
+["fareBR", "fareCI", "fareOther", "override", "oVisa", "oTrans", "oMisc", "buffer", "longStay"].forEach(function (id) {
   $(id).addEventListener("input", calc);
+});
+["oIns", "oGift"].forEach(function (id) { $(id).addEventListener("input", function () { manualF[id] = true; calc(); }); });
+$("insType").addEventListener("change", function () { insTypeManual = true; calc(); });
+document.querySelectorAll("[data-reset]").forEach(function (b) {
+  b.addEventListener("click", function () { manualF[b.getAttribute("data-reset")] = false; calc(); });
 });
 $("rate").addEventListener("input", function () { if ($("rate").value) store.set("rate", $("rate").value); calc(); });
 document.querySelectorAll('input[name="fareMode"]').forEach(function (e) { e.addEventListener("change", calc); });
 
-// ---------- 自動查價（選用） ----------
-$("api").value = store.get("api") || "";
+// ---------- 自動查價 ----------
+var WORKER_URL = "https://flight-fare.shoryu-tw.workers.dev";
 $("apiBtn").addEventListener("click", function () {
-  var base = $("api").value.trim(), msg = $("apiMsg");
-  if (!base) { msg.textContent = "請先填入查價服務網址。"; return; }
-  if (!/^https?:\/\//i.test(base)) { base = "https://" + base; $("api").value = base; }
-  var to = $("to").value.trim().toUpperCase();
-  if (!/^[A-Z]{3}$/.test(to)) { msg.textContent = "請先填入 3 碼的抵達機場代碼。"; return; }
-  store.set("api", base);
-  var url = base + (base.indexOf("?") > -1 ? "&" : "?") +
-    "from=" + $("from").value + "&to=" + to + "&depart=" + $("d1").value + "&return=" + $("d2").value + "&cabin=" + $("cabin").value;
-  msg.textContent = "查詢中…";
+  var msg = $("apiMsg"), btn = $("apiBtn");
+  var to = getTo();
+  if (!AP_RE.test(to) || !$("d1").value || !$("d2").value) { msg.textContent = "請先選好目的地、抵達機場，並填入出發日期與回程日期。"; return; }
+  if ($("d2").value < $("d1").value) { msg.textContent = "回程日期不能早於出發日期。"; return; }
+  var url = WORKER_URL + "/?from=" + $("from").value + "&to=" + to +
+    "&depart=" + $("d1").value + "&return=" + $("d2").value + "&cabin=e";
+  msg.textContent = "查詢中…"; btn.disabled = true;
   fetch(url).then(function (res) {
     if (!res.ok) throw new Error("HTTP " + res.status);
     return res.json();
   }).then(function (j) {
+    if (j.error) throw new Error(typeof j.error === "string" ? j.error : "查詢失敗");
     if (j.BR) $("fareBR").value = Math.round(j.BR);
     if (j.CI) $("fareCI").value = Math.round(j.CI);
-    msg.textContent = (j.BR || j.CI) ? "已填入查到的票價（Google Flights 最低價組合），請與官網核對。" : "服務回應中沒有長榮或華航的票價。";
+    var tm = j.times, extra = "";
+    if (tm && tm.outArrive) {
+      $("a1").value = tm.outArrive.slice(0, 10);
+      if (tm.retArrive) $("a2").value = tm.retArrive.slice(0, 10); else $("a2").value = "";
+      autoFilled = true; clearManual();
+      var al = tm.airline === "BR" ? "長榮" : (tm.airline === "CI" ? "華航" : tm.airline);
+      autoInfo = "航班日期取自" + al + "最低價航班：去程 " + tm.outDepart + " 台北起飛，" + tm.outArrive + " 抵達（當地時間）" +
+        (tm.retDepart ? "；回程 " + tm.retDepart + " 當地起飛，" + tm.retArrive + " 抵台（台灣時間）。" : "；回程時間未取得，返抵台灣日期暫以回程起飛當日估算。") + "如有不同可直接修改日期。";
+      extra = "，並填入抵達日期";
+    }
+    msg.textContent = (j.BR || j.CI) ? "已填入查到的票價" + extra + "。" : "這個航線與日期查不到長榮或華航的票價，請換日期或到官網查詢。";
     calc();
   }).catch(function (e) {
-    msg.textContent = "查價失敗：" + e.message + "。請檢查網址與服務端是否允許跨來源請求（CORS）。";
-  });
+    msg.textContent = "查價失敗：" + e.message;
+  }).then(function () { btn.disabled = false; });
 });
 
 // ---------- 匯出 ----------
@@ -518,16 +563,8 @@ $("copyBtn").addEventListener("click", function () {
 });
 $("printBtn").addEventListener("click", function () { window.print(); });
 
-var r0 = store.get("rate"); if (r0) $("rate").value = r0;
-// 預設選日本・東京
-(function () {
-  regionSel.value = 0; fillCountries();
-  var cs = DATA[0].countries; for (var i = 0; i < cs.length; i++) if (cs[i].zh === "日本") countrySel.value = i;
-  fillCities();
-  var es = cur().country.entries; for (var j = 0; j < es.length; j++) if (es[j].zh === "東京") citySel.value = j;
-  fillAirports();
-})();
-refresh();
+var r0 = store.get("rate"); $("rate").value = r0 || "32.5";
+calc();
 </script>
 </body>
 </html>

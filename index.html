@@ -429,9 +429,12 @@ function calc() {
   $("resetPct").style.display = Object.keys(manualPct).length ? "" : "none";
 
   var startIso = days.length ? days[0].iso : "", endIso = days.length ? days[days.length - 1].iso : "";
-  $("daysInfo").textContent = days.length
-    ? "出差期間 " + startIso + " 至 " + endIso + "，共 " + days.length + " 天。"
-    : (d1 && r1 ? "請確認回程日期不早於出發日期。" : "請選擇出發日期與回程日期。");
+  var tripKnown = days.length > 0 && !!$("a2").value;      // 要知道「返抵台灣落地日」才算得出天數
+  $("daysInfo").textContent = tripKnown
+    ? "出差期間 " + startIso + " 至 " + endIso + "，共 " + days.length + " 天（從台灣出發到返抵台灣落地）。"
+    : (d1 && r1 && r1 < d1 ? "請確認回程日期不早於出發日期。"
+    : (d1 && r1 ? "出差期間與天數要等按「自動查價」取得返抵台灣日期後才能確定（從台灣出發算到返抵台灣落地）。"
+    : "請選擇出發日期與回程日期。"));
   $("flightNote").textContent = autoInfo ? autoInfo
     : (est.length ? "抵達與返抵日期會在按上方「自動查價」後自動帶入；在此之前，暫以抵達、返抵當日估算。"
     : ($("a1").value || $("a2").value ? "抵達與返抵日期為手動輸入。" : ""));
@@ -462,7 +465,7 @@ function calc() {
   var fare = fareChosen(), buf = Math.max(0, num("buffer")) / 100;
   var fareTotal = fare * pax * (1 + buf);
   var pdTotal = twdOne * pax;
-  var tripN = days.length;
+  var tripN = tripKnown ? days.length : 0;
 
   // 保險費、禮品交際及雜費：自動帶入（使用者改過就保留其輸入）
   if (!insTypeManual && s) $("insType").value = SCHENGEN.indexOf(s.country.zh) > -1 ? "schengen" : "general";
@@ -474,7 +477,7 @@ function calc() {
   document.querySelectorAll("[data-reset]").forEach(function (b) { b.style.display = manualF[b.getAttribute("data-reset")] ? "" : "none"; });
   $("autoNote").textContent = tripN > 30 ? "出國天數 " + tripN + " 天，超過保費表的 30 天，請手動輸入保險費。"
     : (tripN ? "出國天數 " + tripN + " 天：保險費依" + insName + "帶入，禮品交際及雜費 = NT$" + fmt(GIFT_PER_DAY) + " × " + tripN + " 日。"
-    : "選好日期後，會自動帶入保險費與禮品交際及雜費。");
+    : "取得返抵台灣日期（按「自動查價」或手動輸入）後，會自動帶入保險費與禮品交際及雜費。");
 
   var ins = num("oIns"), gift = num("oGift");
   var base = num("oVisa") + num("oTrans") + num("oMisc");
@@ -494,7 +497,7 @@ function calc() {
   lastSummary = [
     "出國經費試算",
     "目的地：" + (s ? s.country.zh + (s.entry.zh !== s.country.zh ? "・" + s.entry.zh : "") : "（尚未選擇）"),
-    "期間：" + (startIso || "-") + " ～ " + (endIso || "-") + "（" + tripN + " 天）",
+    "期間：" + (tripKnown ? startIso + " ～ " + endIso + "（" + tripN + " 天）" : "尚未確定（需先取得返抵台灣日期）"),
     "機票：NT$ " + fmt(fareTotal),
     "日支生活費：NT$ " + fmt(pdTotal) + "（每人 US$ " + fmt(usdOne) + "，相當於 " + (Math.round(equiv * 10) / 10) + " 個整日）",
     "保險費：NT$ " + fmt(ins) + "　禮品交際及雜費：NT$ " + fmt(gift),
@@ -529,7 +532,15 @@ $("toSel").addEventListener("change", function () {
   clearAuto(); refresh();
 });
 $("toOther").addEventListener("input", function () { clearAuto(); refresh(); });
-["d1", "d2"].forEach(function (id) { $(id).addEventListener("input", onTripChange); });
+var d2Manual = false;
+$("d1").addEventListener("input", function () {
+  var v = $("d1").value;
+  $("d2").min = v || "";
+  // 選好出發日期後，回程日期先跟著變成同一天（日曆就直接停在同一個月）；自己選過的回程日期，只在早於出發日時才重設
+  if (v && (!d2Manual || !$("d2").value || $("d2").value < v)) { $("d2").value = v; d2Manual = false; }
+  onTripChange();
+});
+$("d2").addEventListener("input", function () { d2Manual = true; onTripChange(); });
 ["a1", "a2"].forEach(function (id) { $(id).addEventListener("input", function () { autoFilled = false; autoInfo = ""; clearManual(); calc(); }); });
 $("dayRows").addEventListener("change", function (e) {
   var el = e.target;

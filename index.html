@@ -65,6 +65,8 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 table { width: 100%; border-collapse: collapse; font-size: .95rem; }
 th, td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
 td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
+table.perdiem td.r, table.perdiem th.r { white-space: nowrap; min-width: 7.5em; }
+table.perdiem #pdRows tr:first-child td { border-top: 2px solid var(--line); }
 .total { position: sticky; bottom: 0; background: var(--total-bg); color: var(--total-ink);
   padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); margin: 0 -16px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .total strong { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
@@ -144,21 +146,17 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     </div>
     <div class="choices">
       <label><input type="checkbox" id="longStay" checked> 同地駐留超過 1 個月時依要點折算（第 2–3 個月 80%、第 4 個月起 70%，以 30 天為 1 個月概算）</label>
+      <label><input type="checkbox" id="ceilUsd" checked> 依日支表附註 4，每人日支「加總後」尾數進位為整數美元（住宿、膳食、零用分項不進位）</label>
     </div>
     <div class="scroll" style="margin-top:12px">
-      <table>
-        <thead><tr><th>日期</th><th>狀態</th><th>日支比例</th><th class="r">日支 US$</th></tr></thead>
+      <table class="perdiem">
+        <thead><tr><th>日期</th><th>狀態</th><th>日支比例</th><th class="r">US$</th><th class="r">NT$</th></tr></thead>
         <tbody id="dayRows"></tbody>
-      </table>
-    </div>
-    <div class="actions"><button class="btn ghost" id="resetPct" type="button">恢復自動計算</button></div>
-    <div class="scroll" style="margin-top:12px">
-      <table>
-        <thead><tr><th>每人（住宿 70%、膳食 20%、零用 10%）</th><th class="r">US$</th><th class="r">NT$</th></tr></thead>
         <tbody id="pdRows"></tbody>
       </table>
     </div>
-    <p class="note">資料來源：行政院 114 年 10 月 31 日院授主預字第 1140103430 號函修正之日支數額表，自 115 年 1 月 1 日生效。總計後尾數不足 1 元者進位為 1 元。供膳宿、跨區出差等其他扣減情形請依要點核對。香港、澳門及大陸地區另有日支表，請在上方手動覆寫。</p>
+    <div class="actions"><button class="btn ghost" id="resetPct" type="button">恢復自動計算</button></div>
+    <p class="note">資料來源：行政院 114 年 10 月 31 日院授主預字第 1140103430 號函修正之日支數額表，自 115 年 1 月 1 日生效。金額不四捨五入，乘上匯率保留完整小數；住宿、膳食、零用分項不進位，加總後才依附註 4 進位為整數美元。供膳宿、跨區出差等其他扣減情形請依要點核對。香港、澳門及大陸地區另有日支表，請在上方手動覆寫。</p>
   </section>
 
   <section aria-labelledby="s4">
@@ -221,6 +219,33 @@ var store = {
   set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 };
 function fmt(n) { return Math.round(n).toLocaleString("zh-TW"); }
+// ---- 精確小數運算（BigInt）：加總、乘匯率都不會四捨五入，也不會有浮點誤差 ----
+function D(x) {
+  var s = String(x == null ? "" : x).trim();
+  if (!/^-?\d+(\.\d+)?$/.test(s)) {
+    var n = Number(s);
+    if (s === "" || !isFinite(n)) return { v: 0n, sc: 0 };
+    s = n.toFixed(6).replace(/\.?0+$/, "");
+  }
+  var neg = s.charAt(0) === "-"; if (neg) s = s.slice(1);
+  var p = s.split("."), frac = p[1] || "", v = BigInt(p[0] + frac);
+  return { v: neg ? -v : v, sc: frac.length };
+}
+function dint(n) { return { v: BigInt(n), sc: 0 }; }
+function dup(a, sc) { return a.sc >= sc ? a.v : a.v * (10n ** BigInt(sc - a.sc)); }
+function dadd(a, b) { var sc = Math.max(a.sc, b.sc); return { v: dup(a, sc) + dup(b, sc), sc: sc }; }
+function dmul(a, b) { return { v: a.v * b.v, sc: a.sc + b.sc }; }
+function dscale(a, mul, shift) { return { v: a.v * BigInt(mul), sc: a.sc + shift }; }   // a × mul ÷ 10^shift
+function dnum(a) { return Number(a.v) / Math.pow(10, a.sc); }                           // 只用來比大小
+function dceil(a) { var d = 10n ** BigInt(a.sc), q = a.v / d; if (a.v % d !== 0n && a.v > 0n) q += 1n; return { v: q, sc: 0 }; }
+function dfmt(a, minDec) {
+  minDec = minDec || 0;
+  var neg = a.v < 0n, s = (neg ? -a.v : a.v).toString();
+  while (s.length <= a.sc) s = "0" + s;
+  var ip = a.sc ? s.slice(0, s.length - a.sc) : s, fp = a.sc ? s.slice(s.length - a.sc).replace(/0+$/, "") : "";
+  while (fp.length < minDec) fp += "0";
+  return (neg ? "-" : "") + ip.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (fp ? "." + fp : "");
+}
 function num(id) { var v = parseFloat($(id).value); return isNaN(v) ? 0 : v; }
 function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
 
@@ -379,8 +404,8 @@ function clearAuto() {
 }
 
 function calc() {
-  var s = cur(), pax = 1;
-  var rate = num("rate"), override = num("override");
+  var s = cur();
+  var rate = D($("rate").value), override = D($("override").value), hasOverride = override.v > 0n;
   var d1 = $("d1").value, r1 = $("d2").value, a1 = $("a1").value, a2 = $("a2").value;
   var validRange = !!(d1 && r1 && r1 >= d1);
   var est = [];
@@ -391,7 +416,7 @@ function calc() {
   renderRateInfo(s);
 
   // 逐日列出：出發日 ～ 返抵台灣日（以當地日期）
-  var days = [], usdOne = 0, equiv = 0, usedFallback = false, noData = false, orderBad = false;
+  var days = [], usdSum = dint(0), equivUnits = 0n, usedFallback = false, noData = false, orderBad = false;
   if (validRange) {
     if (a1 > r1) orderBad = true;
     var start = a1 < d1 ? a1 : d1, end = a2 > r1 ? a2 : r1;
@@ -401,20 +426,21 @@ function calc() {
       var kind = iso >= r1 ? "ret" : (iso >= a1 ? "stay" : "out");
       var auto = kind === "stay" ? 100 : 30;
       var pct = manualPct[iso] != null ? manualPct[iso] : auto;
-      var r = override > 0 ? { usd: override, src: "override" } : (s ? rateOnDate(s, dt) : { usd: 0, src: "none" });
+      var r = hasOverride ? { usd: override, src: "override" } : (s ? rateOnDate(s, dt) : { usd: 0, src: "none" });
+      var rUsd = D(r.usd);
       if (r.src === "fallback") usedFallback = true;
       if (s && (r.src === "none" || r.src === "manual")) noData = true;
       var idx = iso >= a1 ? dayDiff(a1, iso) : 0;
-      var f = $("longStay").checked ? factorAt(idx) : 1;
-      var usd = r.usd * pct / 100 * f;
-      usdOne += usd; equiv += pct / 100 * f;
+      var f = $("longStay").checked ? factorAt(idx) : 1, fPct = Math.round(f * 100);
+      var usd = dscale(rUsd, pct * fPct, 4);          // 日支數額 × 比例 × 折算，全程整數運算
+      usdSum = dadd(usdSum, usd); equivUnits += BigInt(pct * fPct);
       var label = kind === "out" ? "飛行中，未留宿"
         : kind === "stay" ? (iso === a1 ? "抵達並留宿當地" : "留宿當地")
         : (iso === r1 ? "當地起飛，返程" : (iso === a2 ? "返抵台灣" : "返程飛行中，未留宿"));
       if (iso === r1 && iso === a2) label = "當地起飛並返抵台灣";
       if (iso === a1 && est.indexOf("抵達當地日期") > -1) label += "（抵達日期尚未取得，暫以出發當日計）";
       if (iso === r1 && est.indexOf("返抵台灣日期") > -1) label = "當地起飛（返抵台灣日期尚未取得，暫以當日計）";
-      if (f < 1) label += "（駐留超過 1 個月，數額 × " + Math.round(f * 100) + "%）";
+      if (f < 1) label += "（駐留超過 1 個月，數額 × " + fPct + "%）";
       days.push({ iso: iso, label: label, pct: pct, usd: usd, edited: manualPct[iso] != null });
     }
   }
@@ -422,9 +448,10 @@ function calc() {
   days.forEach(function (d) {
     var opts = PCTS.map(function (p) { return "<option value='" + p + "'" + (p === d.pct ? " selected" : "") + ">" + p + "%</option>"; }).join("");
     rows += "<tr><td>" + d.iso + "（" + wdOf(d.iso) + "）</td><td>" + esc(d.label) + (d.edited ? "　<span class='note'>已手動調整</span>" : "") +
-      "</td><td><select class='pct' data-d='" + d.iso + "' aria-label='" + d.iso + " 日支比例' style='width:auto'>" + opts + "</select></td><td class='r'>" + d.usd.toFixed(2) + "</td></tr>";
+      "</td><td><select class='pct' data-d='" + d.iso + "' aria-label='" + d.iso + " 日支比例' style='width:auto'>" + opts + "</select></td>" +
+      "<td class='r'>" + dfmt(d.usd, 2) + "</td><td class='r'>" + dfmt(dmul(d.usd, rate), 2) + "</td></tr>";
   });
-  if (!days.length) rows = "<tr><td colspan='4' class='note'>" + (validRange ? "請先選擇目的地。" : "請先選好出發日期與回程日期。") + "</td></tr>";
+  if (!days.length) rows = "<tr><td colspan='5' class='note'>" + (validRange ? "請先選擇目的地。" : "請先選好出發日期與回程日期。") + "</td></tr>";
   $("dayRows").innerHTML = rows;
   $("resetPct").style.display = Object.keys(manualPct).length ? "" : "none";
 
@@ -439,32 +466,36 @@ function calc() {
     : (est.length ? "抵達與返抵日期會在按上方「自動查價」後自動帶入；在此之前，暫以抵達、返抵當日估算。"
     : ($("a1").value || $("a2").value ? "抵達與返抵日期為手動輸入。" : ""));
 
-  usdOne = Math.ceil(usdOne - 1e-9) || 0;        // 附註 4：尾數不足 1 元進位
-  var twdOne = usdOne * rate;
+  var ceilOn = $("ceilUsd").checked;
+  var twdSum = dmul(usdSum, rate);                                 // 進位前的精確加總
+  var usdOne = ceilOn ? dceil(usdSum) : usdSum;                    // 依附註 4：加總後才進位為整數美元
+  var twdOne = dmul(usdOne, rate);
 
   var pd = "";
-  [["住宿（70%）", .7], ["膳食（20%）", .2], ["零用（10%）", .1]].forEach(function (x) {
-    pd += "<tr><td>" + x[0] + "</td><td class='r'>" + fmt(usdOne * x[1]) + "</td><td class='r'>" + fmt(twdOne * x[1]) + "</td></tr>";
+  [["住宿（70%）", 7], ["膳食（20%）", 2], ["零用（10%）", 1]].forEach(function (x) {
+    pd += "<tr><td colspan='3'>" + x[0] + "</td><td class='r'>" + dfmt(dscale(usdSum, x[1], 1), 2) + "</td><td class='r'>" + dfmt(dscale(twdSum, x[1], 1), 2) + "</td></tr>";
   });
-  pd += "<tr><td><strong>每人日支合計" + (est.length ? "（暫估）" : "") + "（相當於 " + (Math.round(equiv * 10) / 10) + " 個整日）</strong></td><td class='r'><strong>" + fmt(usdOne) + "</strong></td><td class='r'><strong>" + fmt(twdOne) + "</strong></td></tr>";
+  if (ceilOn) pd += "<tr><td colspan='3'>加總（進位前）</td><td class='r'>" + dfmt(usdSum, 2) + "</td><td class='r'>" + dfmt(twdSum, 2) + "</td></tr>";
+  pd += "<tr><td colspan='3'><strong>每人日支合計" + (ceilOn ? "（加總後進位）" : "") + (est.length ? "（暫估）" : "") + "（相當於 " + dfmt({ v: equivUnits, sc: 4 }, 0) + " 個整日）</strong></td><td class='r'><strong>" +
+    dfmt(usdOne, 2) + "</strong></td><td class='r'><strong>" + dfmt(twdOne, 2) + "</strong></td></tr>";
   $("pdRows").innerHTML = pd;
 
   // 警示
   var warns = [];
   if (s && days.length && days[0].iso < "2026-01-01") warns.push("此日支數額表自 2026-01-01 起生效，出差期間早於此日請改用當時適用的舊表。");
   if (usedFallback) warns.push("行程中有日期不在該城市的季節表內，已依附註改用該國「其他」數額。");
-  if (s && noData && override <= 0) warns.push("此行程缺少日支數額，請手動覆寫。");
+  if (s && noData && !hasOverride) warns.push("此行程缺少日支數額，請手動覆寫。");
   if (orderBad) warns.push("抵達當地日期晚於回程日期，請檢查日期。");
   if (est.length && days.length) warns.push("尚未取得航班時間，日支為暫估（長程航班通常會跨日，實際會比表中多幾天的 30%）。請先按上方「自動查價」，或在「手動修改抵達日期」填入。");
-  if (s && !rate) warns.push("尚未填入匯率，日支新台幣金額暫以 0 計。");
+  if (s && rate.v === 0n) warns.push("尚未填入匯率，日支新台幣金額暫以 0 計。");
   var w = $("warnBox");
   if (!w) { w = document.createElement("div"); w.id = "warnBox"; w.className = "warn"; $("rateInfo").after(w); }
   w.style.display = warns.length ? "" : "none"; w.innerHTML = warns.map(esc).join("<br>");
 
-  // 機票與合計
-  var fare = fareChosen(), buf = Math.max(0, num("buffer")) / 100;
-  var fareTotal = fare * pax * (1 + buf);
-  var pdTotal = twdOne * pax;
+  // 機票與合計（全部用精確小數）
+  var fare = fareChosen(), buf = D($("buffer").value);
+  var fareTotal = dscale(dmul(fare, dadd(dint(100), buf)), 1, 2);     // 票價 × (100 + 緩衝%) ÷ 100
+  var pdTotal = twdOne;
   var tripN = tripKnown ? days.length : 0;
 
   // 保險費、禮品交際及雜費：自動帶入（使用者改過就保留其輸入）
@@ -479,43 +510,43 @@ function calc() {
     : (tripN ? "出國天數 " + tripN + " 天：保險費依" + insName + "帶入，禮品交際及雜費 = NT$" + fmt(GIFT_PER_DAY) + " × " + tripN + " 日。"
     : "取得返抵台灣日期（按「自動查價」或手動輸入）後，會自動帶入保險費與禮品交際及雜費。");
 
-  var ins = num("oIns"), gift = num("oGift");
-  var base = num("oVisa") + num("oTrans") + num("oMisc");
-  var grand = fareTotal + pdTotal + ins + gift + base;
+  var ins = D($("oIns").value), gift = D($("oGift").value);
+  var base = dadd(dadd(D($("oVisa").value), D($("oTrans").value)), D($("oMisc").value));
+  var grand = dadd(dadd(dadd(dadd(fareTotal, pdTotal), ins), gift), base);
 
   var out = "";
-  function line(label, val, sub) { out += "<tr><td>" + label + (sub ? "<div class='note'>" + sub + "</div>" : "") + "</td><td class='r'>" + fmt(val) + "</td></tr>"; }
-  line("機票", fareTotal, fare ? "NT$ " + fmt(fare) + (buf ? " × (1 + " + Math.round(buf * 100) + "% 緩衝)" : "") : "尚未填入票價");
-  line("日支生活費", pdTotal, usdOne && rate ? "US$ " + fmt(usdOne) + " × 匯率 " + rate : "請確認日支數額與匯率");
+  function line(label, val, sub) { out += "<tr><td>" + label + (sub ? "<div class='note'>" + sub + "</div>" : "") + "</td><td class='r'>" + dfmt(val, 0) + "</td></tr>"; }
+  line("機票", fareTotal, fare.v > 0n ? "NT$ " + dfmt(fare, 0) + (buf.v > 0n ? " × (1 + " + dfmt(buf, 0) + "% 緩衝)" : "") : "尚未填入票價");
+  line("日支生活費", pdTotal, usdOne.v > 0n && rate.v > 0n ? "US$ " + dfmt(usdOne, 2) + " × 匯率 " + dfmt(rate, 0) : "請確認日支數額與匯率");
   line("保險費", ins, manualF.oIns ? "手動輸入" : (insAuto ? insName + "　" + tripN + " 日" : (tripN > 30 ? "超過 30 天，請手動輸入" : "")));
   line("禮品交際及雜費", gift, manualF.oGift ? "手動輸入" : (tripN ? "NT$ " + fmt(GIFT_PER_DAY) + " × " + tripN + " 日" : ""));
   line("簽證／當地交通／其他", base, "");
-  out += "<tr><td><strong>合計</strong></td><td class='r'><strong>NT$ " + fmt(grand) + "</strong></td></tr>";
+  out += "<tr><td><strong>合計</strong></td><td class='r'><strong>NT$ " + dfmt(grand, 0) + "</strong></td></tr>";
   $("sumRows").innerHTML = out;
-  $("grand").textContent = "NT$ " + fmt(grand);
+  $("grand").textContent = "NT$ " + dfmt(grand, 0);
 
   lastSummary = [
     "出國經費試算",
     "目的地：" + (s ? s.country.zh + (s.entry.zh !== s.country.zh ? "・" + s.entry.zh : "") : "（尚未選擇）"),
     "期間：" + (tripKnown ? startIso + " ～ " + endIso + "（" + tripN + " 天）" : "尚未確定（需先取得返抵台灣日期）"),
-    "機票：NT$ " + fmt(fareTotal),
-    "日支生活費：NT$ " + fmt(pdTotal) + "（每人 US$ " + fmt(usdOne) + "，相當於 " + (Math.round(equiv * 10) / 10) + " 個整日）",
-    "保險費：NT$ " + fmt(ins) + "　禮品交際及雜費：NT$ " + fmt(gift),
-    "其他費用：NT$ " + fmt(base),
-    "合計：NT$ " + fmt(grand),
+    "機票：NT$ " + dfmt(fareTotal, 0),
+    "日支生活費：NT$ " + dfmt(pdTotal, 0) + "（每人 US$ " + dfmt(usdOne, 2) + "，相當於 " + dfmt({ v: equivUnits, sc: 4 }, 0) + " 個整日）",
+    "保險費：NT$ " + dfmt(ins, 0) + "　禮品交際及雜費：NT$ " + dfmt(gift, 0),
+    "其他費用：NT$ " + dfmt(base, 0),
+    "合計：NT$ " + dfmt(grand, 0),
     "（概估，正式報支以規定為準）"
   ].join("\n");
 }
 
 function fareChosen() {
-  var br = num("fareBR"), ci = num("fareCI"), ot = num("fareOther");
+  var br = D($("fareBR").value), ci = D($("fareCI").value), ot = D($("fareOther").value);
   var mode = document.querySelector('input[name="fareMode"]:checked').value;
-  var filled = [br, ci, ot].filter(function (x) { return x > 0; });
+  var filled = [br, ci, ot].filter(function (x) { return x.v > 0n; });
   if (mode === "BR") return br;
   if (mode === "CI") return ci;
   if (mode === "other") return ot;
-  if (!filled.length) return 0;
-  return mode === "max" ? Math.max.apply(null, filled) : Math.min.apply(null, filled);
+  if (!filled.length) return dint(0);
+  return filled.reduce(function (m, x) { return (mode === "max" ? dnum(x) > dnum(m) : dnum(x) < dnum(m)) ? x : m; });
 }
 
 function refresh() { calc(); }
@@ -547,7 +578,7 @@ $("dayRows").addEventListener("change", function (e) {
   if (el && el.classList && el.classList.contains("pct")) { manualPct[el.getAttribute("data-d")] = +el.value; calc(); }
 });
 $("resetPct").addEventListener("click", function () { clearManual(); calc(); });
-["fareBR", "fareCI", "fareOther", "override", "oVisa", "oTrans", "oMisc", "buffer", "longStay"].forEach(function (id) {
+["fareBR", "fareCI", "fareOther", "override", "oVisa", "oTrans", "oMisc", "buffer", "longStay", "ceilUsd"].forEach(function (id) {
   $(id).addEventListener("input", calc);
 });
 ["oIns", "oGift"].forEach(function (id) { $(id).addEventListener("input", function () { manualF[id] = true; calc(); }); });

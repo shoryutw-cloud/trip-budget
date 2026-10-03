@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>出國經費試算</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #f3f5f7;
+  --panel: #ffffff;
+  --ink: #17233b;
+  --muted: #5d6b82;
+  --line: #d5dbe4;
+  --accent: #0b6e8a;
+  --accent-ink: #ffffff;
+  --total-bg: #17233b;
+  --total-ink: #ffffff;
+  --warn: #8a5a00;
+  --warn-bg: #fff4d6;
+  --focus: #e08a00;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1522; --panel: #182033; --ink: #e8edf6; --muted: #9aa8c0;
+    --line: #2b3650; --accent: #4cc0dd; --accent-ink: #08202a;
+    --total-bg: #0a0f1a; --total-ink: #e8edf6; --warn: #f2c261; --warn-bg: #3a2e10;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1522; --panel: #182033; --ink: #e8edf6; --muted: #9aa8c0;
+  --line: #2b3650; --accent: #4cc0dd; --accent-ink: #08202a;
+  --total-bg: #0a0f1a; --total-ink: #e8edf6; --warn: #f2c261; --warn-bg: #3a2e10;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  font-size: 16px; line-height: 1.6;
+}
+main { max-width: 880px; margin: 0 auto; padding: 20px 16px 120px; }
+h1 { font-size: 1.6rem; margin: 8px 0 4px; letter-spacing: .02em; }
+.sub { color: var(--muted); margin: 0 0 20px; font-size: .95rem; }
+section {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  padding: 18px; margin-bottom: 16px;
+}
+h2 { font-size: 1.05rem; margin: 0 0 12px; }
+.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: 4px; }
+input, select, button {
+  font: inherit; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; width: 100%;
+}
+input[type="radio"], input[type="checkbox"] { width: auto; }
+input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {
+  outline: 3px solid var(--focus); outline-offset: 1px;
+}
+.num { font-variant-numeric: tabular-nums; text-align: right; }
+.links { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
+.links a {
+  display: inline-block; text-decoration: none; color: var(--accent);
+  border: 1px solid var(--accent); border-radius: 8px; padding: 8px 12px; font-size: .92rem;
+}
+.links a:hover { background: var(--accent); color: var(--accent-ink); }
+.note { font-size: .85rem; color: var(--muted); margin: 8px 0 0; }
+.warn { background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 10px 12px; font-size: .88rem; margin-top: 10px; }
+.btn { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); cursor: pointer; font-weight: 500; }
+.btn.ghost { background: transparent; color: var(--accent); }
+.row { display: flex; gap: 8px; align-items: end; flex-wrap: wrap; }
+.row > * { flex: 1 1 160px; }
+.row > .btn { flex: 0 0 auto; width: auto; }
+.choices { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: .92rem; }
+.choices label { display: inline-flex; gap: 6px; align-items: center; color: var(--ink); margin: 0; }
+table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+th, td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
+tr.sub td { color: var(--muted); font-size: .85rem; padding-top: 2px; border-bottom: 0; }
+.total {
+  position: sticky; bottom: 0; background: var(--total-bg); color: var(--total-ink);
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); margin: 0 -16px;
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+}
+.total strong { font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.scroll { overflow-x: auto; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.actions button { width: auto; }
+details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margin-top: 10px; }
+@media print {
+  .links, .actions, details, .total { display: none; }
+  body { background: #fff; color: #000; }
+  section { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>出國經費試算</h1>
+  <p class="sub">機票＋日支生活費＋其他費用，一頁估出預算。</p>
+
+  <section aria-labelledby="s1">
+    <h2 id="s1">1. 行程</h2>
+    <div class="grid">
+      <div><label for="country">目的地國家／地區</label><select id="country"></select></div>
+      <div><label for="city">城市（用於日支數額對照）</label><input id="city" placeholder="例如：東京"></div>
+      <div><label for="from">出發機場</label>
+        <select id="from">
+          <option value="TPE">桃園 TPE</option><option value="TSA">松山 TSA</option>
+          <option value="KHH">高雄 KHH</option><option value="RMQ">台中 RMQ</option>
+        </select></div>
+      <div><label for="to">抵達機場</label><select id="to"></select></div>
+      <div><label for="d1">出發日期</label><input type="date" id="d1"></div>
+      <div><label for="d2">返國日期</label><input type="date" id="d2"></div>
+      <div><label for="pax">人數</label><input type="number" id="pax" min="1" value="1" class="num"></div>
+      <div><label for="cabin">艙等（僅用於查詢連結）</label>
+        <select id="cabin"><option value="e">經濟艙</option><option value="b">商務艙</option></select></div>
+    </div>
+    <p class="note" id="daysInfo"></p>
+  </section>
+
+  <section aria-labelledby="s2">
+    <h2 id="s2">2. 機票查價</h2>
+    <div class="links" id="links"></div>
+
+    <div class="grid">
+      <div><label for="fareBR">長榮 BR 每人票價（NT$）</label><input id="fareBR" type="number" min="0" class="num" placeholder="查到後填入"></div>
+      <div><label for="fareCI">華航 CI 每人票價（NT$）</label><input id="fareCI" type="number" min="0" class="num" placeholder="查到後填入"></div>
+      <div><label for="fareOther">其他／自訂票價（NT$）</label><input id="fareOther" type="number" min="0" class="num"></div>
+    </div>
+    <div class="choices" role="radiogroup" aria-label="預算採用的票價">
+      <label><input type="radio" name="fareMode" value="min" checked> 採用已填的最低價</label>
+      <label><input type="radio" name="fareMode" value="BR"> 長榮</label>
+      <label><input type="radio" name="fareMode" value="CI"> 華航</label>
+      <label><input type="radio" name="fareMode" value="other"> 自訂</label>
+      <label><input type="radio" name="fareMode" value="max"> 採用已填的最高價（保守估）</label>
+    </div>
+    <p class="note">官網與比價網站有驗證碼，頁面無法替你自動取價。打開上方連結查到票價後填入即可。</p>
+
+    <details>
+      <summary>進階：接上自動查價服務</summary>
+      <p class="note">如果你之後架好後端代理（例如 Cloudflare Workers），在此填入網址。頁面會以 GET 呼叫
+        <code>?from=TPE&amp;to=NRT&amp;depart=2026-11-01&amp;return=2026-11-05&amp;cabin=e</code>，
+        並預期回傳 <code>{"BR": 12345, "CI": 13456}</code>（每人、新台幣）。</p>
+      <div class="row">
+        <div><label for="api">查價服務網址</label><input id="api" placeholder="https://your-worker.example.workers.dev/fare"></div>
+        <button class="btn" id="apiBtn" type="button">自動查價</button>
+      </div>
+      <p class="note" id="apiMsg" role="status"></p>
+    </details>
+  </section>
+
+  <section aria-labelledby="s3">
+    <h2 id="s3">3. 日支生活費</h2>
+    <div class="grid">
+      <div><label for="perdiem">該地區日支數額（US$／人／日）</label><input id="perdiem" type="number" min="0" step="0.01" class="num"></div>
+      <div><label for="rate">美元兌台幣匯率</label><input id="rate" type="number" min="0" step="0.001" class="num" placeholder="依規定匯率填入"></div>
+      <div><label for="payDays">計支日數</label><input id="payDays" type="number" min="0" class="num"></div>
+    </div>
+    <p class="note">數額請照行政院「中央政府各機關派赴國外各地區出差人員生活費日支數額表」填入，頁面會依國家＋城市記住你填過的值。
+      <a href="https://law.dgbas.gov.tw/LawContent.aspx?id=FL017584" target="_blank" rel="noopener">國外出差旅費報支要點（主計總處）</a></p>
+    <div class="choices">
+      <label><input type="checkbox" id="longStay" checked> 同地駐留超過 1 個月時，依要點打折（第 2–3 個月 80%、第 4 個月起 70%，以 30 天為 1 個月概算）</label>
+    </div>
+    <div class="warn">供膳宿、返國當日、跨區出差等情形的扣減規定不同，此處以「日數 × 日支數額」概算，正式報支前請依要點逐項核對。</div>
+    <div class="scroll" style="margin-top:12px">
+      <table>
+        <thead><tr><th>項目（要點：住宿 70%、膳食 20%、零用 10%）</th><th class="r">US$</th><th class="r">NT$</th></tr></thead>
+        <tbody id="pdRows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="s4">
+    <h2 id="s4">4. 其他費用（NT$，全部人員合計）</h2>
+    <div class="grid">
+      <div><label for="oVisa">簽證／證件費</label><input id="oVisa" type="number" min="0" class="num" value="0"></div>
+      <div><label for="oIns">保險費</label><input id="oIns" type="number" min="0" class="num" value="0"></div>
+      <div><label for="oTrans">當地交通（機場往返、市區）</label><input id="oTrans" type="number" min="0" class="num" value="0"></div>
+      <div><label for="oGift">禮品交際及雜費（每人每日）</label><input id="oGift" type="number" min="0" class="num" value="0"></div>
+      <div><label for="oMisc">其他</label><input id="oMisc" type="number" min="0" class="num" value="0"></div>
+    </div>
+    <p class="note">依要點，非隨同司處長級以上出差者，禮品交際及雜費得按日數每人每日 NT$600 內檢附原始單據報支。</p>
+  </section>
+
+  <section aria-labelledby="s5">
+    <h2 id="s5">5. 試算結果</h2>
+    <div class="scroll">
+      <table>
+        <tbody id="sumRows"></tbody>
+      </table>
+    </div>
+    <div class="actions">
+      <button class="btn" id="copyBtn" type="button">複製摘要</button>
+      <button class="btn ghost" id="printBtn" type="button">列印／存成 PDF</button>
+    </div>
+    <p class="note" id="copyMsg" role="status"></p>
+  </section>
+
+  <div class="total" aria-live="polite">
+    <span>預算合計</span><strong id="grand">NT$ 0</strong>
+  </div>
+</main>
+
+<script>
+// 國家 → 主要機場（可自行增修）
+var DEST = [
+  ["日本", [["NRT","東京成田"],["HND","東京羽田"],["KIX","大阪關西"],["FUK","福岡"],["CTS","札幌新千歲"],["OKA","沖繩那霸"],["NGO","名古屋"]]],
+  ["韓國", [["ICN","首爾仁川"],["GMP","首爾金浦"],["PUS","釜山"],["CJU","濟州"]]],
+  ["香港", [["HKG","香港"]]],
+  ["澳門", [["MFM","澳門"]]],
+  ["中國大陸", [["PVG","上海浦東"],["PEK","北京首都"],["CAN","廣州"],["SZX","深圳"],["CTU","成都"]]],
+  ["新加坡", [["SIN","新加坡"]]],
+  ["泰國", [["BKK","曼谷素萬那普"],["DMK","曼谷廊曼"],["CNX","清邁"],["HKT","普吉"]]],
+  ["越南", [["SGN","胡志明市"],["HAN","河內"],["DAD","峴港"]]],
+  ["菲律賓", [["MNL","馬尼拉"],["CEB","宿霧"]]],
+  ["馬來西亞", [["KUL","吉隆坡"],["PEN","檳城"]]],
+  ["印尼", [["CGK","雅加達"],["DPS","峇里島"]]],
+  ["印度", [["DEL","德里"],["BOM","孟買"]]],
+  ["美國", [["LAX","洛杉磯"],["SFO","舊金山"],["SEA","西雅圖"],["JFK","紐約甘迺迪"],["IAH","休士頓"],["ORD","芝加哥"],["WAS","華盛頓特區"],["HNL","檀香山"]]],
+  ["加拿大", [["YVR","溫哥華"],["YYZ","多倫多"]]],
+  ["英國", [["LHR","倫敦希斯洛"]]],
+  ["法國", [["CDG","巴黎戴高樂"]]],
+  ["德國", [["FRA","法蘭克福"],["MUC","慕尼黑"]]],
+  ["荷蘭", [["AMS","阿姆斯特丹"]]],
+  ["奧地利", [["VIE","維也納"]]],
+  ["義大利", [["MXP","米蘭"],["FCO","羅馬"]]],
+  ["瑞士", [["ZRH","蘇黎世"],["GVA","日內瓦"]]],
+  ["捷克", [["PRG","布拉格"]]],
+  ["澳洲", [["SYD","雪梨"],["MEL","墨爾本"],["BNE","布里斯本"]]],
+  ["紐西蘭", [["AKL","奧克蘭"]]],
+  ["阿聯", [["DXB","杜拜"]]],
+  ["土耳其", [["IST","伊斯坦堡"]]]
+];
+
+var $ = function (id) { return document.getElementById(id); };
+var store = {
+  get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+};
+
+function fmt(n) { return Math.round(n).toLocaleString("zh-TW"); }
+function num(id) { var v = parseFloat($(id).value); return isNaN(v) ? 0 : v; }
+
+// --- 初始化選單
+var cs = $("country");
+DEST.forEach(function (d, i) {
+  var o = document.createElement("option"); o.value = i; o.textContent = d[0]; cs.appendChild(o);
+});
+function fillAirports() {
+  var to = $("to"); to.innerHTML = "";
+  DEST[cs.value][1].forEach(function (a) {
+    var o = document.createElement("option"); o.value = a[0]; o.textContent = a[1] + " " + a[0]; to.appendChild(o);
+  });
+}
+fillAirports();
+
+// 預設日期：一個月後出發，停留 5 天
+(function () {
+  var t = new Date(); t.setDate(t.getDate() + 30);
+  var r = new Date(t); r.setDate(r.getDate() + 4);
+  var iso = function (d) { return d.toISOString().slice(0, 10); };
+  $("d1").value = iso(t); $("d2").value = iso(r);
+})();
+
+// --- 日數
+function tripDays() {
+  var a = new Date($("d1").value), b = new Date($("d2").value);
+  if (isNaN(a) || isNaN(b) || b < a) return 0;
+  return Math.round((b - a) / 86400000) + 1;
+}
+
+// --- 查價連結
+function ymd(s) { return s.slice(2, 4) + s.slice(5, 7) + s.slice(8, 10); }
+function buildLinks() {
+  var f = $("from").value, t = $("to").value, d1 = $("d1").value, d2 = $("d2").value;
+  var box = $("links"); box.innerHTML = "";
+  var cabinWord = $("cabin").value === "b" ? " business class" : "";
+  function add(label, url) {
+    var a = document.createElement("a");
+    a.href = url; a.target = "_blank"; a.rel = "noopener"; a.textContent = label;
+    box.appendChild(a);
+  }
+  add("長榮航空官網", "https://www.evaair.com/zh-tw/index.html");
+  add("中華航空官網", "https://www.china-airlines.com/tw/zh");
+  if (d1 && d2) {
+    var q = function (air) {
+      return "https://www.google.com/travel/flights?q=" + encodeURIComponent(
+        "Flights from " + f + " to " + t + " on " + d1 + " through " + d2 + (air ? " on " + air : "") + cabinWord);
+    };
+    add("Google Flights（全部）", q(""));
+    add("Google Flights（長榮）", q("EVA Air"));
+    add("Google Flights（華航）", q("China Airlines"));
+    var cab = $("cabin").value === "b" ? "business" : "economy";
+    add("Skyscanner", "https://www.skyscanner.com.tw/transport/flights/" + f.toLowerCase() + "/" + t.toLowerCase() + "/" + ymd(d1) + "/" + ymd(d2) + "/?adultsv2=" + Math.max(1, num("pax")) + "&cabinclass=" + cab);
+  }
+}
+
+// --- 日支記憶
+function pdKey() { return "pd:" + DEST[cs.value][0] + "|" + $("city").value.trim(); }
+function loadPD() {
+  var v = store.get(pdKey());
+  $("perdiem").value = v || "";
+  var r = store.get("rate"); if (r && !$("rate").value) $("rate").value = r;
+}
+function savePD() {
+  if ($("perdiem").value) store.set(pdKey(), $("perdiem").value);
+  if ($("rate").value) store.set("rate", $("rate").value);
+}
+
+// --- 計算
+function fareChosen() {
+  var br = num("fareBR"), ci = num("fareCI"), ot = num("fareOther");
+  var mode = document.querySelector('input[name="fareMode"]:checked').value;
+  var filled = [br, ci, ot].filter(function (x) { return x > 0; });
+  if (mode === "BR") return br;
+  if (mode === "CI") return ci;
+  if (mode === "other") return ot;
+  if (!filled.length) return 0;
+  return mode === "max" ? Math.max.apply(null, filled) : Math.min.apply(null, filled);
+}
+
+function pdFactorSum(days) {
+  // 回傳「等效滿額日數」
+  if (!$("longStay").checked) return days;
+  var full = Math.min(days, 30);
+  var mid = Math.max(0, Math.min(days, 90) - 30);
+  var low = Math.max(0, days - 90);
+  return full + mid * 0.8 + low * 0.7;
+}
+
+var lastSummary = "";
+function calc() {
+  var days = tripDays(), pax = Math.max(1, num("pax"));
+  $("daysInfo").textContent = days
+    ? "共 " + days + " 天（含出發與返國當日），" + Math.max(0, days - 1) + " 晚。"
+    : "請確認返國日期不早於出發日期。";
+
+  if (document.activeElement !== $("payDays")) $("payDays").value = days || "";
+  var payDays = num("payDays");
+  var perdiem = num("perdiem"), rate = num("rate");
+
+  var fare = fareChosen();
+  var fareTotal = fare * pax;
+
+  var eq = pdFactorSum(payDays);
+  var pdUsdOne = perdiem * eq;
+  var pdTwdOne = pdUsdOne * rate;
+  var pdTotal = pdTwdOne * pax;
+
+  var rows = "";
+  function r(label, usd, twd, sub) {
+    rows += "<tr><td>" + label + "</td><td class='r'>" + (usd == null ? "" : fmt(usd)) + "</td><td class='r'>" + fmt(twd) + "</td></tr>";
+  }
+  var dailyUsd = perdiem;
+  [["住宿（70%）", .7], ["膳食（20%）", .2], ["零用（10%）", .1]].forEach(function (x) {
+    rows += "<tr><td>" + x[0] + "</td><td class='r'>" + fmt(pdUsdOne * x[1]) + "</td><td class='r'>" + fmt(pdTwdOne * x[1]) + "</td></tr>";
+  });
+  rows += "<tr><td><strong>每人日支合計</strong></td><td class='r'><strong>" + fmt(pdUsdOne) + "</strong></td><td class='r'><strong>" + fmt(pdTwdOne) + "</strong></td></tr>";
+  $("pdRows").innerHTML = rows;
+
+  var gift = num("oGift") * payDays * pax;
+  var others = num("oVisa") + num("oIns") + num("oTrans") + gift + num("oMisc");
+  var grand = fareTotal + pdTotal + others;
+
+  var s = "";
+  function line(label, val, sub) {
+    s += "<tr><td>" + label + (sub ? "<div class='note'>" + sub + "</div>" : "") + "</td><td class='r'>" + fmt(val) + "</td></tr>";
+  }
+  line("機票", fareTotal, fare ? "NT$ " + fmt(fare) + " × " + pax + " 人" : "尚未填入票價");
+  line("日支生活費", pdTotal, perdiem && rate ? "US$ " + perdiem + " × " + (Math.round(eq * 10) / 10) + " 日 × 匯率 " + rate + " × " + pax + " 人" : "請填入日支數額與匯率");
+  line("簽證／保險／交通／其他", num("oVisa") + num("oIns") + num("oTrans") + num("oMisc"), "");
+  line("禮品交際及雜費", gift, num("oGift") ? "NT$ " + fmt(num("oGift")) + " × " + payDays + " 日 × " + pax + " 人" : "");
+  s += "<tr><td><strong>合計</strong></td><td class='r'><strong>NT$ " + fmt(grand) + "</strong></td></tr>";
+  $("sumRows").innerHTML = s;
+  $("grand").textContent = "NT$ " + fmt(grand);
+
+  lastSummary = [
+    "出國經費試算",
+    "目的地：" + DEST[cs.value][0] + ($("city").value ? "（" + $("city").value + "）" : ""),
+    "日期：" + $("d1").value + " ～ " + $("d2").value + "（" + days + " 天，" + pax + " 人）",
+    "機票：NT$ " + fmt(fareTotal),
+    "日支生活費：NT$ " + fmt(pdTotal),
+    "其他費用：NT$ " + fmt(others),
+    "合計：NT$ " + fmt(grand),
+    "（概估，正式報支以規定為準）"
+  ].join("\n");
+}
+
+function refresh() { buildLinks(); calc(); }
+
+cs.addEventListener("change", function () { fillAirports(); loadPD(); refresh(); });
+$("city").addEventListener("input", function () { loadPD(); calc(); });
+["from", "to", "d1", "d2", "pax", "cabin"].forEach(function (id) {
+  $(id).addEventListener("input", function () { $("payDays").value = ""; refresh(); });
+});
+["fareBR", "fareCI", "fareOther", "perdiem", "rate", "payDays", "oVisa", "oIns", "oTrans", "oGift", "oMisc", "longStay"].forEach(function (id) {
+  $(id).addEventListener("input", function () { savePD(); calc(); });
+});
+document.querySelectorAll('input[name="fareMode"]').forEach(function (e) { e.addEventListener("change", calc); });
+
+// --- 自動查價（選用）
+$("api").value = store.get("api") || "";
+$("apiBtn").addEventListener("click", function () {
+  var base = $("api").value.trim(), msg = $("apiMsg");
+  if (!base) { msg.textContent = "請先填入查價服務網址。"; return; }
+  store.set("api", base);
+  var url = base + (base.indexOf("?") > -1 ? "&" : "?") +
+    "from=" + $("from").value + "&to=" + $("to").value +
+    "&depart=" + $("d1").value + "&return=" + $("d2").value + "&cabin=" + $("cabin").value;
+  msg.textContent = "查詢中…";
+  fetch(url).then(function (res) {
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  }).then(function (j) {
+    if (j.BR) $("fareBR").value = Math.round(j.BR);
+    if (j.CI) $("fareCI").value = Math.round(j.CI);
+    msg.textContent = (j.BR || j.CI) ? "已填入查到的票價，請與官網核對。" : "服務回應中沒有長榮或華航的票價。";
+    calc();
+  }).catch(function (e) {
+    msg.textContent = "查價失敗：" + e.message + "。請檢查網址與服務端是否允許跨來源請求（CORS）。";
+  });
+});
+
+// --- 匯出
+$("copyBtn").addEventListener("click", function () {
+  var m = $("copyMsg");
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(lastSummary).then(
+      function () { m.textContent = "已複製摘要。"; },
+      function () { m.textContent = "無法複製，請手動選取結果表格。"; });
+  } else { m.textContent = "此瀏覽器不支援一鍵複製，請手動選取結果表格。"; }
+});
+$("printBtn").addEventListener("click", function () { window.print(); });
+
+loadPD();
+refresh();
+</script>
+</body>
+</html>

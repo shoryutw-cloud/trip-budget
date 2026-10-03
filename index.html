@@ -110,6 +110,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <h2 id="s2">2. 機票查價</h2>
     <div class="row"><button class="btn" id="apiBtn" type="button">自動查價</button></div>
     <p class="note" id="apiMsg" role="status"></p>
+    <div class="rate" id="flightBox" style="display:none" aria-live="polite"></div>
     <p class="note">自動查價取得的是 Google Flights 顯示的最低價組合，不是航空公司官網價格。訂票前請到官網核對，並把實際價格填入「其他／自訂票價」。</p>
     <div class="grid" style="margin-top:12px">
       <div><label for="fareBR">長榮 BR 每人票價（NT$）</label><input id="fareBR" type="number" min="0" class="num" placeholder="查到後填入"></div>
@@ -209,8 +210,11 @@ var INS = {   // 保費表：陣列第 i 項 = 第 i+1 天（目前提供 1–30
 };
 var SCHENGEN = ["法國","德國","荷蘭","比利時","盧森堡","瑞士","列支敦斯登","奧地利","丹麥","冰島","挪威","瑞典","芬蘭","西班牙","葡萄牙","義大利","馬爾他","希臘","愛沙尼亞","拉脫維亞","立陶宛","波蘭","捷克","斯洛伐克","匈牙利","克羅埃西亞","斯洛維尼亞","羅馬尼亞","保加利亞"];
 var GIFT_PER_DAY = 1100;
+var CODE_LABEL = { TPE: "桃園", TSA: "松山", KHH: "高雄", RMQ: "台中" };
 var manualF = { oIns: false, oGift: false }, insTypeManual = false;
 var $ = function (id) { return document.getElementById(id); };
+Object.keys(AP.e).forEach(function (k) { AP.e[k].forEach(function (a) { if (!CODE_LABEL[a[0]]) CODE_LABEL[a[0]] = a[1]; }); });
+Object.keys(AP.c).forEach(function (k) { AP.c[k].forEach(function (a) { if (!CODE_LABEL[a[0]]) CODE_LABEL[a[0]] = a[1]; }); });
 var AP_RE = /^[A-Z]{3}(,[A-Z]{3})*$/;
 var store = {
   get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -350,7 +354,27 @@ var PCTS = [100, 70, 30, 10, 0];
 function wdOf(iso) { return WD[new Date(parseISO(iso)).getUTCDay()]; }
 function dayDiff(a, b) { return Math.round((parseISO(b) - parseISO(a)) / 86400000); }
 function clearManual() { manualPct = {}; }
+function fmtT(s) { var iso = s.slice(0, 10); return iso.slice(5, 7) + "/" + iso.slice(8, 10) + "（" + wdOf(iso) + "）" + s.slice(11, 16); }
+function apLabel(c) { return c + (CODE_LABEL[c] ? " " + CODE_LABEL[c] : ""); }
+function renderItin(it) {
+  var box = $("flightBox");
+  if (!it) { box.style.display = "none"; box.innerHTML = ""; return; }
+  var h = "<strong>航班起訖時間</strong><div class='note' style='margin-top:2px'>每個時間都是該機場的「當地時間」：台灣機場是台灣時間，國外機場是當地時間。</div>";
+  [["去程", it.out], ["回程", it.ret]].forEach(function (g) {
+    if (!g[1] || !g[1].length) return;
+    h += "<div style='margin-top:10px'><strong>" + g[0] + "</strong></div>";
+    g[1].forEach(function (f) {
+      var diff = dayDiff(f.dep.time.slice(0, 10), f.arr.time.slice(0, 10));
+      h += "<div style='margin-top:4px'>" + esc(f.flight || "") + "　" + esc(fmtT(f.dep.time)) + "　" + esc(apLabel(f.dep.id)) + " 起飛　→　" +
+        esc(fmtT(f.arr.time)) + "　" + esc(apLabel(f.arr.id)) + " 抵達" +
+        (diff ? "<span class='note'>　（當地日期 " + (diff > 0 ? "+" : "") + diff + " 天）</span>" : "") + "</div>";
+    });
+  });
+  if (!it.ret || !it.ret.length) h += "<div class='note' style='margin-top:10px'>回程航班時間沒有取得，返抵台灣日期暫以回程起飛當日計。</div>";
+  box.innerHTML = h; box.style.display = "";
+}
 function clearAuto() {
+  renderItin(null);
   if (autoFilled) { $("a1").value = ""; $("a2").value = ""; autoFilled = false; autoInfo = ""; }
 }
 
@@ -388,6 +412,8 @@ function calc() {
         : kind === "stay" ? (iso === a1 ? "抵達並留宿當地" : "留宿當地")
         : (iso === r1 ? "當地起飛，返程" : (iso === a2 ? "返抵台灣" : "返程飛行中，未留宿"));
       if (iso === r1 && iso === a2) label = "當地起飛並返抵台灣";
+      if (iso === a1 && est.indexOf("抵達當地日期") > -1) label += "（抵達日期尚未取得，暫以出發當日計）";
+      if (iso === r1 && est.indexOf("返抵台灣日期") > -1) label = "當地起飛（返抵台灣日期尚未取得，暫以當日計）";
       if (f < 1) label += "（駐留超過 1 個月，數額 × " + Math.round(f * 100) + "%）";
       days.push({ iso: iso, label: label, pct: pct, usd: usd, edited: manualPct[iso] != null });
     }
@@ -417,7 +443,7 @@ function calc() {
   [["住宿（70%）", .7], ["膳食（20%）", .2], ["零用（10%）", .1]].forEach(function (x) {
     pd += "<tr><td>" + x[0] + "</td><td class='r'>" + fmt(usdOne * x[1]) + "</td><td class='r'>" + fmt(twdOne * x[1]) + "</td></tr>";
   });
-  pd += "<tr><td><strong>每人日支合計（相當於 " + (Math.round(equiv * 10) / 10) + " 個整日）</strong></td><td class='r'><strong>" + fmt(usdOne) + "</strong></td><td class='r'><strong>" + fmt(twdOne) + "</strong></td></tr>";
+  pd += "<tr><td><strong>每人日支合計" + (est.length ? "（暫估）" : "") + "（相當於 " + (Math.round(equiv * 10) / 10) + " 個整日）</strong></td><td class='r'><strong>" + fmt(usdOne) + "</strong></td><td class='r'><strong>" + fmt(twdOne) + "</strong></td></tr>";
   $("pdRows").innerHTML = pd;
 
   // 警示
@@ -426,6 +452,7 @@ function calc() {
   if (usedFallback) warns.push("行程中有日期不在該城市的季節表內，已依附註改用該國「其他」數額。");
   if (s && noData && override <= 0) warns.push("此行程缺少日支數額，請手動覆寫。");
   if (orderBad) warns.push("抵達當地日期晚於回程日期，請檢查日期。");
+  if (est.length && days.length) warns.push("尚未取得航班時間，日支為暫估（長程航班通常會跨日，實際會比表中多幾天的 30%）。請先按上方「自動查價」，或在「手動修改抵達日期」填入。");
   if (s && !rate) warns.push("尚未填入匯率，日支新台幣金額暫以 0 計。");
   var w = $("warnBox");
   if (!w) { w = document.createElement("div"); w.id = "warnBox"; w.className = "warn"; $("rateInfo").after(w); }
@@ -528,7 +555,7 @@ $("apiBtn").addEventListener("click", function () {
   if (!AP_RE.test(to) || !$("d1").value || !$("d2").value) { msg.textContent = "請先選好目的地、抵達機場，並填入出發日期與回程日期。"; return; }
   if ($("d2").value < $("d1").value) { msg.textContent = "回程日期不能早於出發日期。"; return; }
   var url = WORKER_URL + "/?from=" + $("from").value + "&to=" + to +
-    "&depart=" + $("d1").value + "&return=" + $("d2").value + "&cabin=e";
+    "&depart=" + $("d1").value + "&return=" + $("d2").value + "&cabin=e&v=4";
   msg.textContent = "查詢中…"; btn.disabled = true;
   fetch(url).then(function (res) {
     if (!res.ok) throw new Error("HTTP " + res.status);
@@ -543,10 +570,14 @@ $("apiBtn").addEventListener("click", function () {
       if (tm.retArrive) $("a2").value = tm.retArrive.slice(0, 10); else $("a2").value = "";
       autoFilled = true; clearManual();
       var al = tm.airline === "BR" ? "長榮" : (tm.airline === "CI" ? "華航" : tm.airline);
-      autoInfo = "航班日期取自" + al + "最低價航班：去程 " + tm.outDepart + " 台北起飛，" + tm.outArrive + " 抵達（當地時間）" +
-        (tm.retDepart ? "；回程 " + tm.retDepart + " 當地起飛，" + tm.retArrive + " 抵台（台灣時間）。" : "；回程時間未取得，返抵台灣日期暫以回程起飛當日估算。") + "如有不同可直接修改日期。";
+      autoInfo = "抵達與返抵日期取自" + al + "最低價航班（起訖時間見上方「自動查價」結果）。如有不同，可在下方「手動修改抵達日期」改。";
+      var it = j.itinerary;
+      if (!it) it = { out: [{ flight: "", dep: { id: $("from").value, time: tm.outDepart }, arr: { id: to, time: tm.outArrive } }],
+                      ret: tm.retDepart ? [{ flight: "", dep: { id: to, time: tm.retDepart }, arr: { id: $("from").value, time: tm.retArrive } }] : null };
+      renderItin(it);
       extra = "，並填入抵達日期";
     }
+    if (!tm && (j.BR || j.CI)) extra = "，但沒有取得航班時間（請確認 Cloudflare 上的 Worker 是最新版）";
     msg.textContent = (j.BR || j.CI) ? "已填入查到的票價" + extra + "。" : "這個航線與日期查不到長榮或華航的票價，請換日期或到官網查詢。";
     calc();
   }).catch(function (e) {

@@ -1435,7 +1435,10 @@ window.addEventListener("pagehide", saveState);
 document.addEventListener("visibilitychange", function () { if (document.hidden) saveState(); });
 $("clearAll").addEventListener("click", function () {
   if (!window.confirm("確定要清除已記憶的行程與費用資料，重新開始嗎？（匯率不受影響）")) return;
-  stateReady = false; clearTimeout(saveTimer); store.del(STATE_KEY); location.reload();
+  stateReady = false; clearTimeout(saveTimer); store.del(STATE_KEY);
+  try { history.scrollRestoration = "manual"; } catch (e) {}          // 重新載入後不要回到原本捲動的位置
+  try { sessionStorage.setItem("goTop", "1"); } catch (e) {}
+  window.scrollTo(0, 0); location.reload();
 });
 
 var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1469,6 +1472,13 @@ finishRestore(savedState);
 stateReady = true;
 calc();
 syncStk();
+try {                                                             // 按了「清除已記憶的資料」之後，回到頁面最上面
+  if (sessionStorage.getItem("goTop")) {
+    sessionStorage.removeItem("goTop"); window.scrollTo(0, 0);
+    setTimeout(function () { window.scrollTo(0, 0); }, 120);
+    window.addEventListener("load", function () { window.scrollTo(0, 0); });
+  }
+} catch (e) {}
 </script>
 </body>
 </html>

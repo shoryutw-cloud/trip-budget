@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>出國經費試算</title>
+<title>因公赴國外出差旅費試算</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -124,8 +124,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
 </head>
 <body>
 <main>
-  <h1>出國經費試算</h1>
-  <p class="sub">僅供估算。</p>
+  <h1>因公赴國外出差旅費試算</h1>
 
   <section aria-labelledby="s1">
     <h2 id="s1">1. 行程</h2>
@@ -891,7 +890,7 @@ function calc() {
   $("grand").textContent = "TWD " + dfmt(grand, 0);
 
   lastSummary = [
-    "出國經費試算",
+    "因公赴國外出差旅費試算",
     "目的地：" + (s ? s.country.zh + (s.entry.zh !== s.country.zh ? "・" + s.entry.zh : "") : "（尚未選擇）"),
     "期間：" + (tripKnown ? startIso + " ～ " + endIso + "（" + tripN + " 天）" : "尚未確定（需先取得返抵台灣日期）"),
     "一、交通費：TWD " + dfmt(transTotal, 0) + "（機票 " + dfmt(fare, 0) + "、船舶 " + dfmt(boat, 0) + "、大眾陸運工具 " + dfmt(transit, 0) + "、行李托運費 " + dfmt(bag, 0) + "）",

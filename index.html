@@ -112,6 +112,7 @@ section[aria-labelledby="s6"] { scroll-margin-top: calc(env(safe-area-inset-top,
 .othrow .no { flex: 0 0 auto; font-size: .875rem; color: var(--muted); white-space: nowrap; }
 .othrow .nm { flex: 2 1 12em; min-width: 0; }
 .othrow .am { flex: 1 1 7em; min-width: 0; }
+.othrow .amcell { flex: 1 1 7em; min-width: 0; }
 .othrow select { width: auto; flex: 0 0 auto; }
 .othrow button { width: auto; flex: 0 0 auto; padding: 8px 12px; }
 .dotlist { list-style: none; margin: 4px 0 0; padding: 0; }
@@ -715,8 +716,9 @@ function renderTrans() {
     var rm = document.createElement("button"); rm.type = "button"; rm.className = "btn ghost"; rm.textContent = "刪除"; rm.setAttribute("aria-label", "刪除這一項");
     rm.addEventListener("click", function () { transRows.splice(i, 1); renderTrans(); calc(); });
 
-    var nt = document.createElement("div"); nt.className = "note rownote"; nt.style.cssText = "grid-column:1 / -1;margin:0";
-    row.appendChild(kc); row.appendChild(us); row.appendChild(am); row.appendChild(cu); row.appendChild(rm); row.appendChild(nt); box.appendChild(row);
+    var nt = document.createElement("div"); nt.className = "note rownote"; nt.style.cssText = "margin:4px 0 0";
+    var amc = document.createElement("div"); amc.appendChild(am); amc.appendChild(nt);
+    row.appendChild(kc); row.appendChild(us); row.appendChild(amc); row.appendChild(cu); row.appendChild(rm); box.appendChild(row);
   });
 }
 
@@ -740,8 +742,9 @@ function renderOth(g) {
     ["input", "change"].forEach(function (ev) { cu.addEventListener(ev, function () { r.cur = cu.value; calc(); }); });
     var rm = document.createElement("button"); rm.type = "button"; rm.className = "btn ghost"; rm.textContent = "刪除"; rm.setAttribute("aria-label", "刪除這一項");
     rm.addEventListener("click", function () { G.rows.splice(i, 1); renderOth(g); calc(); });
-    var nt = document.createElement("div"); nt.className = "note rownote"; nt.style.cssText = "flex:0 0 100%;margin:0";
-    row.appendChild(no); row.appendChild(nm); row.appendChild(am); row.appendChild(cu); row.appendChild(rm); row.appendChild(nt); box.appendChild(row);
+    var nt = document.createElement("div"); nt.className = "note rownote"; nt.style.cssText = "margin:4px 0 0";
+    var amc = document.createElement("div"); amc.className = "amcell"; amc.appendChild(am); amc.appendChild(nt);
+    row.appendChild(no); row.appendChild(nm); row.appendChild(amc); row.appendChild(cu); row.appendChild(rm); box.appendChild(row);
   });
 }
 function othMoney(g) {

@@ -225,7 +225,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <div class="warn" style="margin-top:12px"><strong>注意：</strong>
       <ul class="dotlist">
         <li>自動查價取得的是 <strong>Google Flights 顯示的最低價組合，非航空公司官網價格</strong>。</li>
-        <li>自動查價<strong>每個月只能查 250 次</strong>：來回票每按一次最多會用掉 2 次額度；多段航班有幾段就用掉幾次（例如 3 段用 3 次）。</li>
+        <li>自動查價<strong>每個月只能查 250 次</strong>：來回票每按一次最多會用掉 4 次額度（長榮、華航、星宇各查一次回程班機）；多段航班有幾段就用掉幾次（例如 3 段用 3 次）。</li>
       </ul></div>
   </section>
 
@@ -877,7 +877,8 @@ function dayDiff(a, b) { return Math.round((parseISO(b) - parseISO(a)) / 8640000
 function clearManual() { manualPct = {}; }
 function fmtT(s) { var iso = s.slice(0, 10); return iso.slice(5, 7) + "/" + iso.slice(8, 10) + "（" + wdOf(iso) + "）" + s.slice(11, 16); }
 function apLabel(c) { return c + (CODE_LABEL[c] ? " " + CODE_LABEL[c] : ""); }
-var lastItin = null;
+var lastItin = null, fareItins = {};
+var AIRLINE_NAME = { BR: "長榮", CI: "華航", JX: "星宇" };
 function renderItin(it) {
   lastItin = it || null;
   var box = $("flightBox");
@@ -897,7 +898,19 @@ function renderItin(it) {
   if (!it.groups && (!it.ret || !it.ret.length)) h += "<div class='note' style='margin-top:10px'>回程航班時間沒有取得，返抵台灣日期暫以回程起飛當日計。</div>";
   box.innerHTML = h; box.style.display = "";
 }
+function showAirline() {                                    // 班機資訊與抵達日期，跟著「選擇要帶入的票價」換
+  var mode = document.querySelector('input[name="fareMode"]:checked').value, it = fareItins[mode];
+  if (!it) return;                                          // 自訂，或沒有該家的班機資料：維持目前顯示
+  renderItin({ out: it.out, ret: it.ret });
+  if (autoFilled) {
+    $("a1").value = it.out.length ? it.out[it.out.length - 1].arr.time.slice(0, 10) : "";
+    $("a2").value = it.ret && it.ret.length ? it.ret[it.ret.length - 1].arr.time.slice(0, 10) : "";
+    autoInfo = "抵達與返抵日期取自" + AIRLINE_NAME[mode] + "最低價航班（起訖時間見上方「自動查價」結果）。如有不同，可在下方「手動修改抵達日期」改。";
+    clearManual();
+  }
+}
 function clearAuto() {
+  fareItins = {};
   renderItin(null);
   if (autoFilled) {
     $("a1").value = ""; $("a2").value = ""; autoFilled = false; autoInfo = "";
@@ -1184,7 +1197,7 @@ $("fareOther").addEventListener("input", function () {   // 填了自訂票價�
   if ($("fareOther").value) document.querySelector('input[name="fareMode"][value="other"]').checked = true;
   calc();
 });
-document.querySelectorAll('input[name="fareMode"]').forEach(function (e) { e.addEventListener("change", calc); });
+document.querySelectorAll('input[name="fareMode"]').forEach(function (e) { e.addEventListener("change", function () { showAirline(); calc(); }); });
 
 // ---------- 自動查價：多段航班 ----------
 function multiLookup(msg, btn) {
@@ -1229,7 +1242,7 @@ $("apiBtn").addEventListener("click", function () {
   if (!AP_RE.test(to) || !$("d1").value || !$("d2").value) { msg.textContent = "請先選好目的地、抵達機場，並填入出發日期與回程日期。"; return; }
   if ($("d2").value < $("d1").value) { msg.textContent = "回程日期不能早於出發日期。"; return; }
   var url = WORKER_URL + "/?from=" + $("from").value + "&to=" + to +
-    "&depart=" + $("d1").value + "&return=" + $("d2").value + "&cabin=e&v=6";
+    "&depart=" + $("d1").value + "&return=" + $("d2").value + "&cabin=e&v=7";
   msg.textContent = "查詢中…"; btn.disabled = true;
   fetch(url).then(function (res) {
     if (!res.ok) throw new Error("HTTP " + res.status);
@@ -1239,6 +1252,7 @@ $("apiBtn").addEventListener("click", function () {
     if (j.BR) $("fareBR").value = Math.round(j.BR);
     if (j.CI) $("fareCI").value = Math.round(j.CI);
     if (j.JX) $("fareJX").value = Math.round(j.JX);
+    fareItins = j.byAirline || {};
     (function () {                                     // 選到的那一家沒有票價、別家有時，自動改選最便宜的那一家
       var ids = { BR: "fareBR", CI: "fareCI", JX: "fareJX" }, vals = {};
       Object.keys(ids).forEach(function (k) { var v = D($(ids[k]).value); if (v.v > 0n) vals[k] = dnum(v); });
@@ -1261,6 +1275,7 @@ $("apiBtn").addEventListener("click", function () {
       renderItin(it);
       extra = "，並填入抵達日期";
     }
+    showAirline();
     if (!tm && (j.BR || j.CI || j.JX)) extra = "，但沒有取得航班時間（請確認 Cloudflare 上的 Worker 是最新版）";
     msg.textContent = (j.BR || j.CI || j.JX) ? "已填入查到的票價" + extra + "。" : "這個航線與日期查不到長榮、華航或星宇的票價，請換日期或到官網查詢。";
     calc();
@@ -1342,7 +1357,7 @@ function snapState() {
     stops: multiStops.map(function (st) { var n = selNames(st.r, st.c, st.t); n.ap = st.ap; n.apOther = st.apOther; n.date = st.date; n.arr = st.arr; return n; }),
     vals: vals, fareMode: mode ? mode.value : "BR", roamPlan: $("roamPlan").value,
     manualF: manualF, insTypeManual: insTypeManual, manualPct: manualPct,
-    autoFilled: autoFilled, autoInfo: autoInfo, itin: lastItin,
+    autoFilled: autoFilled, autoInfo: autoInfo, itin: lastItin, fareItins: fareItins,
     trans: transRows, oth: { fee: OTH.fee.rows, ins: OTH.ins.rows, admin: OTH.admin.rows, gift: OTH.gift.rows }
   };
 }
@@ -1389,6 +1404,7 @@ function restoreState() {
   });
   manualPct = s.manualPct || {};
   autoFilled = !!s.autoFilled; autoInfo = s.autoInfo || "";
+  fareItins = s.fareItins || {};
   if (s.itin) renderItin(s.itin);
   insTypeManual = !!s.insTypeManual;
   return s;

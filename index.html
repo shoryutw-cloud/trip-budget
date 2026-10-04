@@ -745,7 +745,7 @@ function othMoney(g) {
 }
 function sumNtd(arr) { return arr.reduce(function (a, m) { return dadd(a, m.ntd); }, dint(0)); }
 function othText(arr) {
-  return arr.filter(function (m) { return m.ntd.v !== 0n; }).map(function (m) { var c = convText(m); return m.name + " " + dfmt(m.ntd, 0) + (c ? "（" + c + "）" : ""); }).join("、");
+  return arr.filter(function (m) { return m.ntd.v !== 0n; }).map(function (m) { var c = convText(m); return m.name + "：TWD " + dfmt(m.ntd, 0) + (c ? "（" + c + "）" : ""); }).join("、");
 }
 
 // ---------- 多段航班：第 2 站起 ----------
@@ -1026,7 +1026,7 @@ function calc() {
   $("autoNote").style.display = autoMsgs.length ? "" : "none";
 
   function sum(items) { return items.reduce(function (a, x) { return dadd(a, x[1]); }, dint(0)); }
-  function listNonZero(items) { return items.filter(function (x) { return x[1].v !== 0n; }).map(function (x) { return x[0] + " " + dfmt(x[1], 0) + (x[2] ? "（" + x[2] + "）" : ""); }).join("、"); }
+  function listNonZero(items) { return items.filter(function (x) { return x[1].v !== 0n; }).map(function (x) { return x[0] + "：TWD " + dfmt(x[1], 0) + (x[2] ? "（" + x[2] + "）" : ""); }).join("、"); }
 
   // 一、交通費
   var boatM = moneyOf("oBoat", "oBoatCur"), bagM = moneyOf("oBag", "bagCur");
@@ -1077,8 +1077,10 @@ function calc() {
   row("g", "一、交通費", transTotal);
   row("s", "機票", fare, fare.v > 0n ? "" : "尚未填入票價");
   row("s", "船舶", boat, convText(boatM));
-  row("s", "大眾陸運工具", transit);
-  transitM.forEach(function (m) { if (m.ntd.v !== 0n || m.amt.v !== 0n) row("s2", esc(m.name), m.ntd, convText(m)); });
+  var transitNote = transitM.filter(function (m) { return m.ntd.v !== 0n || m.amt.v !== 0n; }).map(function (m) {
+    var c = convText(m); return esc(m.name) + "：TWD " + dfmt(m.ntd, 0) + (c ? "（" + c + "）" : "");
+  }).join("、");
+  row("s", "大眾陸運工具", transit, transitNote);
   row("s", "行李托運費", bag, convText(bagM));
   row("g", "二、生活費（日支費）", living);
   row("s", "日支", living, usdOne.v > 0n && rate.v > 0n ? "USD " + dfmt(usdOne, 2) + " × 匯率 " + dfmt(rate, 0) : "請確認日支數額與匯率");
@@ -1087,9 +1089,9 @@ function calc() {
   var insMainNote = manualF.oIns ? "手動輸入" : (insAuto ? insName + "　" + tripN + " 日" : (tripN > 30 ? "超過 30 天，請手動輸入" : ""));
   row("s", "保險費", ins, [insMainNote, othText(insO)].filter(Boolean).join("；"));
   var esim = adminItems[3][1], adminParts = [];
-  [adminItems[0], adminItems[1]].forEach(function (x) { if (x[1].v !== 0n) adminParts.push(x[0] + " " + dfmt(x[1], 0) + (x[2] ? "（" + x[2] + "）" : "")); });
-  if (roam.v !== 0n) adminParts.push("國際漫遊費 " + dfmt(roam, 0) + ((manualF.oRoam || roamR.custom) ? "（手動輸入）" : (roamR.note ? "（" + roamR.note + "）" : "")));
-  if (esim.v !== 0n) adminParts.push("eSIM 費用 " + dfmt(esim, 0));
+  [adminItems[0], adminItems[1]].forEach(function (x) { if (x[1].v !== 0n) adminParts.push(x[0] + "：TWD " + dfmt(x[1], 0) + (x[2] ? "（" + x[2] + "）" : "")); });
+  if (roam.v !== 0n) adminParts.push("國際漫遊費：TWD " + dfmt(roam, 0) + ((manualF.oRoam || roamR.custom) ? "（手動輸入）" : (roamR.note ? "（" + roamR.note + "）" : "")));
+  if (esim.v !== 0n) adminParts.push("eSIM 費用：TWD " + dfmt(esim, 0));
   var adminOt = othText(adminO); if (adminOt) adminParts.push(adminOt);
   row("s", "行政費", adminTotal, adminParts.join("、"));
   var giftMainNote = manualF.oGift ? "手動輸入" : (tripN ? "TWD " + fmt(GIFT_PER_DAY) + " × " + tripN + " 日" : "");

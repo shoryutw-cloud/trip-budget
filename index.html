@@ -53,12 +53,13 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 .linkbtn { background: none; border: 0; color: var(--accent); padding: 0 0 0 8px; width: auto; font-size: .875rem; cursor: pointer; text-decoration: underline; }
 ul.notes { font-size: .875rem; color: var(--muted); margin: 8px 0 0; padding-left: 1.3em; }
 ul.notes li { margin: 2px 0; }
-h3 { font-size: 1.0625rem; margin: 20px 0 4px; display: grid; grid-template-columns: 11.5em auto; justify-content: start; column-gap: 12px; align-items: baseline; }
+h3 { font-size: 1.0625rem; margin: 20px 0 4px; display: grid; grid-template-columns: minmax(0, 11.5em) auto; justify-content: start; column-gap: 12px; align-items: baseline; }
 h3 .amt { font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 700; white-space: nowrap; text-align: left; }
 .subtotal { display: flex; justify-content: space-between; align-items: baseline; margin-top: 16px; padding-top: 10px; border-top: 2px solid var(--line); font-weight: 700; }
 .subtotal span:last-child { font-variant-numeric: tabular-nums; }
 .readonly { background: var(--bg); border: 1px dashed var(--line); border-radius: 8px; padding: 9px 10px; min-height: 42px; text-align: right; font-variant-numeric: tabular-nums; }
 #sumRows tr.g td { font-weight: 700; background: var(--bg); }
+#sumRows td.r { white-space: nowrap; }
 #sumRows tr.s td:first-child { padding-left: 1.6em; }
 .money { display: flex; gap: 8px; }
 .money input { flex: 1 1 auto; min-width: 0; }
@@ -111,6 +112,26 @@ table { width: 100%; border-collapse: collapse; font-size: .95rem; }
 th, td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
 td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
 table.perdiem td.r, table.perdiem th.r { white-space: nowrap; min-width: 7.5em; }
+/* 手機窄版：逐日表改成「兩行一天」，不再比螢幕寬 */
+@media (max-width: 640px) {
+  table.perdiem { display: block; width: 100%; }
+  table.perdiem thead { display: none; }
+  table.perdiem tbody { display: block; }
+  table.perdiem td.r { min-width: 0; }
+  #dayRows tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 4px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  #dayRows td { border: 0; padding: 0; }
+  #dayRows td:nth-child(1) { grid-column: 1; grid-row: 1; font-weight: 500; }
+  #dayRows td:nth-child(3) { grid-column: 2; grid-row: 1; }
+  #dayRows td:nth-child(2) { grid-column: 1 / -1; grid-row: 2; color: var(--muted); font-size: .875rem; }
+  #dayRows td:nth-child(4) { grid-column: 1; grid-row: 3; text-align: left; }
+  #dayRows td:nth-child(5) { grid-column: 2; grid-row: 3; text-align: right; }
+  #dayRows td:nth-child(4)::before { content: "USD "; color: var(--muted); font-size: .875rem; }
+  #dayRows td:nth-child(5)::before { content: "TWD "; color: var(--muted); font-size: .875rem; }
+  #dayRows td[colspan] { grid-column: 1 / -1; grid-row: auto; }
+  #pdRows tr { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; column-gap: 12px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  #pdRows td { border: 0; padding: 0; }
+  #pdRows td:nth-child(1) { grid-column: 1; }
+}
 table.perdiem #pdRows tr:first-child td { border-top: 2px solid var(--line); }
 .total { position: sticky; bottom: 0; background: var(--total-bg); color: var(--total-ink);
   padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); margin: 0 -16px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
@@ -162,11 +183,9 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       <div><label for="fareOther">其他／自訂票價（TWD）</label><input id="fareOther" type="number" min="0" class="num"></div>
     </div>
     <div class="choices" role="radiogroup" aria-label="預算採用的票價">
-      <label><input type="radio" name="fareMode" value="min" checked> 採用已填的最低價</label>
-      <label><input type="radio" name="fareMode" value="BR"> 長榮</label>
+      <label><input type="radio" name="fareMode" value="BR" checked> 長榮</label>
       <label><input type="radio" name="fareMode" value="CI"> 華航</label>
       <label><input type="radio" name="fareMode" value="other"> 自訂</label>
-      <label><input type="radio" name="fareMode" value="max"> 採用已填的最高價（保守估）</label>
     </div>
     <div class="rate" id="flightBox" style="display:none" aria-live="polite"></div>
     <div class="warn" style="margin-top:12px"><strong>注意：</strong>自動查價取得的是 <strong>Google Flights 顯示的最低價組合，不是航空公司官網價格</strong>。訂票前請到官網核對，並把實際價格填入「其他／自訂票價」。自動查價<strong>每個月只能查 250 次</strong>，每按一次最多會用掉 2 次額度。</div>
@@ -203,10 +222,10 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       <span class="amt" id="subBag">TWD 0</span></div>
 
     <div class="item"><h3>大眾陸運工具</h3>
-      <div class="ctrl"><button class="btn ghost" id="transAdd" type="button" style="width:auto">＋ 新增大眾陸運工具</button></div>
       <span class="amt" id="subTransit">TWD 0</span></div>
     <div class="transrow transhead" aria-hidden="true"><span>交通工具</span><span>用途</span><span>金額</span><span>幣別</span><span>刪除</span></div>
     <div id="transList"></div>
+    <div class="actions"><button class="btn ghost" id="transAdd" type="button">＋ 新增大眾陸運工具</button></div>
 
     <div class="subtotal"><span>交通費小計</span><span id="subTrans">TWD 0</span></div>
   </section>
@@ -219,8 +238,8 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <details id="manualDates">
       <summary>手動修改抵達日期</summary>
       <div class="grid two" style="margin-top:8px">
-        <div><label for="a1">抵達當地日期（當地日期）</label><input type="date" id="a1"></div>
-        <div><label for="a2">返抵台灣日期（台灣日期）</label><input type="date" id="a2"></div>
+        <div><label for="a1">抵達當地日期</label><input type="date" id="a1"></div>
+        <div><label for="a2">返抵台灣日期</label><input type="date" id="a2"></div>
       </div>
     </details>
     <div class="grid two" style="margin-top:12px">
@@ -902,14 +921,8 @@ function calc() {
 }
 
 function fareChosen() {
-  var br = D($("fareBR").value), ci = D($("fareCI").value), ot = D($("fareOther").value);
   var mode = document.querySelector('input[name="fareMode"]:checked').value;
-  var filled = [br, ci, ot].filter(function (x) { return x.v > 0n; });
-  if (mode === "BR") return br;
-  if (mode === "CI") return ci;
-  if (mode === "other") return ot;
-  if (!filled.length) return dint(0);
-  return filled.reduce(function (m, x) { return (mode === "max" ? dnum(x) > dnum(m) : dnum(x) < dnum(m)) ? x : m; });
+  return D($(mode === "BR" ? "fareBR" : mode === "CI" ? "fareCI" : "fareOther").value);
 }
 
 function refresh() { calc(); }
@@ -950,6 +963,10 @@ $("insType").addEventListener("change", function () { insTypeManual = true; calc
 document.querySelectorAll("[data-reset]").forEach(function (b) {
   b.addEventListener("click", function () { manualF[b.getAttribute("data-reset")] = false; calc(); });
 });
+$("fareOther").addEventListener("input", function () {   // 填了自訂票價就自動改選「自訂」
+  if ($("fareOther").value) document.querySelector('input[name="fareMode"][value="other"]').checked = true;
+  calc();
+});
 document.querySelectorAll('input[name="fareMode"]').forEach(function (e) { e.addEventListener("change", calc); });
 
 // ---------- 自動查價 ----------
@@ -969,6 +986,12 @@ $("apiBtn").addEventListener("click", function () {
     if (j.error) throw new Error(typeof j.error === "string" ? j.error : "查詢失敗");
     if (j.BR) $("fareBR").value = Math.round(j.BR);
     if (j.CI) $("fareCI").value = Math.round(j.CI);
+    (function () {                                     // 只查到其中一家時，自動改選那一家
+      var br = D($("fareBR").value), ci = D($("fareCI").value);
+      var sel = document.querySelector('input[name="fareMode"]:checked').value, pickv = null;
+      if (sel === "BR" && br.v === 0n && ci.v > 0n) pickv = "CI"; else if (sel === "CI" && ci.v === 0n && br.v > 0n) pickv = "BR";
+      if (pickv) document.querySelector('input[name="fareMode"][value="' + pickv + '"]').checked = true;
+    })();
     var tm = j.times, extra = "";
     if (tm && tm.outArrive) {
       $("a1").value = tm.outArrive.slice(0, 10);

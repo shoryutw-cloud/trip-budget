@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>因公赴國外出差旅費試算</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,7 +35,6 @@ body { margin: 0; background: var(--bg); color: var(--ink);
   font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif; font-size: 16px; line-height: 1.6; }
 main { max-width: 900px; margin: 0 auto; padding: 20px 16px 120px; }
 h1 { font-size: 1.75rem; margin: 8px 0 4px; letter-spacing: .02em; }
-.sub { color: var(--muted); margin: 0 0 20px; font-size: .95rem; }
 section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
 h2 { font-size: 1.25rem; margin: 0 0 12px; }
 .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
@@ -45,6 +44,7 @@ h2 { font-size: 1.25rem; margin: 0 0 12px; }
 @media (max-width: 640px) { .grid.three, .grid.two { grid-template-columns: minmax(0, 1fr); } }
 label { display: block; font-size: .875rem; color: var(--muted); margin-bottom: 4px; }
 input, select, button { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; width: 100%; }
+input, select, textarea { font-size: 16px; }
 input[type="radio"], input[type="checkbox"] { width: auto; }
 input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
 .num { font-variant-numeric: tabular-nums; text-align: right; }
@@ -102,7 +102,7 @@ section[aria-labelledby="s6"] { scroll-margin-top: calc(env(safe-area-inset-top,
 @media (max-width: 760px) { .item { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name amt" "ctrl ctrl"; row-gap: 6px; } }
 .money.roam select { flex: 2 1 14em; min-width: 0; }
 .money.roam input { flex: 1 1 7em; }
-.sub { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 22em); column-gap: 12px; align-items: center; margin-top: 10px; }
+.sub { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 22em); column-gap: 12px; align-items: center; margin: 14px 0 6px; }
 .sub > label { margin: 0; color: var(--ink); font-size: 1rem; }
 .sub .ctrl { min-width: 0; }
 .sub.indent > label { padding-left: 1.6em; }

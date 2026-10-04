@@ -310,7 +310,6 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
   <section aria-labelledby="s6">
     <h2 id="s6">6. 辦公費</h2>
     <p class="note" id="autoNote"></p>
-    <p class="note">標有「恢復自動」的欄位會自動帶入，也可以直接修改；改過之後按「恢復自動」就會回到自動帶入。每一類都可以按「＋ 新增其他」手動加項目。</p>
 
     <h3>6-1 手續費<span class="amt" id="subFee">TWD 0</span></h3>
     <p class="note">包括護照費、簽證費、黃皮書費、預防針費、結匯手續費及機場服務費。</p>
@@ -337,7 +336,9 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <div class="sub"><label for="aReg">(1) 報名／註冊費</label><div class="ctrl">
       <div class="money"><input id="aReg" type="number" min="0" step="any" class="num" placeholder="金額"><select class="cur" id="aRegCur" data-def="USD" aria-label="報名註冊費幣別"></select></div>
       <div class="note" id="aRegNT" style="margin-top:4px"></div></div></div>
-    <div class="sub"><label for="aDocs">(2) 資料、郵電、翻譯及運費等</label><div class="ctrl"><input id="aDocs" type="number" min="0" step="any" class="num" placeholder="TWD 金額"></div></div>
+    <div class="sub"><label for="aDocs">(2) 資料、郵電、翻譯及運費等</label><div class="ctrl">
+      <div class="money"><input id="aDocs" type="number" min="0" step="any" class="num" placeholder="金額"><select class="cur" id="aDocsCur" data-def="USD" aria-label="資料郵電翻譯運費幣別"></select></div>
+      <div class="note" id="aDocsNT" style="margin-top:4px"></div></div></div>
     <div class="subhead">(3) 網路費</div>
     <div class="sub indent"><label for="oRoam">國際漫遊費（中華電信方案，只列 10GB 以上；依「公務出國資通訊設備管理須知」，應使用漫遊，當地無漫遊時才改用 eSIM）<button type="button" class="linkbtn" data-reset="oRoam" style="display:none">恢復自動</button></label><div class="ctrl">
       <div class="money roam"><select id="roamPlan" aria-label="中華電信漫遊方案"></select><input id="oRoam" type="number" min="0" step="any" class="num" placeholder="TWD 金額"></div></div></div>
@@ -347,7 +348,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
 
     <h3>6-4 禮品交際及雜費<span class="amt" id="subGift">TWD 0</span></h3>
     <p class="note">包括禮品費、交際費、計程車費、租車費等費用。</p>
-    <div class="sub"><label for="oGift">(1) 禮品交際及雜費（預設每日 TWD 1,100 × 出國天數）<button type="button" class="linkbtn" data-reset="oGift" style="display:none">恢復自動</button></label><div class="ctrl"><input id="oGift" type="number" min="0" step="any" class="num" placeholder="TWD 金額"></div></div>
+    <div class="sub"><label for="oGift">(1) 禮品交際及雜費（自動帶入，每日 TWD 1,100 × 出國天數）<button type="button" class="linkbtn" data-reset="oGift" style="display:none">恢復自動</button></label><div class="ctrl"><input id="oGift" type="number" min="0" step="any" class="num" placeholder="TWD 金額"></div></div>
     <div id="oth_gift"></div>
     <div class="actions"><button class="btn ghost" id="othAdd_gift" type="button">＋ 新增其他</button></div>
   
@@ -1020,7 +1021,6 @@ function calc() {
   document.querySelectorAll("[data-reset]").forEach(function (b) { var k = b.getAttribute("data-reset"); b.style.display = (manualF[k] && !(k === "oRoam" && roamR.custom)) ? "" : "none"; });
   var autoMsgs = [];
   if (tripN > 30) autoMsgs.push("出國天數 " + tripN + " 天，超過保費表的 30 天，請手動輸入保險費。");
-  if (!tripN) autoMsgs.push("保險費與禮品交際及雜費會在取得返抵台灣日期（按「自動查價」或手動輸入）後自動帶入；國際漫遊費依你選的方案先以 1 份計入。");
   if (s && roamR.amt === 0 && roamR.note) autoMsgs.push(roamR.note + "；依須知，當地無漫遊時可改用 eSIM，請填在「eSIM 費用」。");
   $("autoNote").textContent = autoMsgs.join(" ");
   $("autoNote").style.display = autoMsgs.length ? "" : "none";
@@ -1040,8 +1040,8 @@ function calc() {
   $("subBoat").textContent = "TWD " + dfmt(boat, 0);
   $("subBag").textContent = "TWD " + dfmt(bag, 0);
   // 三、辦公費
-  var visaM = moneyOf("fVisa", "fVisaCur"), regM = moneyOf("aReg", "aRegCur");
-  setNote("fVisaNT", visaM); setNote("aRegNT", regM);
+  var visaM = moneyOf("fVisa", "fVisaCur"), regM = moneyOf("aReg", "aRegCur"), docsM = moneyOf("aDocs", "aDocsCur");
+  setNote("fVisaNT", visaM); setNote("aRegNT", regM); setNote("aDocsNT", docsM);
   var feeItems = [["護照費", D($("fPass").value)], ["簽證費", visaM.ntd, convText(visaM)], ["黃皮書費", D($("fYellow").value)],
                   ["預防針費", D($("fVacc").value)], ["結匯手續費", D($("fFx").value)], ["機場服務費", D($("fAirport").value)]];
   var feeO = othMoney("fee"), insO = othMoney("ins"), adminO = othMoney("admin"), giftO = othMoney("gift");
@@ -1049,12 +1049,12 @@ function calc() {
   var feeTotal = sum(feeItems);
   var insMain = D($("oIns").value), ins = dadd(insMain, sumNtd(insO));
   var roam = D($("oRoam").value);
-  var adminItems = [["報名／註冊費", regM.ntd, convText(regM)], ["資料、郵電、翻譯及運費等", D($("aDocs").value)],
+  var adminItems = [["報名／註冊費", regM.ntd, convText(regM)], ["資料、郵電、翻譯及運費等", docsM.ntd, convText(docsM)],
                     ["國際漫遊費", roam], ["eSIM 費用", D($("aEsim").value)]];
   adminO.forEach(function (m) { adminItems.push([m.name, m.ntd, convText(m)]); });
   var adminTotal = sum(adminItems);
   var missingCur = {};
-  [boatM, bagM, visaM, regM].concat(transitM, feeO, insO, adminO, giftO).forEach(function (m) { if (m.missing) missingCur[curShort(m.cur)] = true; });
+  [boatM, bagM, visaM, regM, docsM].concat(transitM, feeO, insO, adminO, giftO).forEach(function (m) { if (m.missing) missingCur[curShort(m.cur)] = true; });
   var mc = Object.keys(missingCur);
   $("rateWarn").textContent = mc.length ? "有金額使用「" + mc.join("、") + "」，但這個幣別的匯率沒填，該筆暫以 0 計。" : "";
   $("rateWarn").style.display = mc.length ? "" : "none";
@@ -1144,7 +1144,7 @@ $("dayRows").addEventListener("change", function (e) {
   if (el && el.classList && el.classList.contains("pct")) { manualPct[el.getAttribute("data-d")] = +el.value; calc(); }
 });
 $("resetPct").addEventListener("click", function () { clearManual(); calc(); });
-["fareBR", "fareCI", "fareOther", "override", "oBoat", "oBoatCur", "oBag", "bagCur", "fPass", "fVisa", "fVisaCur", "fYellow", "fVacc", "fFx", "fAirport", "aReg", "aRegCur", "aDocs", "aEsim"].forEach(function (id) {
+["fareBR", "fareCI", "fareOther", "override", "oBoat", "oBoatCur", "oBag", "bagCur", "fPass", "fVisa", "fVisaCur", "fYellow", "fVacc", "fFx", "fAirport", "aReg", "aRegCur", "aDocs", "aDocsCur", "aEsim"].forEach(function (id) {
   $(id).addEventListener("input", calc);
 });
 ["oIns", "oGift", "oRoam"].forEach(function (id) { $(id).addEventListener("input", function () { manualF[id] = true; calc(); }); });

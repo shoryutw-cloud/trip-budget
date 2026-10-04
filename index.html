@@ -76,6 +76,20 @@ h3 .amt { font-variant-numeric: tabular-nums; color: var(--accent); font-weight:
 }
 #sumRows tr.s2 td:first-child { padding-left: 3.2em; }
 #sumRows tr.s2 td { font-size: .92rem; }
+.item { display: grid; grid-template-columns: 11.5em 24em auto; grid-template-areas: "name ctrl amt"; column-gap: 12px; align-items: center; justify-content: start; margin-top: 16px; }
+.item h3 { grid-area: name; margin: 0; display: block; }
+.item .ctrl { grid-area: ctrl; min-width: 0; }
+.item .ctrl.note { margin: 0; }
+.item .amt { grid-area: amt; font-size: .98rem; font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 700; white-space: nowrap; }
+@media (max-width: 760px) { .item { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name amt" "ctrl ctrl"; row-gap: 6px; } }
+.money.roam select { flex: 2 1 14em; min-width: 0; }
+.money.roam input { flex: 1 1 7em; }
+.othrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; align-items: center; }
+.othrow .no { flex: 0 0 auto; font-size: .85rem; color: var(--muted); white-space: nowrap; }
+.othrow .nm { flex: 2 1 12em; min-width: 0; }
+.othrow .am { flex: 1 1 7em; min-width: 0; }
+.othrow select { width: auto; flex: 0 0 auto; }
+.othrow button { width: auto; flex: 0 0 auto; padding: 8px 12px; }
 .note { font-size: .85rem; color: var(--muted); margin: 8px 0 0; }
 .warn { background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 10px 12px; font-size: .88rem; margin-top: 10px; }
 .btn { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); cursor: pointer; font-weight: 500; }
@@ -174,21 +188,23 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <h2 id="s4">4. 交通費</h2>
     <p class="note">含機票、船舶及大眾陸運工具、行李托運費。</p>
 
-    <h3>機票<span class="amt" id="subFare">尚未填入票價</span></h3>
-    <p class="note">依上方「機票查詢」所選的票價。</p>
+    <div class="item"><h3>機票</h3>
+      <div class="ctrl note">依上方「機票查詢」所選的票價。</div>
+      <span class="amt" id="subFare">尚未填入票價</span></div>
 
-    <h3>船舶<span class="amt" id="subBoat">TWD 0</span></h3>
-    <div class="money" style="margin-top:8px"><input id="oBoat" type="number" min="0" step="any" class="num" placeholder="金額" aria-label="船舶金額"><select class="cur" id="oBoatCur" data-def="TWD" aria-label="船舶幣別"></select></div>
-    <div class="note" id="oBoatNT" style="margin-top:4px"></div>
+    <div class="item"><h3>船舶</h3>
+      <div class="ctrl"><div class="money"><input id="oBoat" type="number" min="0" step="any" class="num" placeholder="金額" aria-label="船舶金額"><select class="cur" id="oBoatCur" data-def="TWD" aria-label="船舶幣別"></select></div></div>
+      <span class="amt" id="subBoat">TWD 0</span></div>
 
-    <h3>大眾陸運工具<span class="amt" id="subTransit">TWD 0</span></h3>
+    <div class="item"><h3>行李托運費</h3>
+      <div class="ctrl"><div class="money"><input id="oBag" type="number" min="0" step="any" class="num" placeholder="金額" aria-label="行李托運費金額"><select class="cur" id="bagCur" data-def="USD" aria-label="行李托運費幣別"></select></div></div>
+      <span class="amt" id="subBag">TWD 0</span></div>
+
+    <div class="item"><h3>大眾陸運工具</h3>
+      <div class="ctrl"><button class="btn ghost" id="transAdd" type="button" style="width:auto">＋ 新增大眾陸運工具</button></div>
+      <span class="amt" id="subTransit">TWD 0</span></div>
     <div class="transrow transhead" aria-hidden="true"><span>交通工具</span><span>用途</span><span>金額</span><span>幣別</span><span>刪除</span></div>
     <div id="transList"></div>
-    <div class="actions"><button class="btn ghost" id="transAdd" type="button">＋ 新增大眾陸運工具</button></div>
-
-    <h3>行李托運費<span class="amt" id="subBag">TWD 0</span></h3>
-    <div class="money" style="margin-top:8px"><input id="oBag" type="number" min="0" step="any" class="num" placeholder="金額" aria-label="行李托運費金額"><select class="cur" id="bagCur" data-def="USD" aria-label="行李托運費幣別"></select></div>
-    <div class="note" id="bagNT" style="margin-top:4px"></div>
 
     <div class="subtotal"><span>交通費小計</span><span id="subTrans">TWD 0</span></div>
   </section>
@@ -230,49 +246,58 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
   <section aria-labelledby="s6">
     <h2 id="s6">6. 辦公費</h2>
     <p class="note" id="autoNote"></p>
-    <p class="note">標有「恢復自動」的欄位會自動帶入，也可以直接修改；改過之後按「恢復自動」就會回到自動帶入。</p>
+    <p class="note">標有「恢復自動」的欄位會自動帶入，也可以直接修改；改過之後按「恢復自動」就會回到自動帶入。每一類都可以按「＋ 新增其他」手動加項目。</p>
 
     <h3>6-1 手續費<span class="amt" id="subFee">TWD 0</span></h3>
     <p class="note">包括護照費、簽證費、黃皮書費、預防針費、結匯手續費及機場服務費。</p>
     <div class="grid" style="margin-top:8px">
-      <div><label for="fPass">護照費（僅公務護照可核銷）</label><input id="fPass" type="number" min="0" class="num" placeholder="0"></div>
-      <div><label for="fVisa">簽證費</label>
+      <div><label for="fPass">(1) 護照費（僅公務護照可核銷）</label><input id="fPass" type="number" min="0" class="num" placeholder="0"></div>
+      <div><label for="fVisa">(2) 簽證費</label>
         <div class="money"><input id="fVisa" type="number" min="0" step="any" class="num" placeholder="0"><select class="cur" id="fVisaCur" data-def="USD" aria-label="簽證費幣別"></select></div>
         <div class="note" id="fVisaNT" style="margin-top:4px"></div></div>
-      <div><label for="fYellow">黃皮書費（國際預防接種證明）</label><input id="fYellow" type="number" min="0" class="num" placeholder="0"></div>
-      <div><label for="fVacc">預防針費</label><input id="fVacc" type="number" min="0" class="num" placeholder="0"></div>
-      <div><label for="fFx">結匯手續費</label><input id="fFx" type="number" min="0" class="num" placeholder="0"></div>
-      <div><label for="fAirport">機場服務費</label><input id="fAirport" type="number" min="0" class="num" placeholder="0"></div>
+      <div><label for="fYellow">(3) 黃皮書費（國際預防接種證明）</label><input id="fYellow" type="number" min="0" class="num" placeholder="0"></div>
+      <div><label for="fVacc">(4) 預防針費</label><input id="fVacc" type="number" min="0" class="num" placeholder="0"></div>
+      <div><label for="fFx">(5) 結匯手續費</label><input id="fFx" type="number" min="0" class="num" placeholder="0"></div>
+      <div><label for="fAirport">(6) 機場服務費</label><input id="fAirport" type="number" min="0" class="num" placeholder="0"></div>
     </div>
+    <div id="oth_fee"></div>
+    <div class="actions"><button class="btn ghost" id="othAdd_fee" type="button">＋ 新增其他</button></div>
 
     <h3>6-2 保險費<span class="amt" id="subIns">TWD 0</span></h3>
     <p class="note">依保費表（1–30 天）帶入，申根國家預設選申根險。</p>
     <div class="grid two" style="margin-top:8px">
-      <div><label for="insType">保險種類</label>
-        <select id="insType"><option value="general">一般險</option><option value="schengen">申根險</option></select></div>
-      <div><label for="oIns">保險費<button type="button" class="linkbtn" data-reset="oIns" style="display:none">恢復自動</button></label>
-        <input id="oIns" type="number" min="0" class="num"></div>
+      <div><label for="oIns">(1) 保險費（種類與金額，自動帶入，可手動修改）<button type="button" class="linkbtn" data-reset="oIns" style="display:none">恢復自動</button></label>
+        <div class="money"><select id="insType" aria-label="保險種類"><option value="general">一般險</option><option value="schengen">申根險</option></select><input id="oIns" type="number" min="0" step="any" class="num" placeholder="金額"></div></div>
     </div>
+    <div id="oth_ins"></div>
+    <div class="actions"><button class="btn ghost" id="othAdd_ins" type="button">＋ 新增其他</button></div>
 
     <h3>6-3 行政費<span class="amt" id="subAdmin">TWD 0</span></h3>
     <p class="note">包括在國外執行公務所必要之資料、報名、註冊、郵電、翻譯及運費等費用。</p>
     <div class="grid two" style="margin-top:8px">
-      <div><label for="aReg">報名／註冊費</label>
+      <div><label for="aReg">(1) 報名／註冊費</label>
         <div class="money"><input id="aReg" type="number" min="0" step="any" class="num" placeholder="0"><select class="cur" id="aRegCur" data-def="USD" aria-label="報名註冊費幣別"></select></div>
         <div class="note" id="aRegNT" style="margin-top:4px"></div></div>
-      <div><label for="aDocs">資料、郵電、翻譯及運費等</label><input id="aDocs" type="number" min="0" class="num" placeholder="0"></div>
-      <div><label for="roamPlan">漫遊方案（中華電信，只列 10GB 以上）</label><select id="roamPlan"></select></div>
-      <div><label for="oRoam">國際漫遊費（依「公務出國資通訊設備管理須知」，應使用漫遊，當地無漫遊時才改用 eSIM）<button type="button" class="linkbtn" data-reset="oRoam" style="display:none">恢復自動</button></label>
-        <input id="oRoam" type="number" min="0" class="num"></div>
-      <div><label for="aEsim">eSIM 費用（當地無漫遊時才使用）</label><input id="aEsim" type="number" min="0" class="num" placeholder="0"></div>
+      <div><label for="aDocs">(2) 資料、郵電、翻譯及運費等</label><input id="aDocs" type="number" min="0" class="num" placeholder="0"></div>
+      <div style="grid-column:1/-1"><label>(3) 網路費</label>
+        <div class="grid two" style="margin-top:4px">
+          <div><label for="oRoam" style="color:inherit">國際漫遊費（中華電信方案，只列 10GB 以上；依「公務出國資通訊設備管理須知」，應使用漫遊，當地無漫遊時才改用 eSIM）<button type="button" class="linkbtn" data-reset="oRoam" style="display:none">恢復自動</button></label>
+            <div class="money roam"><select id="roamPlan" aria-label="中華電信漫遊方案"></select><input id="oRoam" type="number" min="0" step="any" class="num" placeholder="金額"></div></div>
+          <div><label for="aEsim" style="color:inherit">eSIM 費用（當地無漫遊時才使用）</label><input id="aEsim" type="number" min="0" class="num" placeholder="0"></div>
+        </div></div>
     </div>
+    <div id="oth_admin"></div>
+    <div class="actions"><button class="btn ghost" id="othAdd_admin" type="button">＋ 新增其他</button></div>
 
     <h3>6-4 禮品交際及雜費<span class="amt" id="subGift">TWD 0</span></h3>
-    <p class="note">包括禮品費、交際費、計程車費、租車費等費用，預設為每日 TWD 1,100 × 出國天數。</p>
+    <p class="note">包括禮品費、交際費、計程車費、租車費等費用。</p>
     <div class="grid two" style="margin-top:8px">
-      <div><label for="oGift">禮品交際及雜費<button type="button" class="linkbtn" data-reset="oGift" style="display:none">恢復自動</button></label>
+      <div><label for="oGift">(1) 禮品交際及雜費（預設每日 TWD 1,100 × 出國天數）<button type="button" class="linkbtn" data-reset="oGift" style="display:none">恢復自動</button></label>
         <input id="oGift" type="number" min="0" class="num"></div>
     </div>
+    <div id="oth_gift"></div>
+    <div class="actions"><button class="btn ghost" id="othAdd_gift" type="button">＋ 新增其他</button></div>
+
     <div class="subtotal"><span>辦公費小計</span><span id="subOffice">TWD 0</span></div>
   </section>
 
@@ -536,7 +561,7 @@ function convText(m) {
   if (m.cur === "TWD" || m.amt.v === 0n) return "";
   return curShort(m.cur) + " " + dfmt(m.amt, 0) + " × 匯率 " + dfmt(m.rt, 0);
 }
-function setNote(id, m) { $(id).textContent = (m.cur !== "TWD" && m.amt.v !== 0n) ? "約 TWD " + dfmt(m.ntd, 0) : ""; }
+function setNote(id, m) { if (!$(id)) return; $(id).textContent = (m.cur !== "TWD" && m.amt.v !== 0n) ? "約 TWD " + dfmt(m.ntd, 0) : ""; }
 function initRates() {
   Object.keys(RATE_DEF).forEach(function (id) {
     var v = store.get("rt_" + id);
@@ -587,6 +612,40 @@ function renderTrans() {
 
     row.appendChild(kc); row.appendChild(us); row.appendChild(am); row.appendChild(cu); row.appendChild(rm); box.appendChild(row);
   });
+}
+
+// ---------- 辦公費各類的「其他」（可手動新增、編號接在固定項目後面） ----------
+var OTH = {
+  fee:   { pre: "6-1", off: 6, rows: [{ name: "", amt: "", cur: "TWD" }] },
+  ins:   { pre: "6-2", off: 1, rows: [{ name: "", amt: "", cur: "TWD" }] },
+  admin: { pre: "6-3", off: 3, rows: [{ name: "", amt: "", cur: "TWD" }] },
+  gift:  { pre: "6-4", off: 1, rows: [{ name: "", amt: "", cur: "TWD" }] }
+};
+function renderOth(g) {
+  var G = OTH[g], box = $("oth_" + g); box.innerHTML = "";
+  G.rows.forEach(function (r, i) {
+    var row = document.createElement("div"); row.className = "othrow";
+    var no = document.createElement("span"); no.className = "no"; no.textContent = "(" + (G.off + 1 + i) + ") 其他";
+    var nm = document.createElement("input"); nm.className = "nm"; nm.placeholder = "項目名稱（人工輸入）"; nm.value = r.name; nm.setAttribute("aria-label", G.pre + " 其他項目名稱");
+    nm.addEventListener("input", function () { r.name = nm.value; calc(); });
+    var am = document.createElement("input"); am.type = "number"; am.min = "0"; am.step = "any"; am.className = "am num"; am.placeholder = "金額"; am.value = r.amt; am.setAttribute("aria-label", "金額");
+    am.addEventListener("input", function () { r.amt = am.value; calc(); });
+    var cu = document.createElement("select"); cu.className = "cur"; cu.setAttribute("data-def", r.cur); cu.setAttribute("aria-label", "幣別"); fillCur(cu); cu.value = r.cur;
+    ["input", "change"].forEach(function (ev) { cu.addEventListener(ev, function () { r.cur = cu.value; calc(); }); });
+    var rm = document.createElement("button"); rm.type = "button"; rm.className = "btn ghost"; rm.textContent = "刪除"; rm.setAttribute("aria-label", "刪除這一項");
+    rm.addEventListener("click", function () { G.rows.splice(i, 1); renderOth(g); calc(); });
+    row.appendChild(no); row.appendChild(nm); row.appendChild(am); row.appendChild(cu); row.appendChild(rm); box.appendChild(row);
+  });
+}
+function othMoney(g) {
+  return OTH[g].rows.map(function (r) {
+    var m = moneyFrom(D(r.amt), r.cur), n = (r.name || "").trim();
+    m.name = n ? "其他（" + n + "）" : "其他"; return m;
+  });
+}
+function sumNtd(arr) { return arr.reduce(function (a, m) { return dadd(a, m.ntd); }, dint(0)); }
+function othText(arr) {
+  return arr.filter(function (m) { return m.ntd.v !== 0n; }).map(function (m) { var c = convText(m); return m.name + " " + dfmt(m.ntd, 0) + (c ? "（" + c + "）" : ""); }).join("、");
 }
 
 var lastSummary = "";
@@ -753,19 +812,22 @@ function calc() {
   setNote("fVisaNT", visaM); setNote("aRegNT", regM);
   var feeItems = [["護照費", D($("fPass").value)], ["簽證費", visaM.ntd, convText(visaM)], ["黃皮書費", D($("fYellow").value)],
                   ["預防針費", D($("fVacc").value)], ["結匯手續費", D($("fFx").value)], ["機場服務費", D($("fAirport").value)]];
+  var feeO = othMoney("fee"), insO = othMoney("ins"), adminO = othMoney("admin"), giftO = othMoney("gift");
+  feeO.forEach(function (m) { feeItems.push([m.name, m.ntd, convText(m)]); });
   var feeTotal = sum(feeItems);
-  var ins = D($("oIns").value);
+  var insMain = D($("oIns").value), ins = dadd(insMain, sumNtd(insO));
   var roam = D($("oRoam").value);
   var adminItems = [["報名／註冊費", regM.ntd, convText(regM)], ["資料、郵電、翻譯及運費等", D($("aDocs").value)],
                     ["國際漫遊費", roam], ["eSIM 費用", D($("aEsim").value)]];
+  adminO.forEach(function (m) { adminItems.push([m.name, m.ntd, convText(m)]); });
   var adminTotal = sum(adminItems);
   var missingCur = {};
-  [boatM, bagM, visaM, regM].concat(transitM).forEach(function (m) { if (m.missing) missingCur[curShort(m.cur)] = true; });
+  [boatM, bagM, visaM, regM].concat(transitM, feeO, insO, adminO, giftO).forEach(function (m) { if (m.missing) missingCur[curShort(m.cur)] = true; });
   var mc = Object.keys(missingCur);
   $("rateWarn").textContent = mc.length ? "有金額使用「" + mc.join("、") + "」，但這個幣別的匯率沒填，該筆暫以 0 計。" : "";
   $("rateWarn").style.display = mc.length ? "" : "none";
   $("subTransit").textContent = "TWD " + dfmt(transit, 0);
-  var gift = D($("oGift").value);
+  var giftMain = D($("oGift").value), gift = dadd(giftMain, sumNtd(giftO));
   var officeTotal = dadd(dadd(dadd(feeTotal, ins), adminTotal), gift);
   var grand = dadd(dadd(transTotal, living), officeTotal);
 
@@ -790,13 +852,16 @@ function calc() {
   row("s", "日支", living, usdOne.v > 0n && rate.v > 0n ? "USD " + dfmt(usdOne, 2) + " × 匯率 " + dfmt(rate, 0) : "請確認日支數額與匯率");
   row("g", "三、辦公費", officeTotal);
   row("s", "手續費", feeTotal, listNonZero(feeItems));
-  row("s", "保險費", ins, manualF.oIns ? "手動輸入" : (insAuto ? insName + "　" + tripN + " 日" : (tripN > 30 ? "超過 30 天，請手動輸入" : "")));
+  var insMainNote = manualF.oIns ? "手動輸入" : (insAuto ? insName + "　" + tripN + " 日" : (tripN > 30 ? "超過 30 天，請手動輸入" : ""));
+  row("s", "保險費", ins, [insMainNote, othText(insO)].filter(Boolean).join("；"));
   var esim = adminItems[3][1], adminParts = [];
   [adminItems[0], adminItems[1]].forEach(function (x) { if (x[1].v !== 0n) adminParts.push(x[0] + " " + dfmt(x[1], 0) + (x[2] ? "（" + x[2] + "）" : "")); });
   if (roam.v !== 0n) adminParts.push("國際漫遊費 " + dfmt(roam, 0) + (manualF.oRoam ? "（手動輸入）" : (roamR.note ? "（" + roamR.note + "）" : "")));
   if (esim.v !== 0n) adminParts.push("eSIM 費用 " + dfmt(esim, 0));
+  var adminOt = othText(adminO); if (adminOt) adminParts.push(adminOt);
   row("s", "行政費", adminTotal, adminParts.join("、"));
-  row("s", "禮品交際及雜費", gift, manualF.oGift ? "手動輸入" : (tripN ? "TWD " + fmt(GIFT_PER_DAY) + " × " + tripN + " 日" : ""));
+  var giftMainNote = manualF.oGift ? "手動輸入" : (tripN ? "TWD " + fmt(GIFT_PER_DAY) + " × " + tripN + " 日" : "");
+  row("s", "禮品交際及雜費", gift, [giftMainNote, othText(giftO)].filter(Boolean).join("；"));
   out += "<tr class='g'><td><strong>合計</strong></td><td class='r'><strong>TWD " + dfmt(grand, 0) + "</strong></td></tr>";
   $("sumRows").innerHTML = out;
   $("grand").textContent = "TWD " + dfmt(grand, 0);
@@ -922,6 +987,13 @@ $("printBtn").addEventListener("click", function () { window.print(); });
 document.querySelectorAll("select.cur").forEach(fillCur);
 initRates(); refreshCurLabels();
 renderTrans();
+Object.keys(OTH).forEach(function (g) {
+  renderOth(g);
+  $("othAdd_" + g).addEventListener("click", function () {
+    OTH[g].rows.push({ name: "", amt: "", cur: "TWD" }); renderOth(g);
+    var ins = document.querySelectorAll("#oth_" + g + " .nm"); ins[ins.length - 1].focus(); calc();
+  });
+});
 $("transAdd").addEventListener("click", function () {
   var next = TRANS_KINDS.filter(function (k) { return !transRows.some(function (r) { return r.kind === k; }); })[0] || "__other";
   transRows.push({ kind: next, other: "", use: "", amt: "", cur: "TWD" }); renderTrans();

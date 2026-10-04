@@ -53,8 +53,8 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 .linkbtn { background: none; border: 0; color: var(--accent); padding: 0 0 0 8px; width: auto; font-size: .8rem; cursor: pointer; text-decoration: underline; }
 ul.notes { font-size: .85rem; color: var(--muted); margin: 8px 0 0; padding-left: 1.3em; }
 ul.notes li { margin: 2px 0; }
-h3 { font-size: .98rem; margin: 20px 0 4px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-h3 .amt { font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 700; white-space: nowrap; }
+h3 { font-size: .98rem; margin: 20px 0 4px; display: grid; grid-template-columns: 11.5em auto; justify-content: start; column-gap: 12px; align-items: baseline; }
+h3 .amt { font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 700; white-space: nowrap; text-align: left; }
 .subtotal { display: flex; justify-content: space-between; align-items: baseline; margin-top: 16px; padding-top: 10px; border-top: 2px solid var(--line); font-weight: 700; }
 .subtotal span:last-child { font-variant-numeric: tabular-nums; }
 .readonly { background: var(--bg); border: 1px dashed var(--line); border-radius: 8px; padding: 9px 10px; min-height: 42px; text-align: right; font-variant-numeric: tabular-nums; }
@@ -138,9 +138,9 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <div class="row"><button class="btn" id="apiBtn" type="button">自動查價</button></div>
     <p class="note" id="apiMsg" role="status"></p>
     <div class="grid" style="margin-top:12px">
-      <div><label for="fareBR">長榮 BR 每人票價（NT$）</label><input id="fareBR" type="number" min="0" class="num" placeholder="查到後填入"></div>
-      <div><label for="fareCI">華航 CI 每人票價（NT$）</label><input id="fareCI" type="number" min="0" class="num" placeholder="查到後填入"></div>
-      <div><label for="fareOther">其他／自訂票價（NT$）</label><input id="fareOther" type="number" min="0" class="num"></div>
+      <div><label for="fareBR">長榮 BR 每人票價（TWD）</label><input id="fareBR" type="number" min="0" class="num" placeholder="查到後填入"></div>
+      <div><label for="fareCI">華航 CI 每人票價（TWD）</label><input id="fareCI" type="number" min="0" class="num" placeholder="查到後填入"></div>
+      <div><label for="fareOther">其他／自訂票價（TWD）</label><input id="fareOther" type="number" min="0" class="num"></div>
     </div>
     <div class="choices" role="radiogroup" aria-label="預算採用的票價">
       <label><input type="radio" name="fareMode" value="min" checked> 採用已填的最低價</label>
@@ -157,14 +157,14 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <h2 id="s3">3. 匯率</h2>
     <p class="note">每 1 單位外幣兌換多少新台幣。交通費與辦公費的各項費用可選幣別，頁面會自動換算成新台幣；日支生活費依規定一律用美元。手動調整後的匯率會自動記憶。</p>
     <div class="grid" style="margin-top:12px">
-      <div><label for="rate">美元 US$（日支用）</label><input id="rate" type="number" min="0" step="any" class="num"></div>
-      <div><label for="rEUR">歐元 EUR</label><input id="rEUR" type="number" min="0" step="any" class="num"></div>
-      <div><label for="rJPY">日圓 JPY</label><input id="rJPY" type="number" min="0" step="any" class="num"></div>
-      <div><label for="rKRW">韓元 KRW</label><input id="rKRW" type="number" min="0" step="any" class="num"></div>
+      <div><label for="rate">USD 美元（日支用）</label><input id="rate" type="number" min="0" step="any" class="num"></div>
+      <div><label for="rEUR">EUR 歐元</label><input id="rEUR" type="number" min="0" step="any" class="num"></div>
+      <div><label for="rJPY">JPY 日圓</label><input id="rJPY" type="number" min="0" step="any" class="num"></div>
+      <div><label for="rKRW">KRW 韓元</label><input id="rKRW" type="number" min="0" step="any" class="num"></div>
     </div>
     <div class="grid two" style="margin-top:12px">
-      <div><label for="cName">自訂幣別名稱</label><input id="cName" placeholder="例如：英鎊" autocomplete="off"></div>
-      <div><label for="rCust">自訂幣別匯率</label><input id="rCust" type="number" min="0" step="any" class="num"></div>
+      <div><label for="cName">自訂幣別代碼（國際標準縮寫）</label><input id="cName" placeholder="例如：GBP" autocomplete="off" maxlength="6" style="text-transform:uppercase"></div>
+      <div><label for="rCust">自訂幣別匯率（1 單位兌 TWD）</label><input id="rCust" type="number" min="0" step="any" class="num"></div>
     </div>
     <div class="warn" id="rateWarn" style="display:none"></div>
     <div class="actions"><button class="btn ghost" id="rateReset" type="button">恢復預設匯率</button></div>
@@ -177,21 +177,20 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <h3>機票<span class="amt" id="subFare">尚未填入票價</span></h3>
     <p class="note">依上方「機票查詢」所選的票價。</p>
 
-    <h3>船舶<span class="amt" id="subBoat">NT$ 0</span></h3>
+    <h3>船舶<span class="amt" id="subBoat">TWD 0</span></h3>
     <div class="money" style="margin-top:8px"><input id="oBoat" type="number" min="0" step="any" class="num" placeholder="金額" aria-label="船舶金額"><select class="cur" id="oBoatCur" data-def="TWD" aria-label="船舶幣別"></select></div>
     <div class="note" id="oBoatNT" style="margin-top:4px"></div>
 
-    <h3>大眾陸運工具<span class="amt" id="subTransit">NT$ 0</span></h3>
-    <p class="note">可以新增多個項目：交通工具從選單挑（沒有符合的選「其他」再自己輸入），用途、金額自己填，再選幣別。預設的捷運 NT$320 是台北車站往返桃園機場的捷運費用。</p>
+    <h3>大眾陸運工具<span class="amt" id="subTransit">TWD 0</span></h3>
     <div class="transrow transhead" aria-hidden="true"><span>交通工具</span><span>用途</span><span>金額</span><span>幣別</span><span>刪除</span></div>
     <div id="transList"></div>
     <div class="actions"><button class="btn ghost" id="transAdd" type="button">＋ 新增大眾陸運工具</button></div>
 
-    <h3>行李托運費<span class="amt" id="subBag">NT$ 0</span></h3>
+    <h3>行李托運費<span class="amt" id="subBag">TWD 0</span></h3>
     <div class="money" style="margin-top:8px"><input id="oBag" type="number" min="0" step="any" class="num" placeholder="金額" aria-label="行李托運費金額"><select class="cur" id="bagCur" data-def="USD" aria-label="行李托運費幣別"></select></div>
     <div class="note" id="bagNT" style="margin-top:4px"></div>
 
-    <div class="subtotal"><span>交通費小計</span><span id="subTrans">NT$ 0</span></div>
+    <div class="subtotal"><span>交通費小計</span><span id="subTrans">TWD 0</span></div>
   </section>
 
   <section aria-labelledby="s5">
@@ -207,11 +206,11 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       </div>
     </details>
     <div class="grid two" style="margin-top:12px">
-      <div id="overrideBox" style="display:none"><label for="override">此地區不在日支數額表內，請輸入日支數額（US$／日）</label><input id="override" type="number" min="0" step="0.01" class="num"></div>
+      <div id="overrideBox" style="display:none"><label for="override">此地區不在日支數額表內，請輸入日支數額（USD／日）</label><input id="override" type="number" min="0" step="0.01" class="num"></div>
     </div>
     <div class="scroll" style="margin-top:12px">
       <table class="perdiem">
-        <thead><tr><th>日期</th><th>狀態</th><th>日支比例</th><th class="r">US$</th><th class="r">NT$</th></tr></thead>
+        <thead><tr><th>日期</th><th>狀態</th><th>日支比例</th><th class="r">USD</th><th class="r">TWD</th></tr></thead>
         <tbody id="dayRows"></tbody>
         <tbody id="pdRows"></tbody>
       </table>
@@ -225,7 +224,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       <li>供膳宿等其他扣減情形，請依要點核對。</li>
       <li>香港、澳門及大陸地區另有日支表，選這些地區時請自行輸入日支數額。</li>
     </ul>
-    <div class="subtotal"><span>生活費小計</span><span id="subLiving">NT$ 0</span></div>
+    <div class="subtotal"><span>生活費小計</span><span id="subLiving">TWD 0</span></div>
   </section>
 
   <section aria-labelledby="s6">
@@ -233,7 +232,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <p class="note" id="autoNote"></p>
     <p class="note">標有「恢復自動」的欄位會自動帶入，也可以直接修改；改過之後按「恢復自動」就會回到自動帶入。</p>
 
-    <h3>6-1 手續費<span class="amt" id="subFee">NT$ 0</span></h3>
+    <h3>6-1 手續費<span class="amt" id="subFee">TWD 0</span></h3>
     <p class="note">包括護照費、簽證費、黃皮書費、預防針費、結匯手續費及機場服務費。</p>
     <div class="grid" style="margin-top:8px">
       <div><label for="fPass">護照費（僅公務護照可核銷）</label><input id="fPass" type="number" min="0" class="num" placeholder="0"></div>
@@ -246,7 +245,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       <div><label for="fAirport">機場服務費</label><input id="fAirport" type="number" min="0" class="num" placeholder="0"></div>
     </div>
 
-    <h3>6-2 保險費<span class="amt" id="subIns">NT$ 0</span></h3>
+    <h3>6-2 保險費<span class="amt" id="subIns">TWD 0</span></h3>
     <p class="note">依保費表（1–30 天）帶入，申根國家預設選申根險。</p>
     <div class="grid two" style="margin-top:8px">
       <div><label for="insType">保險種類</label>
@@ -255,7 +254,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
         <input id="oIns" type="number" min="0" class="num"></div>
     </div>
 
-    <h3>6-3 行政費<span class="amt" id="subAdmin">NT$ 0</span></h3>
+    <h3>6-3 行政費<span class="amt" id="subAdmin">TWD 0</span></h3>
     <p class="note">包括在國外執行公務所必要之資料、報名、註冊、郵電、翻譯及運費等費用。</p>
     <div class="grid two" style="margin-top:8px">
       <div><label for="aReg">報名／註冊費</label>
@@ -268,13 +267,13 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       <div><label for="aEsim">eSIM 費用（當地無漫遊時才使用）</label><input id="aEsim" type="number" min="0" class="num" placeholder="0"></div>
     </div>
 
-    <h3>6-4 禮品交際及雜費<span class="amt" id="subGift">NT$ 0</span></h3>
-    <p class="note">包括禮品費、交際費、計程車費、租車費等費用，預設為每日 NT$1,100 × 出國天數。</p>
+    <h3>6-4 禮品交際及雜費<span class="amt" id="subGift">TWD 0</span></h3>
+    <p class="note">包括禮品費、交際費、計程車費、租車費等費用，預設為每日 TWD 1,100 × 出國天數。</p>
     <div class="grid two" style="margin-top:8px">
       <div><label for="oGift">禮品交際及雜費<button type="button" class="linkbtn" data-reset="oGift" style="display:none">恢復自動</button></label>
         <input id="oGift" type="number" min="0" class="num"></div>
     </div>
-    <div class="subtotal"><span>辦公費小計</span><span id="subOffice">NT$ 0</span></div>
+    <div class="subtotal"><span>辦公費小計</span><span id="subOffice">TWD 0</span></div>
   </section>
 
   <section aria-labelledby="s7">
@@ -287,7 +286,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <p class="note" id="copyMsg" role="status"></p>
   </section>
 
-  <div class="total" aria-live="polite"><span>預算合計</span><strong id="grand">NT$ 0</strong></div>
+  <div class="total" aria-live="polite"><span>預算合計</span><strong id="grand">TWD 0</strong></div>
 </main>
 
 <script>
@@ -336,7 +335,7 @@ function refreshRoamPlans(s) {
     var o = document.createElement("option"); o.value = ""; o.textContent = s ? "此國不在全球通涵蓋名單，請手動輸入" : "請先選擇目的地"; sel.appendChild(o); return;
   }
   list.forEach(function (p) {
-    var o = document.createElement("option"); o.value = p.key; o.textContent = p.name + "　NT$" + p.price + "／" + p.days + " 天"; sel.appendChild(o);
+    var o = document.createElement("option"); o.value = p.key; o.textContent = p.name + "　TWD " + p.price + "／" + p.days + " 天"; sel.appendChild(o);
   });
   sel.value = list[0].key;
 }
@@ -345,7 +344,7 @@ function roamAutoCalc(s, tripN, key) {
   var p = ROAM_PLANS.filter(function (x) { return x.key === key; })[0];
   if (!p || roamApplicable(s).indexOf(p) === -1) return { amt: 0, note: "此國不在全球通方案涵蓋名單，請依中華電信公告手動輸入" };
   var n = tripN ? Math.ceil(tripN / p.days) : 1;       // 天數還不確定時，先以 1 份計
-  return { amt: p.price * n, note: p.name + " NT$" + p.price + " × " + n + " 份（每份 " + p.days + " 天）" + (tripN ? "" : "，天數確定前先以 1 份計") };
+  return { amt: p.price * n, note: p.name + " TWD " + p.price + " × " + n + " 份（每份 " + p.days + " 天）" + (tripN ? "" : "，天數確定前先以 1 份計") };
 }
 var CODE_LABEL = { TPE: "桃園", TSA: "松山", KHH: "高雄", RMQ: "台中" };
 var manualF = { oIns: false, oGift: false, oRoam: false }, insTypeManual = false;
@@ -494,26 +493,26 @@ function renderRateInfo(s) {
   if (e.manual) {
     h = name + "：此地區不在本日支數額表內，請在下方輸入該地區適用的日支數額。";
   } else if (e.rate != null) {
-    h = name + "：<strong>US$ " + e.rate + "</strong>／人／日";
+    h = name + "：<strong>USD " + e.rate + "</strong>／人／日";
   } else {
     h = name + "：數額依日期分季節<ul style='margin:6px 0 0;padding-left:20px'>";
     e.seasons.forEach(function (x) {
-      h += "<li>" + x[0].map(function (r) { return mmdd(r[0], r[1]) + "–" + mmdd(r[2], r[3]); }).join("、") + "：US$ " + x[1] + "</li>";
+      h += "<li>" + x[0].map(function (r) { return mmdd(r[0], r[1]) + "–" + mmdd(r[2], r[3]); }).join("、") + "：USD " + x[1] + "</li>";
     });
     var other = s.country.entries.filter(function (z) { return z.zh === "其他"; })[0];
-    h += "</ul>" + (other && !seasonsCoverYear(e) ? "<div class='note'>表中未列載的期間，依附註按該國「其他」US$ " + other.rate + " 支給。</div>" : "");
+    h += "</ul>" + (other && !seasonsCoverYear(e) ? "<div class='note'>表中未列載的期間，依附註按該國「其他」USD " + other.rate + " 支給。</div>" : "");
   }
   $("rateInfo").innerHTML = h;
 }
 
 // ---------- 幣別與匯率 ----------
-var CURS = [["USD", "美元 US$", "rate"], ["EUR", "歐元 EUR", "rEUR"], ["JPY", "日圓 JPY", "rJPY"], ["KRW", "韓元 KRW", "rKRW"], ["CUS", "自訂幣別", "rCust"], ["TWD", "新台幣 NT$", null]];
+var CURS = [["USD", "USD 美元", "rate"], ["EUR", "EUR 歐元", "rEUR"], ["JPY", "JPY 日圓", "rJPY"], ["KRW", "KRW 韓元", "rKRW"], ["CUS", "自訂幣別", "rCust"], ["TWD", "TWD 新台幣", null]];
 var RATE_DEF = { rate: "32.5", rEUR: "36", rJPY: "0.25", rKRW: "0.025", rCust: "" };
 function curLabel(c) {
   if (c === "CUS") return ($("cName").value || "").trim() || "自訂幣別";
   return CURS.filter(function (x) { return x[0] === c; })[0][1];
 }
-function curShort(c) { return c === "USD" ? "US$" : c === "TWD" ? "NT$" : c === "CUS" ? curLabel("CUS") : { EUR: "歐元", JPY: "日圓", KRW: "韓元" }[c]; }
+function curShort(c) { return c === "CUS" ? curLabel("CUS") : c; }      // 一律用國際標準的幣別代碼（ISO 4217）
 function curRate(c) { var x = CURS.filter(function (y) { return y[0] === c; })[0]; return x[2] ? D($(x[2]).value) : dint(1); }
 function fillCur(sel) {
   var keep = sel.value || sel.getAttribute("data-def") || "USD";
@@ -535,9 +534,9 @@ function moneyFrom(amt, cur) {
 function moneyOf(idAmt, idCur) { return moneyFrom(D($(idAmt).value), $(idCur).value); }
 function convText(m) {
   if (m.cur === "TWD" || m.amt.v === 0n) return "";
-  return (m.cur === "USD" ? "US$ " + dfmt(m.amt, 0) : dfmt(m.amt, 0) + " " + curShort(m.cur)) + " × 匯率 " + dfmt(m.rt, 0);
+  return curShort(m.cur) + " " + dfmt(m.amt, 0) + " × 匯率 " + dfmt(m.rt, 0);
 }
-function setNote(id, m) { $(id).textContent = (m.cur !== "TWD" && m.amt.v !== 0n) ? "約 NT$ " + dfmt(m.ntd, 0) : ""; }
+function setNote(id, m) { $(id).textContent = (m.cur !== "TWD" && m.amt.v !== 0n) ? "約 TWD " + dfmt(m.ntd, 0) : ""; }
 function initRates() {
   Object.keys(RATE_DEF).forEach(function (id) {
     var v = store.get("rt_" + id);
@@ -545,7 +544,7 @@ function initRates() {
     $(id).addEventListener("input", function () { store.set("rt_" + id, $(id).value); calc(); });   // 手動調整後自動記憶
   });
   var n = store.get("rt_cName"); $("cName").value = n !== null ? n : "";
-  $("cName").addEventListener("input", function () { store.set("rt_cName", $("cName").value); refreshCurLabels(); calc(); });
+  $("cName").addEventListener("input", function () { $("cName").value = $("cName").value.toUpperCase(); store.set("rt_cName", $("cName").value); refreshCurLabels(); calc(); });
   $("rateReset").addEventListener("click", function () {
     Object.keys(RATE_DEF).forEach(function (id) { store.del("rt_" + id); $(id).value = RATE_DEF[id]; });
     store.del("rt_cName"); $("cName").value = ""; refreshCurLabels(); calc();
@@ -746,9 +745,9 @@ function calc() {
   var transItems = [["機票", fare], ["船舶", boat], ["大眾陸運工具", transit], ["行李托運費", bag]];
   var transTotal = sum(transItems);
   setNote("oBoatNT", boatM); setNote("bagNT", bagM);
-  $("subFare").textContent = fare.v > 0n ? "NT$ " + dfmt(fare, 0) : "尚未填入票價";
-  $("subBoat").textContent = "NT$ " + dfmt(boat, 0);
-  $("subBag").textContent = "NT$ " + dfmt(bag, 0);
+  $("subFare").textContent = fare.v > 0n ? "TWD " + dfmt(fare, 0) : "尚未填入票價";
+  $("subBoat").textContent = "TWD " + dfmt(boat, 0);
+  $("subBag").textContent = "TWD " + dfmt(bag, 0);
   // 三、辦公費
   var visaM = moneyOf("fVisa", "fVisaCur"), regM = moneyOf("aReg", "aRegCur");
   setNote("fVisaNT", visaM); setNote("aRegNT", regM);
@@ -765,12 +764,12 @@ function calc() {
   var mc = Object.keys(missingCur);
   $("rateWarn").textContent = mc.length ? "有金額使用「" + mc.join("、") + "」，但這個幣別的匯率沒填，該筆暫以 0 計。" : "";
   $("rateWarn").style.display = mc.length ? "" : "none";
-  $("subTransit").textContent = "NT$ " + dfmt(transit, 0);
+  $("subTransit").textContent = "TWD " + dfmt(transit, 0);
   var gift = D($("oGift").value);
   var officeTotal = dadd(dadd(dadd(feeTotal, ins), adminTotal), gift);
   var grand = dadd(dadd(transTotal, living), officeTotal);
 
-  function T(v) { return "NT$ " + dfmt(v, 0); }
+  function T(v) { return "TWD " + dfmt(v, 0); }
   $("subTrans").textContent = T(transTotal);
   $("subLiving").textContent = T(living);
   $("subFee").textContent = T(feeTotal);
@@ -788,7 +787,7 @@ function calc() {
   transitM.forEach(function (m) { if (m.ntd.v !== 0n || m.amt.v !== 0n) row("s2", esc(m.name), m.ntd, convText(m)); });
   row("s", "行李托運費", bag, convText(bagM));
   row("g", "二、生活費（日支費）", living);
-  row("s", "日支", living, usdOne.v > 0n && rate.v > 0n ? "US$ " + dfmt(usdOne, 2) + " × 匯率 " + dfmt(rate, 0) : "請確認日支數額與匯率");
+  row("s", "日支", living, usdOne.v > 0n && rate.v > 0n ? "USD " + dfmt(usdOne, 2) + " × 匯率 " + dfmt(rate, 0) : "請確認日支數額與匯率");
   row("g", "三、辦公費", officeTotal);
   row("s", "手續費", feeTotal, listNonZero(feeItems));
   row("s", "保險費", ins, manualF.oIns ? "手動輸入" : (insAuto ? insName + "　" + tripN + " 日" : (tripN > 30 ? "超過 30 天，請手動輸入" : "")));
@@ -797,19 +796,19 @@ function calc() {
   if (roam.v !== 0n) adminParts.push("國際漫遊費 " + dfmt(roam, 0) + (manualF.oRoam ? "（手動輸入）" : (roamR.note ? "（" + roamR.note + "）" : "")));
   if (esim.v !== 0n) adminParts.push("eSIM 費用 " + dfmt(esim, 0));
   row("s", "行政費", adminTotal, adminParts.join("、"));
-  row("s", "禮品交際及雜費", gift, manualF.oGift ? "手動輸入" : (tripN ? "NT$ " + fmt(GIFT_PER_DAY) + " × " + tripN + " 日" : ""));
-  out += "<tr class='g'><td><strong>合計</strong></td><td class='r'><strong>NT$ " + dfmt(grand, 0) + "</strong></td></tr>";
+  row("s", "禮品交際及雜費", gift, manualF.oGift ? "手動輸入" : (tripN ? "TWD " + fmt(GIFT_PER_DAY) + " × " + tripN + " 日" : ""));
+  out += "<tr class='g'><td><strong>合計</strong></td><td class='r'><strong>TWD " + dfmt(grand, 0) + "</strong></td></tr>";
   $("sumRows").innerHTML = out;
-  $("grand").textContent = "NT$ " + dfmt(grand, 0);
+  $("grand").textContent = "TWD " + dfmt(grand, 0);
 
   lastSummary = [
     "出國經費試算",
     "目的地：" + (s ? s.country.zh + (s.entry.zh !== s.country.zh ? "・" + s.entry.zh : "") : "（尚未選擇）"),
     "期間：" + (tripKnown ? startIso + " ～ " + endIso + "（" + tripN + " 天）" : "尚未確定（需先取得返抵台灣日期）"),
-    "一、交通費：NT$ " + dfmt(transTotal, 0) + "（機票 " + dfmt(fare, 0) + "、船舶 " + dfmt(boat, 0) + "、大眾陸運工具 " + dfmt(transit, 0) + "、行李托運費 " + dfmt(bag, 0) + "）",
-    "二、生活費（日支費）：NT$ " + dfmt(living, 0) + "（每人 US$ " + dfmt(usdOne, 2) + "，相當於 " + dfmt({ v: equivUnits, sc: 4 }, 0) + " 個整日）",
-    "三、辦公費：NT$ " + dfmt(officeTotal, 0) + "（手續費 " + dfmt(feeTotal, 0) + "、保險費 " + dfmt(ins, 0) + "、行政費 " + dfmt(adminTotal, 0) + "、禮品交際及雜費 " + dfmt(gift, 0) + "）",
-    "合計：NT$ " + dfmt(grand, 0),
+    "一、交通費：TWD " + dfmt(transTotal, 0) + "（機票 " + dfmt(fare, 0) + "、船舶 " + dfmt(boat, 0) + "、大眾陸運工具 " + dfmt(transit, 0) + "、行李托運費 " + dfmt(bag, 0) + "）",
+    "二、生活費（日支費）：TWD " + dfmt(living, 0) + "（每人 USD " + dfmt(usdOne, 2) + "，相當於 " + dfmt({ v: equivUnits, sc: 4 }, 0) + " 個整日）",
+    "三、辦公費：TWD " + dfmt(officeTotal, 0) + "（手續費 " + dfmt(feeTotal, 0) + "、保險費 " + dfmt(ins, 0) + "、行政費 " + dfmt(adminTotal, 0) + "、禮品交際及雜費 " + dfmt(gift, 0) + "）",
+    "合計：TWD " + dfmt(grand, 0),
     "（概估，正式報支以規定為準）"
   ].join("\n");
 }
@@ -912,6 +911,14 @@ $("copyBtn").addEventListener("click", function () {
 });
 $("printBtn").addEventListener("click", function () { window.print(); });
 
+["d1", "d2", "a1", "a2"].forEach(function (id) {
+  var el = $(id); el.style.cursor = "pointer";
+  el.addEventListener("click", function (e) {
+    var r = el.getBoundingClientRect();
+    if (e.clientX > r.right - 44) return;                 // 點到日曆小圖示時，瀏覽器本來就會開，不重複處理
+    try { if (el.showPicker) el.showPicker(); } catch (err) {}
+  });
+});
 document.querySelectorAll("select.cur").forEach(fillCur);
 initRates(); refreshCurLabels();
 renderTrans();

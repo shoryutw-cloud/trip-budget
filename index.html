@@ -164,7 +164,7 @@ table.perdiem #pdRows tr:first-child td { border-top: 2px solid var(--line); }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .actions button { width: auto; }
 details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margin-top: 10px; }
-@media print { .stk, .totop, .links, .actions, details, .total { display: none; } body { background: #fff; color: #000; } section { break-inside: avoid; } }
+@media print { #clearAll, .stk, .totop, .links, .actions, details, .total { display: none; } body { background: #fff; color: #000; } section { break-inside: avoid; } }
 </style>
 </head>
 <body>
@@ -251,11 +251,13 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       <span class="amt" id="subFare">尚未填入票價</span></div>
 
     <div class="item"><h3>船舶</h3>
-      <div class="ctrl"><div class="money"><input id="oBoat" type="number" min="0" step="any" class="num" placeholder="金額" aria-label="船舶金額"><select class="cur" id="oBoatCur" data-def="TWD" aria-label="船舶幣別"></select></div></div>
+      <div class="ctrl"><div class="money"><input id="oBoat" type="number" min="0" step="any" class="num" placeholder="金額" aria-label="船舶金額"><select class="cur" id="oBoatCur" data-def="TWD" aria-label="船舶幣別"></select></div>
+        <div class="note" id="oBoatNT" style="margin-top:4px"></div></div>
       <span class="amt" id="subBoat">TWD 0</span></div>
 
     <div class="item"><h3>行李托運費</h3>
-      <div class="ctrl"><div class="money"><input id="oBag" type="number" min="0" step="any" class="num" placeholder="金額" aria-label="行李托運費金額"><select class="cur" id="bagCur" data-def="USD" aria-label="行李托運費幣別"></select></div></div>
+      <div class="ctrl"><div class="money"><input id="oBag" type="number" min="0" step="any" class="num" placeholder="金額" aria-label="行李托運費金額"><select class="cur" id="bagCur" data-def="USD" aria-label="行李托運費幣別"></select></div>
+        <div class="note" id="bagNT" style="margin-top:4px"></div></div>
       <span class="amt" id="subBag">TWD 0</span></div>
 
     <div class="item"><h3>大眾陸運工具</h3>
@@ -361,7 +363,9 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <div class="actions">
       <button class="btn" id="copyBtn" type="button">複製摘要</button>
       <button class="btn ghost" id="printBtn" type="button">列印／存成 PDF</button>
+      <button class="btn ghost" id="clearAll" type="button">清除已記憶的資料，重新開始</button>
     </div>
+    <p class="note">填過的行程與費用會自動記憶在這個瀏覽器裡，下次打開還在；換手機、換瀏覽器或清除瀏覽資料就會消失。匯率另外記憶，要回到預設值請按「恢復預設匯率」。</p>
     <p class="note" id="copyMsg" role="status"></p>
   </section>
 
@@ -637,7 +641,8 @@ function convText(m) {
   if (m.cur === "TWD" || m.amt.v === 0n) return "";
   return curShort(m.cur) + " " + dfmt(m.amt, 0) + " × 匯率 " + dfmt(m.rt, 0);
 }
-function setNote(id, m) { if (!$(id)) return; $(id).textContent = (m.cur !== "TWD" && m.amt.v !== 0n) ? "約 TWD " + dfmt(m.ntd, 0) : ""; }
+function noteText(m) { return (m.cur !== "TWD" && m.amt.v !== 0n) ? "約 TWD " + dfmt(m.ntd, 0) : ""; }
+function setNote(id, m) { if (!$(id)) return; $(id).textContent = noteText(m); }
 function saveCustoms() { store.set("rt_customs", JSON.stringify(customs)); }
 function renderCust() {
   var box = $("custList"); box.innerHTML = "";
@@ -710,7 +715,8 @@ function renderTrans() {
     var rm = document.createElement("button"); rm.type = "button"; rm.className = "btn ghost"; rm.textContent = "刪除"; rm.setAttribute("aria-label", "刪除這一項");
     rm.addEventListener("click", function () { transRows.splice(i, 1); renderTrans(); calc(); });
 
-    row.appendChild(kc); row.appendChild(us); row.appendChild(am); row.appendChild(cu); row.appendChild(rm); box.appendChild(row);
+    var nt = document.createElement("div"); nt.className = "note rownote"; nt.style.cssText = "grid-column:1 / -1;margin:0";
+    row.appendChild(kc); row.appendChild(us); row.appendChild(am); row.appendChild(cu); row.appendChild(rm); row.appendChild(nt); box.appendChild(row);
   });
 }
 
@@ -734,7 +740,8 @@ function renderOth(g) {
     ["input", "change"].forEach(function (ev) { cu.addEventListener(ev, function () { r.cur = cu.value; calc(); }); });
     var rm = document.createElement("button"); rm.type = "button"; rm.className = "btn ghost"; rm.textContent = "刪除"; rm.setAttribute("aria-label", "刪除這一項");
     rm.addEventListener("click", function () { G.rows.splice(i, 1); renderOth(g); calc(); });
-    row.appendChild(no); row.appendChild(nm); row.appendChild(am); row.appendChild(cu); row.appendChild(rm); box.appendChild(row);
+    var nt = document.createElement("div"); nt.className = "note rownote"; nt.style.cssText = "flex:0 0 100%;margin:0";
+    row.appendChild(no); row.appendChild(nm); row.appendChild(am); row.appendChild(cu); row.appendChild(rm); row.appendChild(nt); box.appendChild(row);
   });
 }
 function othMoney(g) {
@@ -865,7 +872,9 @@ function dayDiff(a, b) { return Math.round((parseISO(b) - parseISO(a)) / 8640000
 function clearManual() { manualPct = {}; }
 function fmtT(s) { var iso = s.slice(0, 10); return iso.slice(5, 7) + "/" + iso.slice(8, 10) + "（" + wdOf(iso) + "）" + s.slice(11, 16); }
 function apLabel(c) { return c + (CODE_LABEL[c] ? " " + CODE_LABEL[c] : ""); }
+var lastItin = null;
 function renderItin(it) {
+  lastItin = it || null;
   var box = $("flightBox");
   if (!it) { box.style.display = "none"; box.innerHTML = ""; return; }
   var groups = it.groups || [{ title: "去程", flights: it.out }, { title: "回程", flights: it.ret }];
@@ -1033,6 +1042,8 @@ function calc() {
   var boat = boatM.ntd, bag = bagM.ntd;                                         // 外幣依匯率換算，不四捨五入
   var transitM = transRows.map(function (r) { var m = moneyFrom(D(r.amt), r.cur); m.name = transName(r); return m; });
   var transit = transitM.reduce(function (acc, m) { return dadd(acc, m.ntd); }, dint(0));
+  var tnotes = document.querySelectorAll("#transList .rownote");
+  transitM.forEach(function (m, i) { if (tnotes[i]) tnotes[i].textContent = noteText(m); });
   var transItems = [["機票", fare], ["船舶", boat], ["大眾陸運工具", transit], ["行李托運費", bag]];
   var transTotal = sum(transItems);
   setNote("oBoatNT", boatM); setNote("bagNT", bagM);
@@ -1045,6 +1056,10 @@ function calc() {
   var feeItems = [["護照費", D($("fPass").value)], ["簽證費", visaM.ntd, convText(visaM)], ["黃皮書費", D($("fYellow").value)],
                   ["預防針費", D($("fVacc").value)], ["結匯手續費", D($("fFx").value)], ["機場服務費", D($("fAirport").value)]];
   var feeO = othMoney("fee"), insO = othMoney("ins"), adminO = othMoney("admin"), giftO = othMoney("gift");
+  [["fee", feeO], ["ins", insO], ["admin", adminO], ["gift", giftO]].forEach(function (x) {
+    var ns = document.querySelectorAll("#oth_" + x[0] + " .rownote");
+    x[1].forEach(function (m, i) { if (ns[i]) ns[i].textContent = noteText(m); });
+  });
   feeO.forEach(function (m) { feeItems.push([m.name, m.ntd, convText(m)]); });
   var feeTotal = sum(feeItems);
   var insMain = D($("oIns").value), ins = dadd(insMain, sumNtd(insO));
@@ -1110,6 +1125,7 @@ function calc() {
     "合計：TWD " + dfmt(grand, 0),
     "（概估，正式報支以規定為準）"
   ].join("\n");
+  scheduleSave();
 }
 
 function fareChosen() {
@@ -1277,6 +1293,115 @@ $("transAdd").addEventListener("click", function () {
   transRows.push({ kind: next, other: "", use: "", amt: "", cur: "TWD" }); renderTrans();
   var ins = document.querySelectorAll("#transList .t-use"); ins[ins.length - 1].focus(); calc();
 });
+// ---------- 自動記憶：行程、票價、各項費用 ----------
+var STATE_KEY = "trip_state_v1", stateReady = false, saveTimer = null;
+var STATE_IDS = ["from", "d1", "d2", "a1", "a2", "fareBR", "fareCI", "fareOther", "override", "oBoat", "oBoatCur", "oBag", "bagCur",
+  "fPass", "fVisa", "fVisaCur", "fYellow", "fVacc", "fFx", "fAirport", "insType", "oIns", "aReg", "aRegCur", "aDocs", "aDocsCur", "aEsim", "oRoam", "oGift"];
+function selNames(rv, cv, tv) {
+  var o = { rc: "", cz: "", ez: "", ei: 0 };
+  if (rv === "" || rv == null) return o;
+  var R = DATA[rv]; if (!R) return o; o.rc = R.code;
+  if (cv === "" || cv == null) return o;
+  var C = R.countries[cv]; if (!C) return o; o.cz = C.zh;
+  if (tv === "" || tv == null) return o;
+  var E = C.entries[tv]; if (!E) return o; o.ez = E.zh; o.ei = E.id || 0;
+  return o;
+}
+function selIdx(o) {
+  var out = { r: "", c: "", t: "" };
+  if (!o || !o.rc) return out;
+  var ri = -1, ci = -1, ti = -1, k;
+  for (k = 0; k < DATA.length; k++) if (DATA[k].code === o.rc) { ri = k; break; }
+  if (ri < 0) return out; out.r = String(ri);
+  if (!o.cz) return out;
+  var cs = DATA[ri].countries;
+  for (k = 0; k < cs.length; k++) if (cs[k].zh === o.cz) { ci = k; break; }
+  if (ci < 0) return out; out.c = String(ci);
+  if (!o.ez) return out;
+  var es = cs[ci].entries;
+  for (k = 0; k < es.length; k++) if (o.ei ? es[k].id === o.ei : es[k].zh === o.ez) { ti = k; break; }
+  if (ti < 0) return out; out.t = String(ti);
+  return out;
+}
+function snapState() {
+  var vals = {}; STATE_IDS.forEach(function (id) { vals[id] = $(id).value; });
+  var mode = document.querySelector('input[name="fareMode"]:checked');
+  return {
+    v: 1, main: selNames(regionSel.value, countrySel.value, citySel.value),
+    to: $("toSel").value, toOther: $("toOther").value, d2Manual: d2Manual,
+    multi: $("multi").checked,
+    stops: multiStops.map(function (st) { var n = selNames(st.r, st.c, st.t); n.ap = st.ap; n.apOther = st.apOther; n.date = st.date; n.arr = st.arr; return n; }),
+    vals: vals, fareMode: mode ? mode.value : "BR", roamPlan: $("roamPlan").value,
+    manualF: manualF, insTypeManual: insTypeManual, manualPct: manualPct,
+    autoFilled: autoFilled, autoInfo: autoInfo, itin: lastItin,
+    trans: transRows, oth: { fee: OTH.fee.rows, ins: OTH.ins.rows, admin: OTH.admin.rows, gift: OTH.gift.rows }
+  };
+}
+function saveState() { if (!stateReady) return; try { store.set(STATE_KEY, JSON.stringify(snapState())); } catch (e) {} }
+function scheduleSave() { if (!stateReady) return; clearTimeout(saveTimer); saveTimer = setTimeout(saveState, 250); }
+function hasOption(sel, v) { for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === v) return true; return false; }
+function restoreState() {
+  var raw = store.get(STATE_KEY), s;
+  if (!raw) return null;
+  try { s = JSON.parse(raw); } catch (e) { return null; }
+  if (!s || s.v !== 1) return null;
+  var cl = curList(), okCur = function (c) { return cl.indexOf(c) > -1 ? c : "TWD"; };
+
+  var ix = selIdx(s.main);                                   // 第 1 站
+  if (ix.r !== "") {
+    regionSel.value = ix.r; fillCountries();
+    if (ix.c !== "") { countrySel.value = ix.c; fillCities(); if (ix.t !== "") { citySel.value = ix.t; fillAirports(); } }
+  }
+  if (s.to !== undefined && hasOption($("toSel"), s.to)) { $("toSel").value = s.to; }
+  $("toOther").value = s.toOther || ""; $("toOther").style.display = $("toSel").value === "__other" ? "" : "none";
+
+  multiStops = (s.stops || []).map(function (st) { var i = selIdx(st); return { r: i.r, c: i.c, t: i.t, ap: st.ap || "", apOther: st.apOther || "", date: st.date || "", arr: st.arr || "" }; });
+  $("multi").checked = !!s.multi && multiStops.length > 0;
+  $("multiBox").style.display = $("multi").checked ? "" : "none";
+  $("d2Label").textContent = $("multi").checked ? "回程日期（最後一站當地起飛）" : "回程日期（當地起飛）";
+  renderStops();
+
+  var vals = s.vals || {};
+  STATE_IDS.forEach(function (id) {
+    if (vals[id] === undefined) return;
+    var el = $(id);
+    if (el.tagName === "SELECT" && !hasOption(el, vals[id])) return;
+    el.value = vals[id];
+  });
+  if ($("d1").value) $("d2").min = $("d1").value;
+  d2Manual = !!s.d2Manual;
+  var fm = document.querySelector('input[name="fareMode"][value="' + s.fareMode + '"]'); if (fm) fm.checked = true;
+
+  transRows = (s.trans || []).map(function (r) { r.cur = okCur(r.cur); return r; });
+  renderTrans();
+  ["fee", "ins", "admin", "gift"].forEach(function (g) {
+    OTH[g].rows = ((s.oth || {})[g] || []).map(function (r) { r.cur = okCur(r.cur); return r; });
+    renderOth(g);
+  });
+  manualPct = s.manualPct || {};
+  autoFilled = !!s.autoFilled; autoInfo = s.autoInfo || "";
+  if (s.itin) renderItin(s.itin);
+  insTypeManual = !!s.insTypeManual;
+  return s;
+}
+function finishRestore(s) {                                  // 在第一次計算之後才能還原：漫遊方案與「手動輸入」的標記
+  if (!s) return;
+  var mf = s.manualF || {};
+  if (s.roamPlan && hasOption($("roamPlan"), s.roamPlan)) $("roamPlan").value = s.roamPlan;
+  manualF.oIns = !!mf.oIns; manualF.oGift = !!mf.oGift; manualF.oRoam = !!mf.oRoam;
+  var vals = s.vals || {};
+  if (insTypeManual && vals.insType) $("insType").value = vals.insType;
+  if (manualF.oIns && vals.oIns !== undefined) $("oIns").value = vals.oIns;
+  if (manualF.oGift && vals.oGift !== undefined) $("oGift").value = vals.oGift;
+  if ((manualF.oRoam || s.roamPlan === "custom") && vals.oRoam !== undefined) $("oRoam").value = vals.oRoam;
+}
+window.addEventListener("pagehide", saveState);
+document.addEventListener("visibilitychange", function () { if (document.hidden) saveState(); });
+$("clearAll").addEventListener("click", function () {
+  if (!window.confirm("確定要清除已記憶的行程與費用資料，重新開始嗎？（匯率不受影響）")) return;
+  stateReady = false; clearTimeout(saveTimer); store.del(STATE_KEY); location.reload();
+});
+
 var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 var SCROLL_BEHAVIOR = reduceMotion ? "auto" : "smooth";
 [["stk1", "s4", "交通費"], ["stk2", "s5", "生活費"], ["stk3", "s6", "辦公費"]].forEach(function (x) {
@@ -1302,6 +1427,10 @@ function syncToTop() { toTop.classList.toggle("show", (window.pageYOffset || doc
 window.addEventListener("scroll", syncToTop, { passive: true });
 toTop.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: SCROLL_BEHAVIOR }); });
 syncToTop();
+var savedState = restoreState();
+calc();
+finishRestore(savedState);
+stateReady = true;
 calc();
 syncStk();
 </script>

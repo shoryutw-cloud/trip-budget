@@ -11,7 +11,6 @@
 :root {
   box-sizing: border-box;
   padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
   --stkh: 36px;
   --bg: #f3f5f7; --panel: #ffffff; --ink: #17233b; --muted: #5d6b82; --line: #d5dbe4;
   --accent: #0b6e8a; --accent-ink: #ffffff; --total-bg: #17233b; --total-ink: #ffffff;
@@ -33,7 +32,7 @@ html { scroll-padding-top: env(safe-area-inset-top, 0px); }
 *, *::before, *::after { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ink);
   font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif; font-size: 16px; line-height: 1.6; }
-main { max-width: 900px; margin: 0 auto; padding: 20px 16px 120px; }
+main { max-width: 900px; margin: 0 auto; padding: 20px 16px 0; }
 h1 { font-size: 1.75rem; margin: 8px 0 4px; letter-spacing: .02em; }
 section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
 h2 { font-size: 1.25rem; margin: 0 0 12px; }

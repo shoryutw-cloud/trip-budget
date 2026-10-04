@@ -290,6 +290,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
         <div><label for="a2">返抵台灣日期</label><input type="date" id="a2"></div>
       </div>
       <div id="extraArr" class="grid two" style="margin-top:8px"></div>
+      <p class="note" id="arrNote">抵達當地日期最多可以比出發日期早 1 天（時差造成）；返抵台灣日期不能早於回程日期。</p>
     </details>
     <div class="grid two" style="margin-top:12px">
       <div id="overrideBox" style="display:none"><label for="override">此地區不在日支數額表內，請輸入日支數額（USD／日）</label><input id="override" type="number" min="0" step="0.01" class="num"></div>
@@ -859,8 +860,12 @@ function renderExtraArr() {
   var box = $("extraArr"); box.innerHTML = "";
   multiStops.forEach(function (st, i) {
     var d = document.createElement("div"), l = document.createElement("label"), inp = document.createElement("input");
-    l.textContent = "第 " + (i + 2) + " 站抵達日期"; inp.type = "date"; inp.value = st.arr; attachPicker(inp);
-    inp.addEventListener("input", function () { st.arr = inp.value; autoFilled = false; autoInfo = ""; clearManual(); calc(); });
+    l.textContent = "第 " + (i + 2) + " 站抵達日期"; inp.type = "date"; inp.value = st.arr; inp.min = isoAdd(st.date, -1); attachPicker(inp);
+    inp.addEventListener("input", function () {
+      var mn = isoAdd(st.date, -1);
+      if (clampTo(inp, mn)) $("arrNote").textContent = "第 " + (i + 2) + " 站的抵達日期最多只能比前往日期早 1 天，已改成 " + mn + "。"; else $("arrNote").textContent = ARR_HINT;
+      st.arr = inp.value; autoFilled = false; autoInfo = ""; clearManual(); calc();
+    });
     d.appendChild(l); d.appendChild(inp); box.appendChild(d);
   });
 }
@@ -935,6 +940,7 @@ function clearAuto() {
 
 function calc() {
   var places = placesList(), n = places.length, multi = n > 1, s = places[0];
+  $("a1").min = isoAdd($("d1").value, -1); $("a2").min = $("d2").value || "";
   var rate = D($("rate").value), override = D($("override").value);
   var needManual = places.some(function (p) { return p && p.entry.manual; });   // 只有日支表沒有的地區（港澳、大陸）才需要自己輸入數額
   $("overrideBox").style.display = needManual ? "" : "none";
@@ -1038,6 +1044,12 @@ function calc() {
   if (usedFallback) warns.push("行程中有日期不在該城市的季節表內，已依附註改用該國「其他」數額。");
   if (s && noData && !hasOverride) warns.push("此行程缺少日支數額，請在下方輸入。");
   if (orderBad) warns.push("抵達當地日期晚於離開日期，請檢查各站日期。");
+  if (validRange) {
+    var early = [];
+    if (arrs[0] < d1) early.push("抵達當地日期（" + arrs[0] + "）比出發日期（" + d1 + "）早 " + dayDiff(arrs[0], d1) + " 天");
+    multiStops.forEach(function (st, i) { var ar = arrs[i + 1]; if (ar && st.date && ar < st.date) early.push("第 " + (i + 2) + " 站的抵達日期（" + ar + "）比前往日期（" + st.date + "）早 " + dayDiff(ar, st.date) + " 天"); });
+    if (early.length) warns.push(early.join("；") + "（時差造成）。日支費會從較早的那一天開始列，出國天數、保險費、禮品交際及雜費也會跟著多算。這種情況請向主計確認日支費的填寫方式。");
+  }
   if (multi && places.some(function (p) { return !p; })) warns.push("有幾站尚未選擇地區、國家與城市。");
   if (est.length && days.length) warns.push("尚未取得航班時間，日支為暫估（長程航班通常會跨日，實際會比表中多幾天的 30%）。請先按上方「自動查價」，或在「手動修改抵達日期」填入。");
   if (s && rate.v === 0n) warns.push("尚未填入匯率，日支新台幣金額暫以 0 計。");
@@ -1168,7 +1180,7 @@ function fareChosen() {
 
 function refresh() { calc(); }
 
-function onTripChange() { clearAuto(); clearManual(); insTypeManual = false; refresh(); }
+function onTripChange() { clearAuto(); clearManual(); insTypeManual = false; clampManualArrivals(); refresh(); }
 regionSel.addEventListener("change", function () { fillCountries(); onTripChange(); });
 countrySel.addEventListener("change", function () { fillCities(); onTripChange(); });
 citySel.addEventListener("change", function () { fillAirports(); onTripChange(); });
@@ -1189,7 +1201,35 @@ $("d1").addEventListener("input", function () {
   onTripChange();
 });
 $("d2").addEventListener("input", function () { d2Manual = true; onTripChange(); });
-["a1", "a2"].forEach(function (id) { $(id).addEventListener("input", function () { autoFilled = false; autoInfo = ""; clearManual(); calc(); }); });
+var ARR_HINT = "抵達當地日期最多可以比出發日期早 1 天（時差造成）；返抵台灣日期不能早於回程日期。";
+function isoAdd(iso, n) { return iso ? isoOf(addDays(parseISO(iso), n)) : ""; }
+function clampTo(inp, minVal) { if (inp.value && minVal && inp.value < minVal) { inp.value = minVal; return true; } return false; }
+function fillManualDefaults() {                     // 手動修改區打開時，還是空的抵達日期先帶入各自的出發日期
+  if (!$("manualDates").open) return false;
+  var changed = false;
+  if (!$("a1").value && $("d1").value) { $("a1").value = $("d1").value; changed = true; }
+  if (!$("a2").value && $("d2").value) { $("a2").value = $("d2").value; changed = true; }
+  multiStops.forEach(function (st) { if (!st.arr && st.date) { st.arr = st.date; changed = true; } });
+  return changed;
+}
+function clampManualArrivals() {                    // 出發／回程日期改了以後，手動填的抵達日期不能比它早
+  if (autoFilled) return;
+  clampTo($("a1"), isoAdd($("d1").value, -1)); clampTo($("a2"), $("d2").value);
+  multiStops.forEach(function (st) { var mn = isoAdd(st.date, -1); if (st.arr && mn && st.arr < mn) st.arr = mn; });
+  fillManualDefaults();
+  if (multiStops.length) renderExtraArr();
+}
+[["a1", "d1", "最多只能比出發日期早 1 天", -1], ["a2", "d2", "不能早於回程日期", 0]].forEach(function (x) {
+  $(x[0]).addEventListener("input", function () {
+    var mn = isoAdd($(x[1]).value, x[3]), fixed = clampTo($(x[0]), mn);
+    $("arrNote").textContent = fixed ? x[2] + "，已改成 " + mn + "。" : ARR_HINT;
+    autoFilled = false; autoInfo = ""; clearManual(); calc();
+  });
+});
+// 打開「手動修改抵達日期」時：還沒有日期的欄位，先帶入出發日期／回程日期
+$("manualDates").addEventListener("toggle", function () {
+  if (fillManualDefaults()) { renderExtraArr(); autoFilled = false; autoInfo = ""; clearManual(); calc(); }
+});
 $("dayRows").addEventListener("change", function (e) {
   var el = e.target;
   if (el && el.classList && el.classList.contains("pct")) { manualPct[el.getAttribute("data-d")] = +el.value; calc(); }

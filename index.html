@@ -53,6 +53,13 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 .linkbtn { background: none; border: 0; color: var(--accent); padding: 0 0 0 8px; width: auto; font-size: .8rem; cursor: pointer; text-decoration: underline; }
 ul.notes { font-size: .85rem; color: var(--muted); margin: 8px 0 0; padding-left: 1.3em; }
 ul.notes li { margin: 2px 0; }
+h3 { font-size: .98rem; margin: 20px 0 4px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+h3 .amt { font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 700; white-space: nowrap; }
+.subtotal { display: flex; justify-content: space-between; align-items: baseline; margin-top: 16px; padding-top: 10px; border-top: 2px solid var(--line); font-weight: 700; }
+.subtotal span:last-child { font-variant-numeric: tabular-nums; }
+.readonly { background: var(--bg); border: 1px dashed var(--line); border-radius: 8px; padding: 9px 10px; min-height: 42px; text-align: right; font-variant-numeric: tabular-nums; }
+#sumRows tr.g td { font-weight: 700; background: var(--bg); }
+#sumRows tr.s td:first-child { padding-left: 1.6em; }
 .note { font-size: .85rem; color: var(--muted); margin: 8px 0 0; }
 .warn { background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 10px 12px; font-size: .88rem; margin-top: 10px; }
 .btn { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); cursor: pointer; font-weight: 500; }
@@ -127,11 +134,22 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       <label><input type="radio" name="fareMode" value="max"> 採用已填的最高價（保守估）</label>
     </div>
     <div class="rate" id="flightBox" style="display:none" aria-live="polite"></div>
-    <p class="note">自動查價取得的是 Google Flights 顯示的最低價組合，不是航空公司官網價格。訂票前請到官網核對，並把實際價格填入「其他／自訂票價」。</p>
+    <div class="warn" style="margin-top:12px"><strong>注意：</strong>自動查價取得的是 <strong>Google Flights 顯示的最低價組合，不是航空公司官網價格</strong>。訂票前請到官網核對，並把實際價格填入「其他／自訂票價」。</div>
   </section>
 
   <section aria-labelledby="s3">
-    <h2 id="s3">3. 日支生活費</h2>
+    <h2 id="s3">3. 交通費</h2>
+    <p class="note">含機票、船舶及大眾陸運工具、行李托運費。</p>
+    <div class="grid" style="margin-top:12px">
+      <div><label>機票（依上方「機票查詢」所選的票價）</label><div class="readonly" id="fareShow">尚未填入票價</div></div>
+      <div><label for="oBoat">船舶及大眾陸運工具（NT$）</label><input id="oBoat" type="number" min="0" class="num" placeholder="0"></div>
+      <div><label for="oBag">行李托運費（NT$）</label><input id="oBag" type="number" min="0" class="num" placeholder="0"></div>
+    </div>
+    <div class="subtotal"><span>交通費小計</span><span id="subTrans">NT$ 0</span></div>
+  </section>
+
+  <section aria-labelledby="s4">
+    <h2 id="s4">4. 生活費（日支費）</h2>
     <div class="rate" id="rateInfo" aria-live="polite"></div>
     <p class="note"><strong>計算方式：</strong>看每天有沒有在當地留宿。留宿當地的日子按該地區日支數額 100%；在飛機上、沒有留宿的日子（出發日到抵達前，以及離開當地到返抵台灣）按 30%。日期都以所在地的當地日期為準，每一天的比例都可以手動調整。</p>
     <p class="note" id="flightNote"></p>
@@ -145,10 +163,6 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <div class="grid two" style="margin-top:12px">
       <div><label for="rate">美元兌台幣匯率</label><input id="rate" type="number" min="0" step="0.001" class="num" placeholder="依規定匯率填入"></div>
       <div id="overrideBox" style="display:none"><label for="override">此地區不在日支數額表內，請輸入日支數額（US$／日）</label><input id="override" type="number" min="0" step="0.01" class="num"></div>
-    </div>
-    <div class="choices">
-      
-      
     </div>
     <div class="scroll" style="margin-top:12px">
       <table class="perdiem">
@@ -164,38 +178,56 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       <li>供膳宿、跨區出差等其他扣減情形，請依要點核對。</li>
       <li>香港、澳門及大陸地區另有日支表，選這些地區時請自行輸入日支數額。</li>
     </ul>
+    <div class="subtotal"><span>生活費小計</span><span id="subLiving">NT$ 0</span></div>
   </section>
 
-  <section aria-labelledby="s4">
-    <h2 id="s4">4. 其他費用（NT$）</h2>
-    <div class="grid">
-      <div><label for="oVisa">簽證／證件費</label><input id="oVisa" type="number" min="0" class="num" value="0"></div>
+  <section aria-labelledby="s5">
+    <h2 id="s5">5. 辦公費</h2>
+    <p class="note" id="autoNote"></p>
+    <p class="note">標有「恢復自動」的欄位會自動帶入，也可以直接修改；改過之後按「恢復自動」就會回到自動帶入。</p>
+
+    <h3>5-1 手續費<span class="amt" id="subFee">NT$ 0</span></h3>
+    <p class="note">包括護照費、簽證費、黃皮書費、預防針費、結匯手續費及機場服務費。</p>
+    <div class="grid" style="margin-top:8px">
+      <div><label for="fPass">護照費</label><input id="fPass" type="number" min="0" class="num" placeholder="0"></div>
+      <div><label for="fVisa">簽證費</label><input id="fVisa" type="number" min="0" class="num" placeholder="0"></div>
+      <div><label for="fYellow">黃皮書費</label><input id="fYellow" type="number" min="0" class="num" placeholder="0"></div>
+      <div><label for="fVacc">預防針費</label><input id="fVacc" type="number" min="0" class="num" placeholder="0"></div>
+      <div><label for="fFx">結匯手續費</label><input id="fFx" type="number" min="0" class="num" placeholder="0"></div>
+      <div><label for="fAirport">機場服務費</label><input id="fAirport" type="number" min="0" class="num" placeholder="0"></div>
+    </div>
+
+    <h3>5-2 保險費<span class="amt" id="subIns">NT$ 0</span></h3>
+    <p class="note">依保費表（1–30 天）帶入，申根國家預設選申根險。</p>
+    <div class="grid two" style="margin-top:8px">
       <div><label for="insType">保險種類</label>
         <select id="insType"><option value="general">一般險</option><option value="schengen">申根險</option></select></div>
       <div><label for="oIns">保險費<button type="button" class="linkbtn" data-reset="oIns" style="display:none">恢復自動</button></label>
         <input id="oIns" type="number" min="0" class="num"></div>
-      <div><label for="roamPlan">漫遊方案（中華電信）</label>
-        <select id="roamPlan"></select></div>
+    </div>
+
+    <h3>5-3 行政費<span class="amt" id="subAdmin">NT$ 0</span></h3>
+    <p class="note">包括在國外執行公務所必要之資料、報名、註冊、郵電、翻譯及運費等費用，上網費也編列在這裡。依「公務出國資通訊設備管理須知」，應使用漫遊，當地無漫遊時才改用 eSIM。</p>
+    <div class="grid two" style="margin-top:8px">
+      <div><label for="aReg">報名／註冊費</label><input id="aReg" type="number" min="0" class="num" placeholder="0"></div>
+      <div><label for="aDocs">資料、郵電、翻譯及運費等</label><input id="aDocs" type="number" min="0" class="num" placeholder="0"></div>
+      <div><label for="roamPlan">漫遊方案（中華電信，只列 10GB 以上）</label><select id="roamPlan"></select></div>
       <div><label for="oRoam">國際漫遊費<button type="button" class="linkbtn" data-reset="oRoam" style="display:none">恢復自動</button></label>
         <input id="oRoam" type="number" min="0" class="num"></div>
-      <div><label for="oTrans">當地交通（機場往返、市區）</label><input id="oTrans" type="number" min="0" class="num" value="0"></div>
+      <div><label for="aEsim">eSIM 費用（當地無漫遊時才使用）</label><input id="aEsim" type="number" min="0" class="num" placeholder="0"></div>
+    </div>
+
+    <h3>5-4 禮品交際及雜費<span class="amt" id="subGift">NT$ 0</span></h3>
+    <p class="note">包括禮品費、交際費、計程車費、租車費等費用，預設為每日 NT$1,100 × 出國天數。</p>
+    <div class="grid two" style="margin-top:8px">
       <div><label for="oGift">禮品交際及雜費<button type="button" class="linkbtn" data-reset="oGift" style="display:none">恢復自動</button></label>
         <input id="oGift" type="number" min="0" class="num"></div>
-      <div><label for="oMisc">其他</label><input id="oMisc" type="number" min="0" class="num" value="0"></div>
-      <div><label for="buffer">票價緩衝（%）</label><input id="buffer" type="number" min="0" max="100" class="num" value="0"></div>
     </div>
-    <p class="note" id="autoNote"></p>
-    <ul class="notes">
-      <li>保險費依保費表（1–30 天）帶入，申根國家預設選申根險。</li>
-      <li>禮品交際及雜費預設為每日 NT$1,100 × 出國天數。</li>
-      <li>國際漫遊費依中華電信定量型方案帶入（只列 10GB 以上，預設選最低價的一個；每 30 天算一份），實際以中華電信公告為準。</li>
-      <li>保險費、禮品交際及雜費、國際漫遊費都可以直接修改，改過後按「恢復自動」會回到自動帶入。</li>
-      <li>票價緩衝只加在機票上，用來涵蓋 Google Flights 與官網的價差。</li>
-    </ul>
+    <div class="subtotal"><span>辦公費小計</span><span id="subOffice">NT$ 0</span></div>
   </section>
 
-  <section aria-labelledby="s5">
-    <h2 id="s5">5. 試算結果</h2>
+  <section aria-labelledby="s6">
+    <h2 id="s6">6. 試算結果</h2>
     <div class="scroll"><table><tbody id="sumRows"></tbody></table></div>
     <div class="actions">
       <button class="btn" id="copyBtn" type="button">複製摘要</button>
@@ -544,13 +576,12 @@ function calc() {
   if (!w) { w = document.createElement("div"); w.id = "warnBox"; w.className = "warn"; $("rateInfo").after(w); }
   w.style.display = warns.length ? "" : "none"; w.innerHTML = warns.map(esc).join("<br>");
 
-  // 機票與合計（全部用精確小數）
-  var fare = fareChosen(), buf = D($("buffer").value);
-  var fareTotal = dscale(dmul(fare, dadd(dint(100), buf)), 1, 2);     // 票價 × (100 + 緩衝%) ÷ 100
-  var pdTotal = twdOne;
+  // ---- 各項費用（全部用精確小數）----
+  var fare = fareChosen();
+  var living = twdOne;                                   // 生活費（日支費）
   var tripN = tripKnown ? days.length : 0;
 
-  // 保險費、禮品交際及雜費：自動帶入（使用者改過就保留其輸入）
+  // 保險費、禮品交際及雜費、國際漫遊費：自動帶入（使用者改過就保留其輸入）
   if (!insTypeManual && s) $("insType").value = SCHENGEN.indexOf(s.country.zh) > -1 ? "schengen" : "general";
   var insType = $("insType").value, insName = insType === "schengen" ? "申根險" : "一般險";
   var insAuto = (tripN >= 1 && tripN <= 30) ? INS[insType][tripN - 1] : 0;
@@ -561,23 +592,61 @@ function calc() {
   var roamR = roamAutoCalc(s, tripN, $("roamPlan").value);
   if (!manualF.oRoam) $("oRoam").value = roamR.amt || "";
   document.querySelectorAll("[data-reset]").forEach(function (b) { b.style.display = manualF[b.getAttribute("data-reset")] ? "" : "none"; });
-  $("autoNote").textContent = tripN > 30 ? "出國天數 " + tripN + " 天，超過保費表的 30 天，請手動輸入保險費。"
-    : (tripN ? "出國天數 " + tripN + " 天：保險費依" + insName + "帶入，禮品交際及雜費 = NT$" + fmt(GIFT_PER_DAY) + " × " + tripN + " 日，國際漫遊費 = " + roamR.note + "。"
-    : "保險費與禮品交際及雜費會在取得返抵台灣日期（按「自動查價」或手動輸入）後自動帶入；國際漫遊費依你選的方案先以 1 份計入。");
+  var autoMsgs = [];
+  if (tripN > 30) autoMsgs.push("出國天數 " + tripN + " 天，超過保費表的 30 天，請手動輸入保險費。");
+  if (!tripN) autoMsgs.push("保險費與禮品交際及雜費會在取得返抵台灣日期（按「自動查價」或手動輸入）後自動帶入；國際漫遊費依你選的方案先以 1 份計入。");
+  if (s && roamR.amt === 0 && roamR.note) autoMsgs.push(roamR.note + "；依須知，當地無漫遊時可改用 eSIM，請填在「eSIM 費用」。");
+  $("autoNote").textContent = autoMsgs.join(" ");
+  $("autoNote").style.display = autoMsgs.length ? "" : "none";
 
-  var ins = D($("oIns").value), gift = D($("oGift").value), roam = D($("oRoam").value);
-  var base = dadd(dadd(D($("oVisa").value), D($("oTrans").value)), D($("oMisc").value));
-  var grand = dadd(dadd(dadd(dadd(dadd(fareTotal, pdTotal), ins), gift), roam), base);
+  function sum(items) { return items.reduce(function (a, x) { return dadd(a, x[1]); }, dint(0)); }
+  function listNonZero(items) { return items.filter(function (x) { return x[1].v !== 0n; }).map(function (x) { return x[0] + " " + dfmt(x[1], 0); }).join("、"); }
+
+  // 一、交通費
+  var boat = D($("oBoat").value), bag = D($("oBag").value);
+  var transItems = [["機票", fare], ["船舶及大眾陸運工具", boat], ["行李托運費", bag]];
+  var transTotal = sum(transItems);
+  $("fareShow").textContent = fare.v > 0n ? "NT$ " + dfmt(fare, 0) : "尚未填入票價";
+  // 三、辦公費
+  var feeItems = [["護照費", D($("fPass").value)], ["簽證費", D($("fVisa").value)], ["黃皮書費", D($("fYellow").value)],
+                  ["預防針費", D($("fVacc").value)], ["結匯手續費", D($("fFx").value)], ["機場服務費", D($("fAirport").value)]];
+  var feeTotal = sum(feeItems);
+  var ins = D($("oIns").value);
+  var roam = D($("oRoam").value);
+  var adminItems = [["報名／註冊費", D($("aReg").value)], ["資料、郵電、翻譯及運費等", D($("aDocs").value)],
+                    ["國際漫遊費", roam], ["eSIM 費用", D($("aEsim").value)]];
+  var adminTotal = sum(adminItems);
+  var gift = D($("oGift").value);
+  var officeTotal = dadd(dadd(dadd(feeTotal, ins), adminTotal), gift);
+  var grand = dadd(dadd(transTotal, living), officeTotal);
+
+  function T(v) { return "NT$ " + dfmt(v, 0); }
+  $("subTrans").textContent = T(transTotal);
+  $("subLiving").textContent = T(living);
+  $("subFee").textContent = T(feeTotal);
+  $("subIns").textContent = T(ins);
+  $("subAdmin").textContent = T(adminTotal);
+  $("subGift").textContent = T(gift);
+  $("subOffice").textContent = T(officeTotal);
 
   var out = "";
-  function line(label, val, sub) { out += "<tr><td>" + label + (sub ? "<div class='note'>" + sub + "</div>" : "") + "</td><td class='r'>" + dfmt(val, 0) + "</td></tr>"; }
-  line("機票", fareTotal, fare.v > 0n ? "NT$ " + dfmt(fare, 0) + (buf.v > 0n ? " × (1 + " + dfmt(buf, 0) + "% 緩衝)" : "") : "尚未填入票價");
-  line("日支生活費", pdTotal, usdOne.v > 0n && rate.v > 0n ? "US$ " + dfmt(usdOne, 2) + " × 匯率 " + dfmt(rate, 0) : "請確認日支數額與匯率");
-  line("保險費", ins, manualF.oIns ? "手動輸入" : (insAuto ? insName + "　" + tripN + " 日" : (tripN > 30 ? "超過 30 天，請手動輸入" : "")));
-  line("禮品交際及雜費", gift, manualF.oGift ? "手動輸入" : (tripN ? "NT$ " + fmt(GIFT_PER_DAY) + " × " + tripN + " 日" : ""));
-  line("國際漫遊費", roam, manualF.oRoam ? "手動輸入" : (tripN ? roamR.note : ""));
-  line("簽證／當地交通／其他", base, "");
-  out += "<tr><td><strong>合計</strong></td><td class='r'><strong>NT$ " + dfmt(grand, 0) + "</strong></td></tr>";
+  function row(cls, label, val, sub) { out += "<tr class='" + cls + "'><td>" + label + (sub ? "<div class='note'>" + sub + "</div>" : "") + "</td><td class='r'>" + dfmt(val, 0) + "</td></tr>"; }
+  row("g", "一、交通費", transTotal);
+  row("s", "機票", fare, fare.v > 0n ? "" : "尚未填入票價");
+  row("s", "船舶及大眾陸運工具", boat);
+  row("s", "行李托運費", bag);
+  row("g", "二、生活費（日支費）", living);
+  row("s", "日支", living, usdOne.v > 0n && rate.v > 0n ? "US$ " + dfmt(usdOne, 2) + " × 匯率 " + dfmt(rate, 0) : "請確認日支數額與匯率");
+  row("g", "三、辦公費", officeTotal);
+  row("s", "手續費", feeTotal, listNonZero(feeItems));
+  row("s", "保險費", ins, manualF.oIns ? "手動輸入" : (insAuto ? insName + "　" + tripN + " 日" : (tripN > 30 ? "超過 30 天，請手動輸入" : "")));
+  var esim = adminItems[3][1], adminParts = [];
+  [adminItems[0], adminItems[1]].forEach(function (x) { if (x[1].v !== 0n) adminParts.push(x[0] + " " + dfmt(x[1], 0)); });
+  if (roam.v !== 0n) adminParts.push("國際漫遊費 " + dfmt(roam, 0) + (manualF.oRoam ? "（手動輸入）" : (roamR.note ? "（" + roamR.note + "）" : "")));
+  if (esim.v !== 0n) adminParts.push("eSIM 費用 " + dfmt(esim, 0));
+  row("s", "行政費", adminTotal, adminParts.join("、"));
+  row("s", "禮品交際及雜費", gift, manualF.oGift ? "手動輸入" : (tripN ? "NT$ " + fmt(GIFT_PER_DAY) + " × " + tripN + " 日" : ""));
+  out += "<tr class='g'><td><strong>合計</strong></td><td class='r'><strong>NT$ " + dfmt(grand, 0) + "</strong></td></tr>";
   $("sumRows").innerHTML = out;
   $("grand").textContent = "NT$ " + dfmt(grand, 0);
 
@@ -585,10 +654,9 @@ function calc() {
     "出國經費試算",
     "目的地：" + (s ? s.country.zh + (s.entry.zh !== s.country.zh ? "・" + s.entry.zh : "") : "（尚未選擇）"),
     "期間：" + (tripKnown ? startIso + " ～ " + endIso + "（" + tripN + " 天）" : "尚未確定（需先取得返抵台灣日期）"),
-    "機票：NT$ " + dfmt(fareTotal, 0),
-    "日支生活費：NT$ " + dfmt(pdTotal, 0) + "（每人 US$ " + dfmt(usdOne, 2) + "，相當於 " + dfmt({ v: equivUnits, sc: 4 }, 0) + " 個整日）",
-    "保險費：NT$ " + dfmt(ins, 0) + "　禮品交際及雜費：NT$ " + dfmt(gift, 0) + "　國際漫遊費：NT$ " + dfmt(roam, 0),
-    "其他費用：NT$ " + dfmt(base, 0),
+    "一、交通費：NT$ " + dfmt(transTotal, 0) + "（機票 " + dfmt(fare, 0) + "、船舶及大眾陸運工具 " + dfmt(boat, 0) + "、行李托運費 " + dfmt(bag, 0) + "）",
+    "二、生活費（日支費）：NT$ " + dfmt(living, 0) + "（每人 US$ " + dfmt(usdOne, 2) + "，相當於 " + dfmt({ v: equivUnits, sc: 4 }, 0) + " 個整日）",
+    "三、辦公費：NT$ " + dfmt(officeTotal, 0) + "（手續費 " + dfmt(feeTotal, 0) + "、保險費 " + dfmt(ins, 0) + "、行政費 " + dfmt(adminTotal, 0) + "、禮品交際及雜費 " + dfmt(gift, 0) + "）",
     "合計：NT$ " + dfmt(grand, 0),
     "（概估，正式報支以規定為準）"
   ].join("\n");
@@ -634,7 +702,7 @@ $("dayRows").addEventListener("change", function (e) {
   if (el && el.classList && el.classList.contains("pct")) { manualPct[el.getAttribute("data-d")] = +el.value; calc(); }
 });
 $("resetPct").addEventListener("click", function () { clearManual(); calc(); });
-["fareBR", "fareCI", "fareOther", "override", "oVisa", "oTrans", "oMisc", "buffer"].forEach(function (id) {
+["fareBR", "fareCI", "fareOther", "override", "oBoat", "oBag", "fPass", "fVisa", "fYellow", "fVacc", "fFx", "fAirport", "aReg", "aDocs", "aEsim"].forEach(function (id) {
   $(id).addEventListener("input", calc);
 });
 ["oIns", "oGift", "oRoam"].forEach(function (id) { $(id).addEventListener("input", function () { manualF[id] = true; calc(); }); });
@@ -643,7 +711,7 @@ $("insType").addEventListener("change", function () { insTypeManual = true; calc
 document.querySelectorAll("[data-reset]").forEach(function (b) {
   b.addEventListener("click", function () { manualF[b.getAttribute("data-reset")] = false; calc(); });
 });
-$("rate").addEventListener("input", function () { if ($("rate").value) store.set("rate", $("rate").value); calc(); });
+$("rate").addEventListener("input", calc);
 document.querySelectorAll('input[name="fareMode"]').forEach(function (e) { e.addEventListener("change", calc); });
 
 // ---------- 自動查價 ----------
@@ -693,7 +761,7 @@ $("copyBtn").addEventListener("click", function () {
 });
 $("printBtn").addEventListener("click", function () { window.print(); });
 
-var r0 = store.get("rate"); $("rate").value = r0 || "32.5";
+$("rate").value = "32.5";
 calc();
 </script>
 </body>

@@ -211,12 +211,14 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <div class="grid" style="margin-top:12px">
       <div><label for="fareBR">長榮 BR 每人票價（TWD）</label><input id="fareBR" type="number" min="0" class="num" placeholder="查到後填入"></div>
       <div><label for="fareCI">華航 CI 每人票價（TWD）</label><input id="fareCI" type="number" min="0" class="num" placeholder="查到後填入"></div>
+      <div><label for="fareJX">星宇 JX 每人票價（TWD）</label><input id="fareJX" type="number" min="0" class="num" placeholder="查到後填入"></div>
       <div><label for="fareOther">其他／自訂票價（TWD）</label><input id="fareOther" type="number" min="0" class="num"></div>
     </div>
     <div class="choices" role="radiogroup" aria-labelledby="fareModeLabel">
       <span id="fareModeLabel" style="font-weight:500">選擇要帶入的票價：</span>
       <label><input type="radio" name="fareMode" value="BR" checked> 長榮</label>
       <label><input type="radio" name="fareMode" value="CI"> 華航</label>
+      <label><input type="radio" name="fareMode" value="JX"> 星宇</label>
       <label><input type="radio" name="fareMode" value="other"> 自訂</label>
     </div>
     <div class="rate" id="flightBox" style="display:none" aria-live="polite"></div>
@@ -1133,7 +1135,7 @@ function calc() {
 
 function fareChosen() {
   var mode = document.querySelector('input[name="fareMode"]:checked').value;
-  return D($(mode === "BR" ? "fareBR" : mode === "CI" ? "fareCI" : "fareOther").value);
+  return D($({ BR: "fareBR", CI: "fareCI", JX: "fareJX", other: "fareOther" }[mode]).value);
 }
 
 function refresh() { calc(); }
@@ -1165,7 +1167,7 @@ $("dayRows").addEventListener("change", function (e) {
   if (el && el.classList && el.classList.contains("pct")) { manualPct[el.getAttribute("data-d")] = +el.value; calc(); }
 });
 $("resetPct").addEventListener("click", function () { clearManual(); calc(); });
-["fareBR", "fareCI", "fareOther", "override", "oBoat", "oBoatCur", "oBag", "bagCur", "fPass", "fVisa", "fVisaCur", "fYellow", "fVacc", "fFx", "fAirport", "aReg", "aRegCur", "aDocs", "aDocsCur", "aEsim"].forEach(function (id) {
+["fareBR", "fareCI", "fareJX", "fareOther", "override", "oBoat", "oBoatCur", "oBag", "bagCur", "fPass", "fVisa", "fVisaCur", "fYellow", "fVacc", "fFx", "fAirport", "aReg", "aRegCur", "aDocs", "aDocsCur", "aEsim"].forEach(function (id) {
   $(id).addEventListener("input", calc);
 });
 ["oIns", "oGift", "oRoam"].forEach(function (id) { $(id).addEventListener("input", function () { manualF[id] = true; calc(); }); });
@@ -1227,7 +1229,7 @@ $("apiBtn").addEventListener("click", function () {
   if (!AP_RE.test(to) || !$("d1").value || !$("d2").value) { msg.textContent = "請先選好目的地、抵達機場，並填入出發日期與回程日期。"; return; }
   if ($("d2").value < $("d1").value) { msg.textContent = "回程日期不能早於出發日期。"; return; }
   var url = WORKER_URL + "/?from=" + $("from").value + "&to=" + to +
-    "&depart=" + $("d1").value + "&return=" + $("d2").value + "&cabin=e&v=4";
+    "&depart=" + $("d1").value + "&return=" + $("d2").value + "&cabin=e&v=6";
   msg.textContent = "查詢中…"; btn.disabled = true;
   fetch(url).then(function (res) {
     if (!res.ok) throw new Error("HTTP " + res.status);
@@ -1236,18 +1238,22 @@ $("apiBtn").addEventListener("click", function () {
     if (j.error) throw new Error(typeof j.error === "string" ? j.error : "查詢失敗");
     if (j.BR) $("fareBR").value = Math.round(j.BR);
     if (j.CI) $("fareCI").value = Math.round(j.CI);
-    (function () {                                     // 只查到其中一家時，自動改選那一家
-      var br = D($("fareBR").value), ci = D($("fareCI").value);
-      var sel = document.querySelector('input[name="fareMode"]:checked').value, pickv = null;
-      if (sel === "BR" && br.v === 0n && ci.v > 0n) pickv = "CI"; else if (sel === "CI" && ci.v === 0n && br.v > 0n) pickv = "BR";
-      if (pickv) document.querySelector('input[name="fareMode"][value="' + pickv + '"]').checked = true;
+    if (j.JX) $("fareJX").value = Math.round(j.JX);
+    (function () {                                     // 選到的那一家沒有票價、別家有時，自動改選最便宜的那一家
+      var ids = { BR: "fareBR", CI: "fareCI", JX: "fareJX" }, vals = {};
+      Object.keys(ids).forEach(function (k) { var v = D($(ids[k]).value); if (v.v > 0n) vals[k] = dnum(v); });
+      var sel = document.querySelector('input[name="fareMode"]:checked').value, left = Object.keys(vals);
+      if (sel in ids && !(sel in vals) && left.length) {
+        var best = left.reduce(function (m, k) { return vals[k] < vals[m] ? k : m; });
+        document.querySelector('input[name="fareMode"][value="' + best + '"]').checked = true;
+      }
     })();
     var tm = j.times, extra = "";
     if (tm && tm.outArrive) {
       $("a1").value = tm.outArrive.slice(0, 10);
       if (tm.retArrive) $("a2").value = tm.retArrive.slice(0, 10); else $("a2").value = "";
       autoFilled = true; clearManual();
-      var al = tm.airline === "BR" ? "長榮" : (tm.airline === "CI" ? "華航" : tm.airline);
+      var al = { BR: "長榮", CI: "華航", JX: "星宇" }[tm.airline] || tm.airline;
       autoInfo = "抵達與返抵日期取自" + al + "最低價航班（起訖時間見上方「自動查價」結果）。如有不同，可在下方「手動修改抵達日期」改。";
       var it = j.itinerary;
       if (!it) it = { out: [{ flight: "", dep: { id: $("from").value, time: tm.outDepart }, arr: { id: to, time: tm.outArrive } }],
@@ -1255,8 +1261,8 @@ $("apiBtn").addEventListener("click", function () {
       renderItin(it);
       extra = "，並填入抵達日期";
     }
-    if (!tm && (j.BR || j.CI)) extra = "，但沒有取得航班時間（請確認 Cloudflare 上的 Worker 是最新版）";
-    msg.textContent = (j.BR || j.CI) ? "已填入查到的票價" + extra + "。" : "這個航線與日期查不到長榮或華航的票價，請換日期或到官網查詢。";
+    if (!tm && (j.BR || j.CI || j.JX)) extra = "，但沒有取得航班時間（請確認 Cloudflare 上的 Worker 是最新版）";
+    msg.textContent = (j.BR || j.CI || j.JX) ? "已填入查到的票價" + extra + "。" : "這個航線與日期查不到長榮、華航或星宇的票價，請換日期或到官網查詢。";
     calc();
   }).catch(function (e) {
     msg.textContent = "查價失敗：" + e.message;
@@ -1298,7 +1304,7 @@ $("transAdd").addEventListener("click", function () {
 });
 // ---------- 自動記憶：行程、票價、各項費用 ----------
 var STATE_KEY = "trip_state_v1", stateReady = false, saveTimer = null;
-var STATE_IDS = ["from", "d1", "d2", "a1", "a2", "fareBR", "fareCI", "fareOther", "override", "oBoat", "oBoatCur", "oBag", "bagCur",
+var STATE_IDS = ["from", "d1", "d2", "a1", "a2", "fareBR", "fareCI", "fareJX", "fareOther", "override", "oBoat", "oBoatCur", "oBag", "bagCur",
   "fPass", "fVisa", "fVisaCur", "fYellow", "fVacc", "fFx", "fAirport", "insType", "oIns", "aReg", "aRegCur", "aDocs", "aDocsCur", "aEsim", "oRoam", "oGift"];
 function selNames(rv, cv, tv) {
   var o = { rc: "", cz: "", ez: "", ei: 0 };

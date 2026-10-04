@@ -906,7 +906,12 @@ function showAirline() {                                    // 班機資訊與�
     if (autoFilled) { autoInfo = "抵達與返抵日期沿用自動查價的結果；若與你的票不同，請在下方「手動修改抵達日期」修改。"; clearManual(); }
     return;
   }
-  if (!it) return;                                          // 沒有該家的班機資料：維持目前顯示
+  if (!it) {
+    if (!Object.keys(fareItins).length) return;             // 完全沒有分航空公司的資料（舊版 Worker）：維持目前顯示
+    renderItin(null);                                       // 這家航空公司查不到班機：下面的班機資訊清空，抵達日期沿用
+    if (autoFilled) { autoInfo = "這家航空公司沒有查到班機；抵達與返抵日期沿用先前的結果，如有不同請在下方「手動修改抵達日期」修改。"; clearManual(); }
+    return;
+  }
   renderItin({ out: it.out, ret: it.ret });
   if (autoFilled) {
     $("a1").value = it.out.length ? it.out[it.out.length - 1].arr.time.slice(0, 10) : "";

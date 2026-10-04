@@ -33,16 +33,16 @@ html { scroll-padding-top: env(safe-area-inset-top, 0px); }
 body { margin: 0; background: var(--bg); color: var(--ink);
   font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif; font-size: 16px; line-height: 1.6; }
 main { max-width: 900px; margin: 0 auto; padding: 20px 16px 120px; }
-h1 { font-size: 1.6rem; margin: 8px 0 4px; letter-spacing: .02em; }
+h1 { font-size: 1.75rem; margin: 8px 0 4px; letter-spacing: .02em; }
 .sub { color: var(--muted); margin: 0 0 20px; font-size: .95rem; }
 section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
-h2 { font-size: 1.05rem; margin: 0 0 12px; }
+h2 { font-size: 1.25rem; margin: 0 0 12px; }
 .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
 .grid { align-items: start; }
 .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (max-width: 640px) { .grid.three, .grid.two { grid-template-columns: minmax(0, 1fr); } }
-label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: 4px; }
+label { display: block; font-size: .875rem; color: var(--muted); margin-bottom: 4px; }
 input, select, button { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; width: 100%; }
 input[type="radio"], input[type="checkbox"] { width: auto; }
 input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
@@ -50,10 +50,10 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 .links { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
 .links a { display: inline-block; text-decoration: none; color: var(--accent); border: 1px solid var(--accent); border-radius: 8px; padding: 8px 12px; font-size: .92rem; }
 .links a:hover { background: var(--accent); color: var(--accent-ink); }
-.linkbtn { background: none; border: 0; color: var(--accent); padding: 0 0 0 8px; width: auto; font-size: .8rem; cursor: pointer; text-decoration: underline; }
-ul.notes { font-size: .85rem; color: var(--muted); margin: 8px 0 0; padding-left: 1.3em; }
+.linkbtn { background: none; border: 0; color: var(--accent); padding: 0 0 0 8px; width: auto; font-size: .875rem; cursor: pointer; text-decoration: underline; }
+ul.notes { font-size: .875rem; color: var(--muted); margin: 8px 0 0; padding-left: 1.3em; }
 ul.notes li { margin: 2px 0; }
-h3 { font-size: .98rem; margin: 20px 0 4px; display: grid; grid-template-columns: 11.5em auto; justify-content: start; column-gap: 12px; align-items: baseline; }
+h3 { font-size: 1.0625rem; margin: 20px 0 4px; display: grid; grid-template-columns: 11.5em auto; justify-content: start; column-gap: 12px; align-items: baseline; }
 h3 .amt { font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 700; white-space: nowrap; text-align: left; }
 .subtotal { display: flex; justify-content: space-between; align-items: baseline; margin-top: 16px; padding-top: 10px; border-top: 2px solid var(--line); font-weight: 700; }
 .subtotal span:last-child { font-variant-numeric: tabular-nums; }
@@ -67,7 +67,7 @@ h3 .amt { font-variant-numeric: tabular-nums; color: var(--accent); font-weight:
 .transrow select { width: auto; }
 .transrow .t-kind select { width: 100%; }
 .transrow button { width: auto; padding: 8px 12px; }
-.transhead { margin-top: 12px; font-size: .85rem; color: var(--muted); align-items: end; }
+.transhead { margin-top: 12px; font-size: .875rem; color: var(--muted); align-items: end; }
 .transhead span:last-child { visibility: hidden; }
 @media (max-width: 640px) {
   .transrow { grid-template-columns: minmax(0, 1fr) auto auto; }
@@ -80,17 +80,23 @@ h3 .amt { font-variant-numeric: tabular-nums; color: var(--accent); font-weight:
 .item h3 { grid-area: name; margin: 0; display: block; }
 .item .ctrl { grid-area: ctrl; min-width: 0; }
 .item .ctrl.note { margin: 0; }
-.item .amt { grid-area: amt; font-size: .98rem; font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 700; white-space: nowrap; }
+.item .amt { grid-area: amt; font-size: 1.0625rem; font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 700; white-space: nowrap; }
 @media (max-width: 760px) { .item { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name amt" "ctrl ctrl"; row-gap: 6px; } }
 .money.roam select { flex: 2 1 14em; min-width: 0; }
 .money.roam input { flex: 1 1 7em; }
+.sub { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 22em); column-gap: 12px; align-items: center; margin-top: 10px; }
+.sub > label { margin: 0; color: var(--ink); font-size: 1rem; }
+.sub .ctrl { min-width: 0; }
+.sub.indent > label { padding-left: 1.6em; }
+.subhead { margin-top: 12px; font-size: 1rem; font-weight: 500; }
+@media (max-width: 640px) { .sub { grid-template-columns: minmax(0, 1fr); row-gap: 4px; } }
 .othrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; align-items: center; }
-.othrow .no { flex: 0 0 auto; font-size: .85rem; color: var(--muted); white-space: nowrap; }
+.othrow .no { flex: 0 0 auto; font-size: .875rem; color: var(--muted); white-space: nowrap; }
 .othrow .nm { flex: 2 1 12em; min-width: 0; }
 .othrow .am { flex: 1 1 7em; min-width: 0; }
 .othrow select { width: auto; flex: 0 0 auto; }
 .othrow button { width: auto; flex: 0 0 auto; padding: 8px 12px; }
-.note { font-size: .85rem; color: var(--muted); margin: 8px 0 0; }
+.note { font-size: .875rem; color: var(--muted); margin: 8px 0 0; }
 .warn { background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 10px 12px; font-size: .88rem; margin-top: 10px; }
 .btn { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); cursor: pointer; font-weight: 500; }
 .btn.ghost { background: transparent; color: var(--accent); }
@@ -119,7 +125,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
 <body>
 <main>
   <h1>出國經費試算</h1>
-  <p class="sub">選地區、國家、城市，帶出日支數額；再加上機票與其他費用，一頁估出預算。</p>
+  <p class="sub">僅供估算。</p>
 
   <section aria-labelledby="s1">
     <h2 id="s1">1. 行程</h2>
@@ -164,24 +170,21 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       <label><input type="radio" name="fareMode" value="max"> 採用已填的最高價（保守估）</label>
     </div>
     <div class="rate" id="flightBox" style="display:none" aria-live="polite"></div>
-    <div class="warn" style="margin-top:12px"><strong>注意：</strong>自動查價取得的是 <strong>Google Flights 顯示的最低價組合，不是航空公司官網價格</strong>。訂票前請到官網核對，並把實際價格填入「其他／自訂票價」。</div>
+    <div class="warn" style="margin-top:12px"><strong>注意：</strong>自動查價取得的是 <strong>Google Flights 顯示的最低價組合，不是航空公司官網價格</strong>。訂票前請到官網核對，並把實際價格填入「其他／自訂票價」。自動查價<strong>每個月只能查 250 次</strong>，每按一次最多會用掉 2 次額度。</div>
   </section>
 
   <section aria-labelledby="s3">
     <h2 id="s3">3. 匯率</h2>
     <p class="note">每 1 單位外幣兌換多少新台幣。交通費與辦公費的各項費用可選幣別，頁面會自動換算成新台幣；日支生活費依規定一律用美元。手動調整後的匯率會自動記憶。</p>
     <div class="grid" style="margin-top:12px">
-      <div><label for="rate">USD 美元（日支用）</label><input id="rate" type="number" min="0" step="any" class="num"></div>
+      <div><label for="rate">USD 美元</label><input id="rate" type="number" min="0" step="any" class="num"></div>
       <div><label for="rEUR">EUR 歐元</label><input id="rEUR" type="number" min="0" step="any" class="num"></div>
       <div><label for="rJPY">JPY 日圓</label><input id="rJPY" type="number" min="0" step="any" class="num"></div>
       <div><label for="rKRW">KRW 韓元</label><input id="rKRW" type="number" min="0" step="any" class="num"></div>
     </div>
-    <div class="grid two" style="margin-top:12px">
-      <div><label for="cName">自訂幣別代碼（國際標準縮寫）</label><input id="cName" placeholder="例如：GBP" autocomplete="off" maxlength="6" style="text-transform:uppercase"></div>
-      <div><label for="rCust">自訂幣別匯率（1 單位兌 TWD）</label><input id="rCust" type="number" min="0" step="any" class="num"></div>
-    </div>
+    <div id="custList"></div>
     <div class="warn" id="rateWarn" style="display:none"></div>
-    <div class="actions"><button class="btn ghost" id="rateReset" type="button">恢復預設匯率</button></div>
+    <div class="actions"><button class="btn ghost" id="custAdd" type="button">＋ 新增自訂幣別</button><button class="btn ghost" id="rateReset" type="button">恢復預設匯率</button></div>
   </section>
 
   <section aria-labelledby="s4">
@@ -250,51 +253,40 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
 
     <h3>6-1 手續費<span class="amt" id="subFee">TWD 0</span></h3>
     <p class="note">包括護照費、簽證費、黃皮書費、預防針費、結匯手續費及機場服務費。</p>
-    <div class="grid" style="margin-top:8px">
-      <div><label for="fPass">(1) 護照費（僅公務護照可核銷）</label><input id="fPass" type="number" min="0" class="num" placeholder="0"></div>
-      <div><label for="fVisa">(2) 簽證費</label>
-        <div class="money"><input id="fVisa" type="number" min="0" step="any" class="num" placeholder="0"><select class="cur" id="fVisaCur" data-def="USD" aria-label="簽證費幣別"></select></div>
-        <div class="note" id="fVisaNT" style="margin-top:4px"></div></div>
-      <div><label for="fYellow">(3) 黃皮書費（國際預防接種證明）</label><input id="fYellow" type="number" min="0" class="num" placeholder="0"></div>
-      <div><label for="fVacc">(4) 預防針費</label><input id="fVacc" type="number" min="0" class="num" placeholder="0"></div>
-      <div><label for="fFx">(5) 結匯手續費</label><input id="fFx" type="number" min="0" class="num" placeholder="0"></div>
-      <div><label for="fAirport">(6) 機場服務費</label><input id="fAirport" type="number" min="0" class="num" placeholder="0"></div>
-    </div>
+    <div class="sub"><label for="fPass">(1) 護照費（僅公務護照可核銷）</label><div class="ctrl"><input id="fPass" type="number" min="0" step="any" class="num" placeholder="TWD 金額"></div></div>
+    <div class="sub"><label for="fVisa">(2) 簽證費</label><div class="ctrl">
+      <div class="money"><input id="fVisa" type="number" min="0" step="any" class="num" placeholder="金額"><select class="cur" id="fVisaCur" data-def="USD" aria-label="簽證費幣別"></select></div>
+      <div class="note" id="fVisaNT" style="margin-top:4px"></div></div></div>
+    <div class="sub"><label for="fYellow">(3) 黃皮書費（國際預防接種證明）</label><div class="ctrl"><input id="fYellow" type="number" min="0" step="any" class="num" placeholder="TWD 金額"></div></div>
+    <div class="sub"><label for="fVacc">(4) 預防針費</label><div class="ctrl"><input id="fVacc" type="number" min="0" step="any" class="num" placeholder="TWD 金額"></div></div>
+    <div class="sub"><label for="fFx">(5) 結匯手續費</label><div class="ctrl"><input id="fFx" type="number" min="0" step="any" class="num" placeholder="TWD 金額"></div></div>
+    <div class="sub"><label for="fAirport">(6) 機場服務費</label><div class="ctrl"><input id="fAirport" type="number" min="0" step="any" class="num" placeholder="TWD 金額"></div></div>
     <div id="oth_fee"></div>
     <div class="actions"><button class="btn ghost" id="othAdd_fee" type="button">＋ 新增其他</button></div>
 
     <h3>6-2 保險費<span class="amt" id="subIns">TWD 0</span></h3>
     <p class="note">依保費表（1–30 天）帶入，申根國家預設選申根險。</p>
-    <div class="grid two" style="margin-top:8px">
-      <div><label for="oIns">(1) 保險費（種類與金額，自動帶入，可手動修改）<button type="button" class="linkbtn" data-reset="oIns" style="display:none">恢復自動</button></label>
-        <div class="money"><select id="insType" aria-label="保險種類"><option value="general">一般險</option><option value="schengen">申根險</option></select><input id="oIns" type="number" min="0" step="any" class="num" placeholder="金額"></div></div>
-    </div>
+    <div class="sub"><label for="oIns">(1) 保險費（種類與金額，自動帶入，可手動修改）<button type="button" class="linkbtn" data-reset="oIns" style="display:none">恢復自動</button></label><div class="ctrl">
+      <div class="money"><select id="insType" aria-label="保險種類"><option value="general">一般險</option><option value="schengen">申根險</option></select><input id="oIns" type="number" min="0" step="any" class="num" placeholder="TWD 金額"></div></div></div>
     <div id="oth_ins"></div>
     <div class="actions"><button class="btn ghost" id="othAdd_ins" type="button">＋ 新增其他</button></div>
 
     <h3>6-3 行政費<span class="amt" id="subAdmin">TWD 0</span></h3>
     <p class="note">包括在國外執行公務所必要之資料、報名、註冊、郵電、翻譯及運費等費用。</p>
-    <div class="grid two" style="margin-top:8px">
-      <div><label for="aReg">(1) 報名／註冊費</label>
-        <div class="money"><input id="aReg" type="number" min="0" step="any" class="num" placeholder="0"><select class="cur" id="aRegCur" data-def="USD" aria-label="報名註冊費幣別"></select></div>
-        <div class="note" id="aRegNT" style="margin-top:4px"></div></div>
-      <div><label for="aDocs">(2) 資料、郵電、翻譯及運費等</label><input id="aDocs" type="number" min="0" class="num" placeholder="0"></div>
-      <div style="grid-column:1/-1"><label>(3) 網路費</label>
-        <div class="grid two" style="margin-top:4px">
-          <div><label for="oRoam" style="color:inherit">國際漫遊費（中華電信方案，只列 10GB 以上；依「公務出國資通訊設備管理須知」，應使用漫遊，當地無漫遊時才改用 eSIM）<button type="button" class="linkbtn" data-reset="oRoam" style="display:none">恢復自動</button></label>
-            <div class="money roam"><select id="roamPlan" aria-label="中華電信漫遊方案"></select><input id="oRoam" type="number" min="0" step="any" class="num" placeholder="金額"></div></div>
-          <div><label for="aEsim" style="color:inherit">eSIM 費用（當地無漫遊時才使用）</label><input id="aEsim" type="number" min="0" class="num" placeholder="0"></div>
-        </div></div>
-    </div>
+    <div class="sub"><label for="aReg">(1) 報名／註冊費</label><div class="ctrl">
+      <div class="money"><input id="aReg" type="number" min="0" step="any" class="num" placeholder="金額"><select class="cur" id="aRegCur" data-def="USD" aria-label="報名註冊費幣別"></select></div>
+      <div class="note" id="aRegNT" style="margin-top:4px"></div></div></div>
+    <div class="sub"><label for="aDocs">(2) 資料、郵電、翻譯及運費等</label><div class="ctrl"><input id="aDocs" type="number" min="0" step="any" class="num" placeholder="TWD 金額"></div></div>
+    <div class="subhead">(3) 網路費</div>
+    <div class="sub indent"><label for="oRoam">國際漫遊費（中華電信方案，只列 10GB 以上；依「公務出國資通訊設備管理須知」，應使用漫遊，當地無漫遊時才改用 eSIM）<button type="button" class="linkbtn" data-reset="oRoam" style="display:none">恢復自動</button></label><div class="ctrl">
+      <div class="money roam"><select id="roamPlan" aria-label="中華電信漫遊方案"></select><input id="oRoam" type="number" min="0" step="any" class="num" placeholder="TWD 金額"></div></div></div>
+    <div class="sub indent"><label for="aEsim">eSIM 費用（當地無漫遊時才使用）</label><div class="ctrl"><input id="aEsim" type="number" min="0" step="any" class="num" placeholder="TWD 金額"></div></div>
     <div id="oth_admin"></div>
     <div class="actions"><button class="btn ghost" id="othAdd_admin" type="button">＋ 新增其他</button></div>
 
     <h3>6-4 禮品交際及雜費<span class="amt" id="subGift">TWD 0</span></h3>
     <p class="note">包括禮品費、交際費、計程車費、租車費等費用。</p>
-    <div class="grid two" style="margin-top:8px">
-      <div><label for="oGift">(1) 禮品交際及雜費（預設每日 TWD 1,100 × 出國天數）<button type="button" class="linkbtn" data-reset="oGift" style="display:none">恢復自動</button></label>
-        <input id="oGift" type="number" min="0" class="num"></div>
-    </div>
+    <div class="sub"><label for="oGift">(1) 禮品交際及雜費（預設每日 TWD 1,100 × 出國天數）<button type="button" class="linkbtn" data-reset="oGift" style="display:none">恢復自動</button></label><div class="ctrl"><input id="oGift" type="number" min="0" step="any" class="num" placeholder="TWD 金額"></div></div>
     <div id="oth_gift"></div>
     <div class="actions"><button class="btn ghost" id="othAdd_gift" type="button">＋ 新增其他</button></div>
 
@@ -531,26 +523,34 @@ function renderRateInfo(s) {
 }
 
 // ---------- 幣別與匯率 ----------
-var CURS = [["USD", "USD 美元", "rate"], ["EUR", "EUR 歐元", "rEUR"], ["JPY", "JPY 日圓", "rJPY"], ["KRW", "KRW 韓元", "rKRW"], ["CUS", "自訂幣別", "rCust"], ["TWD", "TWD 新台幣", null]];
-var RATE_DEF = { rate: "32.5", rEUR: "36", rJPY: "0.25", rKRW: "0.025", rCust: "" };
+var CURS_BASE = [["USD", "USD 美元", "rate"], ["EUR", "EUR 歐元", "rEUR"], ["JPY", "JPY 日圓", "rJPY"], ["KRW", "KRW 韓元", "rKRW"]];
+var RATE_DEF = { rate: "32.5", rEUR: "36", rJPY: "0.25", rKRW: "0.025" };
+var customs = [], custSeq = 0;                       // 自訂幣別：按「＋ 新增自訂幣別」才會出現
+function baseCur(c) { return CURS_BASE.filter(function (x) { return x[0] === c; })[0]; }
+function customOf(c) { return customs.filter(function (x) { return x.id === c; })[0]; }
+function curList() { return CURS_BASE.map(function (x) { return x[0]; }).concat(customs.map(function (x) { return x.id; }), ["TWD"]); }
 function curLabel(c) {
-  if (c === "CUS") return ($("cName").value || "").trim() || "自訂幣別";
-  return CURS.filter(function (x) { return x[0] === c; })[0][1];
+  if (c === "TWD") return "TWD 新台幣";
+  var b = baseCur(c); if (b) return b[1];
+  var u = customOf(c); return (u && u.code.trim()) || "自訂幣別";
 }
-function curShort(c) { return c === "CUS" ? curLabel("CUS") : c; }      // 一律用國際標準的幣別代碼（ISO 4217）
-function curRate(c) { var x = CURS.filter(function (y) { return y[0] === c; })[0]; return x[2] ? D($(x[2]).value) : dint(1); }
+function curShort(c) { return (c === "TWD" || baseCur(c)) ? c : curLabel(c); }      // 國際標準的幣別代碼（ISO 4217）
+function curRate(c) {
+  if (c === "TWD") return dint(1);
+  var b = baseCur(c); if (b) return D($(b[2]).value);
+  var u = customOf(c); return u ? D(u.rate) : dint(0);
+}
 function fillCur(sel) {
-  var keep = sel.value || sel.getAttribute("data-def") || "USD";
+  var list = curList(), v = sel.value;
+  var keep = list.indexOf(v) > -1 ? v : (sel.getAttribute("data-def") || "USD");
   sel.innerHTML = "";
-  CURS.forEach(function (x) { var o = document.createElement("option"); o.value = x[0]; o.textContent = curLabel(x[0]); sel.appendChild(o); });
+  list.forEach(function (c) { var o = document.createElement("option"); o.value = c; o.textContent = curLabel(c); sel.appendChild(o); });
   sel.value = keep;
 }
-function refreshCurLabels() {
-  document.querySelectorAll("select.cur").forEach(function (sel) {
-    var keep = sel.value;
-    Array.prototype.forEach.call(sel.options, function (o) { o.textContent = curLabel(o.value); });
-    sel.value = keep;
-  });
+function refreshCurLabels() { document.querySelectorAll("select.cur").forEach(fillCur); }
+function dropCurRefs(ids) {                           // 刪除自訂幣別時，用到它的項目改回 TWD
+  function fix(r) { if (ids.indexOf(r.cur) > -1) r.cur = "TWD"; }
+  transRows.forEach(fix); Object.keys(OTH).forEach(function (g) { OTH[g].rows.forEach(fix); });
 }
 function moneyFrom(amt, cur) {
   var rt = curRate(cur);
@@ -562,17 +562,41 @@ function convText(m) {
   return curShort(m.cur) + " " + dfmt(m.amt, 0) + " × 匯率 " + dfmt(m.rt, 0);
 }
 function setNote(id, m) { if (!$(id)) return; $(id).textContent = (m.cur !== "TWD" && m.amt.v !== 0n) ? "約 TWD " + dfmt(m.ntd, 0) : ""; }
+function saveCustoms() { store.set("rt_customs", JSON.stringify(customs)); }
+function renderCust() {
+  var box = $("custList"); box.innerHTML = "";
+  customs.forEach(function (c) {
+    var row = document.createElement("div"); row.className = "othrow";
+    var cd = document.createElement("input"); cd.className = "nm"; cd.placeholder = "自訂幣別（國際標準縮寫，例如 GBP）"; cd.maxLength = 6; cd.value = c.code; cd.setAttribute("aria-label", "自訂幣別代碼");
+    cd.addEventListener("input", function () { cd.value = cd.value.toUpperCase(); c.code = cd.value; saveCustoms(); refreshCurLabels(); calc(); });
+    var rt = document.createElement("input"); rt.type = "number"; rt.min = "0"; rt.step = "any"; rt.className = "am num"; rt.placeholder = "匯率（1 單位兌 TWD）"; rt.value = c.rate; rt.setAttribute("aria-label", "自訂幣別匯率");
+    rt.addEventListener("input", function () { c.rate = rt.value; saveCustoms(); calc(); });
+    var rm = document.createElement("button"); rm.type = "button"; rm.className = "btn ghost"; rm.textContent = "刪除"; rm.setAttribute("aria-label", "刪除這個自訂幣別");
+    rm.addEventListener("click", function () {
+      customs = customs.filter(function (x) { return x.id !== c.id; }); dropCurRefs([c.id]); saveCustoms();
+      renderCust(); renderTrans(); Object.keys(OTH).forEach(renderOth); refreshCurLabels(); calc();
+    });
+    row.appendChild(cd); row.appendChild(rt); row.appendChild(rm); box.appendChild(row);
+  });
+}
 function initRates() {
   Object.keys(RATE_DEF).forEach(function (id) {
     var v = store.get("rt_" + id);
     $(id).value = v !== null ? v : RATE_DEF[id];
     $(id).addEventListener("input", function () { store.set("rt_" + id, $(id).value); calc(); });   // 手動調整後自動記憶
   });
-  var n = store.get("rt_cName"); $("cName").value = n !== null ? n : "";
-  $("cName").addEventListener("input", function () { $("cName").value = $("cName").value.toUpperCase(); store.set("rt_cName", $("cName").value); refreshCurLabels(); calc(); });
+  try { customs = JSON.parse(store.get("rt_customs") || "[]") || []; } catch (e) { customs = []; }
+  customs.forEach(function (c) { custSeq = Math.max(custSeq, parseInt(String(c.id).slice(1), 10) || 0); });
+  renderCust();
+  $("custAdd").addEventListener("click", function () {
+    customs.push({ id: "C" + (++custSeq), code: "", rate: "" }); saveCustoms(); renderCust(); refreshCurLabels();
+    var ins = document.querySelectorAll("#custList .nm"); ins[ins.length - 1].focus(); calc();
+  });
   $("rateReset").addEventListener("click", function () {
+    var ids = customs.map(function (x) { return x.id; });
     Object.keys(RATE_DEF).forEach(function (id) { store.del("rt_" + id); $(id).value = RATE_DEF[id]; });
-    store.del("rt_cName"); $("cName").value = ""; refreshCurLabels(); calc();
+    customs = []; store.del("rt_customs"); dropCurRefs(ids);
+    renderCust(); renderTrans(); Object.keys(OTH).forEach(renderOth); refreshCurLabels(); calc();
   });
 }
 
@@ -616,10 +640,10 @@ function renderTrans() {
 
 // ---------- 辦公費各類的「其他」（可手動新增、編號接在固定項目後面） ----------
 var OTH = {
-  fee:   { pre: "6-1", off: 6, rows: [{ name: "", amt: "", cur: "TWD" }] },
-  ins:   { pre: "6-2", off: 1, rows: [{ name: "", amt: "", cur: "TWD" }] },
-  admin: { pre: "6-3", off: 3, rows: [{ name: "", amt: "", cur: "TWD" }] },
-  gift:  { pre: "6-4", off: 1, rows: [{ name: "", amt: "", cur: "TWD" }] }
+  fee: { pre: "6-1", off: 6, rows: [] },
+  ins: { pre: "6-2", off: 1, rows: [] },
+  admin: { pre: "6-3", off: 3, rows: [] },
+  gift: { pre: "6-4", off: 1, rows: [] }
 };
 function renderOth(g) {
   var G = OTH[g], box = $("oth_" + g); box.innerHTML = "";

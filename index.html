@@ -899,8 +899,14 @@ function renderItin(it) {
   box.innerHTML = h; box.style.display = "";
 }
 function showAirline() {                                    // 班機資訊與抵達日期，跟著「選擇要帶入的票價」換
+  if ($("multi").checked) return;                           // 多段航班沒有分航空公司的班機資料
   var mode = document.querySelector('input[name="fareMode"]:checked').value, it = fareItins[mode];
-  if (!it) return;                                          // 自訂，或沒有該家的班機資料：維持目前顯示
+  if (mode === "other") {                                   // 選「自訂」：下面的班機資訊清空；抵達日期沿用，讓日支與天數照常計算
+    renderItin(null);
+    if (autoFilled) { autoInfo = "抵達與返抵日期沿用自動查價的結果；若與你的票不同，請在下方「手動修改抵達日期」修改。"; clearManual(); }
+    return;
+  }
+  if (!it) return;                                          // 沒有該家的班機資料：維持目前顯示
   renderItin({ out: it.out, ret: it.ret });
   if (autoFilled) {
     $("a1").value = it.out.length ? it.out[it.out.length - 1].arr.time.slice(0, 10) : "";
@@ -1194,7 +1200,7 @@ document.querySelectorAll("[data-reset]").forEach(function (b) {
   b.addEventListener("click", function () { manualF[b.getAttribute("data-reset")] = false; calc(); });
 });
 $("fareOther").addEventListener("input", function () {   // 填了自訂票價就自動改選「自訂」
-  if ($("fareOther").value) document.querySelector('input[name="fareMode"][value="other"]').checked = true;
+  if ($("fareOther").value) { document.querySelector('input[name="fareMode"][value="other"]').checked = true; showAirline(); }
   calc();
 });
 document.querySelectorAll('input[name="fareMode"]').forEach(function (e) { e.addEventListener("change", function () { showAirline(); calc(); }); });

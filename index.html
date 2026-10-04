@@ -51,6 +51,8 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 .links a { display: inline-block; text-decoration: none; color: var(--accent); border: 1px solid var(--accent); border-radius: 8px; padding: 8px 12px; font-size: .92rem; }
 .links a:hover { background: var(--accent); color: var(--accent-ink); }
 .linkbtn { background: none; border: 0; color: var(--accent); padding: 0 0 0 8px; width: auto; font-size: .8rem; cursor: pointer; text-decoration: underline; }
+ul.notes { font-size: .85rem; color: var(--muted); margin: 8px 0 0; padding-left: 1.3em; }
+ul.notes li { margin: 2px 0; }
 .note { font-size: .85rem; color: var(--muted); margin: 8px 0 0; }
 .warn { background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 10px 12px; font-size: .88rem; margin-top: 10px; }
 .btn { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); cursor: pointer; font-weight: 500; }
@@ -112,8 +114,6 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <h2 id="s2">2. 機票查價</h2>
     <div class="row"><button class="btn" id="apiBtn" type="button">自動查價</button></div>
     <p class="note" id="apiMsg" role="status"></p>
-    <div class="rate" id="flightBox" style="display:none" aria-live="polite"></div>
-    <p class="note">自動查價取得的是 Google Flights 顯示的最低價組合，不是航空公司官網價格。訂票前請到官網核對，並把實際價格填入「其他／自訂票價」。</p>
     <div class="grid" style="margin-top:12px">
       <div><label for="fareBR">長榮 BR 每人票價（NT$）</label><input id="fareBR" type="number" min="0" class="num" placeholder="查到後填入"></div>
       <div><label for="fareCI">華航 CI 每人票價（NT$）</label><input id="fareCI" type="number" min="0" class="num" placeholder="查到後填入"></div>
@@ -126,6 +126,8 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       <label><input type="radio" name="fareMode" value="other"> 自訂</label>
       <label><input type="radio" name="fareMode" value="max"> 採用已填的最高價（保守估）</label>
     </div>
+    <div class="rate" id="flightBox" style="display:none" aria-live="polite"></div>
+    <p class="note">自動查價取得的是 Google Flights 顯示的最低價組合，不是航空公司官網價格。訂票前請到官網核對，並把實際價格填入「其他／自訂票價」。</p>
   </section>
 
   <section aria-labelledby="s3">
@@ -141,12 +143,12 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       </div>
     </details>
     <div class="grid two" style="margin-top:12px">
-      <div><label for="override">手動覆寫日支數額（US$／日，留空則依表）</label><input id="override" type="number" min="0" step="0.01" class="num"></div>
       <div><label for="rate">美元兌台幣匯率</label><input id="rate" type="number" min="0" step="0.001" class="num" placeholder="依規定匯率填入"></div>
+      <div id="overrideBox" style="display:none"><label for="override">此地區不在日支數額表內，請輸入日支數額（US$／日）</label><input id="override" type="number" min="0" step="0.01" class="num"></div>
     </div>
     <div class="choices">
-      <label><input type="checkbox" id="longStay" checked> 同地駐留超過 1 個月時依要點折算（第 2–3 個月 80%、第 4 個月起 70%，以 30 天為 1 個月概算）</label>
-      <label><input type="checkbox" id="ceilUsd" checked> 依日支表附註 4，每人日支「加總後」尾數進位為整數美元（住宿、膳食、零用分項不進位）</label>
+      
+      
     </div>
     <div class="scroll" style="margin-top:12px">
       <table class="perdiem">
@@ -156,7 +158,12 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       </table>
     </div>
     <div class="actions"><button class="btn ghost" id="resetPct" type="button">恢復自動計算</button></div>
-    <p class="note">資料來源：行政院 114 年 10 月 31 日院授主預字第 1140103430 號函修正之日支數額表，自 115 年 1 月 1 日生效。金額不四捨五入，乘上匯率保留完整小數；住宿、膳食、零用分項不進位，加總後才依附註 4 進位為整數美元。供膳宿、跨區出差等其他扣減情形請依要點核對。香港、澳門及大陸地區另有日支表，請在上方手動覆寫。</p>
+    <ul class="notes">
+      <li>資料來源：行政院 114 年 10 月 31 日院授主預字第 1140103430 號函修正之日支數額表，自 115 年 1 月 1 日生效。</li>
+      <li>金額不四捨五入，乘上匯率保留完整小數；住宿、膳食、零用分項保留小數，日支合計有小數時自動進位為整數美元（依日支表附註 4）。</li>
+      <li>供膳宿、跨區出差等其他扣減情形，請依要點核對。</li>
+      <li>香港、澳門及大陸地區另有日支表，選這些地區時請自行輸入日支數額。</li>
+    </ul>
   </section>
 
   <section aria-labelledby="s4">
@@ -167,6 +174,10 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
         <select id="insType"><option value="general">一般險</option><option value="schengen">申根險</option></select></div>
       <div><label for="oIns">保險費<button type="button" class="linkbtn" data-reset="oIns" style="display:none">恢復自動</button></label>
         <input id="oIns" type="number" min="0" class="num"></div>
+      <div><label for="roamPlan">漫遊方案（中華電信）</label>
+        <select id="roamPlan"></select></div>
+      <div><label for="oRoam">國際漫遊費<button type="button" class="linkbtn" data-reset="oRoam" style="display:none">恢復自動</button></label>
+        <input id="oRoam" type="number" min="0" class="num"></div>
       <div><label for="oTrans">當地交通（機場往返、市區）</label><input id="oTrans" type="number" min="0" class="num" value="0"></div>
       <div><label for="oGift">禮品交際及雜費<button type="button" class="linkbtn" data-reset="oGift" style="display:none">恢復自動</button></label>
         <input id="oGift" type="number" min="0" class="num"></div>
@@ -174,7 +185,13 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       <div><label for="buffer">票價緩衝（%）</label><input id="buffer" type="number" min="0" max="100" class="num" value="0"></div>
     </div>
     <p class="note" id="autoNote"></p>
-    <p class="note">保險費依保費表（1–30 天）帶入，申根國家預設選申根險；禮品交際及雜費預設為每日 NT$1,100 × 出國天數。兩項都可以直接修改，改過後按「恢復自動」會回到自動帶入。票價緩衝只加在機票上，用來涵蓋 Google Flights 與官網的價差。</p>
+    <ul class="notes">
+      <li>保險費依保費表（1–30 天）帶入，申根國家預設選申根險。</li>
+      <li>禮品交際及雜費預設為每日 NT$1,100 × 出國天數。</li>
+      <li>國際漫遊費依中華電信定量型方案帶入（只列 10GB 以上，預設選最低價的一個；每 30 天算一份），實際以中華電信公告為準。</li>
+      <li>保險費、禮品交際及雜費、國際漫遊費都可以直接修改，改過後按「恢復自動」會回到自動帶入。</li>
+      <li>票價緩衝只加在機票上，用來涵蓋 Google Flights 與官網的價差。</li>
+    </ul>
   </section>
 
   <section aria-labelledby="s5">
@@ -208,8 +225,47 @@ var INS = {   // 保費表：陣列第 i 項 = 第 i+1 天（目前提供 1–30
 };
 var SCHENGEN = ["法國","德國","荷蘭","比利時","盧森堡","瑞士","列支敦斯登","奧地利","丹麥","冰島","挪威","瑞典","芬蘭","西班牙","葡萄牙","義大利","馬爾他","希臘","愛沙尼亞","拉脫維亞","立陶宛","波蘭","捷克","斯洛伐克","匈牙利","克羅埃西亞","斯洛維尼亞","羅馬尼亞","保加利亞"];
 var GIFT_PER_DAY = 1100;
+// 中華電信國際漫遊（資料取自中華電信官網美國頁面，活動期間至 2026-12-31；中華電信月租型門號適用）
+var ROAM_PLANS = [          // 定量型：生效後 30 天內有效、一次收全額；依價格由低到高，預設選第一個（10GB 以上最低價）
+  { key: "usca10", name: "美加定量型 10GB",  price: 588,  days: 30, only: ["美國", "加拿大"] },
+  { key: "usca20", name: "美加定量型 20GB",  price: 888,  days: 30, only: ["美國", "加拿大"] },
+  { key: "us30",   name: "美國定量型 30GB",  price: 928,  days: 30, only: ["美國"] },
+  { key: "g10",    name: "全球通定量型 10GB", price: 988,  days: 30 },
+  { key: "g20",    name: "全球通定量型 20GB", price: 1888, days: 30 },
+  { key: "g30",    name: "全球通定量型 30GB", price: 2788, days: 30 }
+];
+var ROAM_COVER = ["日本","南韓","中國大陸","香港","澳門","阿富汗","巴林","孟加拉","汶萊","柬埔寨","印度","印尼","以色列","寮國","馬來西亞","蒙古","阿曼","巴基斯坦","菲律賓","卡達","沙烏地阿拉伯","新加坡","斯里蘭卡","泰國","土耳其","阿拉伯聯合大公國","越南","吉爾吉斯","科威特",
+  "阿爾巴尼亞","亞美尼亞","奧地利","亞塞拜然","白俄羅斯","比利時","保加利亞","克羅埃西亞","塞浦路斯","捷克","丹麥","愛沙尼亞","芬蘭","法國","喬治亞","德國","直布羅陀","希臘","匈牙利","冰島","愛爾蘭","義大利","哈薩克","拉脫維亞","列支敦斯登","立陶宛","盧森堡","馬爾他","摩爾多瓦","荷蘭","挪威","波蘭","葡萄牙","北馬其頓共和國","塞爾維亞","羅馬尼亞","俄羅斯","斯洛伐克","斯洛維尼亞","西班牙","聖馬利諾","瑞典","瑞士","烏克蘭","英國","烏茲別克","教廷","安道爾拉","波士尼亞赫塞哥維納",
+  "美國","加拿大","阿根廷","巴西","巴拿馬","宏都拉斯","墨西哥","秘魯","薩爾瓦多","哥倫比亞","巴貝多","百慕達","格瑞那達","海地","牙買加","聖克里斯多福及尼維斯","聖露西亞","聖文森","巴拉圭","貝里斯","瓜地馬拉","哥斯大黎加","多明尼加共和國","尼加拉瓜","烏拉圭","智利","安地卡及巴布達","多米尼克",
+  "澳大利亞","斐濟","紐西蘭","帛琉共和國","巴布亞紐幾內亞","東加王國","萬那杜","諾魯","剛果民主共和國","象牙海岸","埃及","迦納","奈及利亞","南非共和國"];
+function roamApplicable(s) {
+  if (!s) return [];
+  var c = s.country.zh;
+  return ROAM_PLANS.filter(function (p) { return p.only ? p.only.indexOf(c) > -1 : ROAM_COVER.indexOf(c) > -1; });
+}
+var roamSig = null;
+function refreshRoamPlans(s) {
+  var list = roamApplicable(s), sig = (s ? "s:" : "n:") + list.map(function (p) { return p.key; }).join(",");
+  if (sig === roamSig) return;
+  roamSig = sig; manualF.oRoam = false;                 // 換目的地就回到自動帶入
+  var sel = $("roamPlan"); sel.innerHTML = "";
+  if (!list.length) {
+    var o = document.createElement("option"); o.value = ""; o.textContent = s ? "此國不在全球通涵蓋名單，請手動輸入" : "請先選擇目的地"; sel.appendChild(o); return;
+  }
+  list.forEach(function (p) {
+    var o = document.createElement("option"); o.value = p.key; o.textContent = p.name + "　NT$" + p.price + "／" + p.days + " 天"; sel.appendChild(o);
+  });
+  sel.value = list[0].key;
+}
+function roamAutoCalc(s, tripN, key) {
+  if (!s) return { amt: 0, note: "" };
+  var p = ROAM_PLANS.filter(function (x) { return x.key === key; })[0];
+  if (!p || roamApplicable(s).indexOf(p) === -1) return { amt: 0, note: "此國不在全球通方案涵蓋名單，請依中華電信公告手動輸入" };
+  var n = tripN ? Math.ceil(tripN / p.days) : 1;       // 天數還不確定時，先以 1 份計
+  return { amt: p.price * n, note: p.name + " NT$" + p.price + " × " + n + " 份（每份 " + p.days + " 天）" + (tripN ? "" : "，天數確定前先以 1 份計") };
+}
 var CODE_LABEL = { TPE: "桃園", TSA: "松山", KHH: "高雄", RMQ: "台中" };
-var manualF = { oIns: false, oGift: false }, insTypeManual = false;
+var manualF = { oIns: false, oGift: false, oRoam: false }, insTypeManual = false;
 var $ = function (id) { return document.getElementById(id); };
 Object.keys(AP.e).forEach(function (k) { AP.e[k].forEach(function (a) { if (!CODE_LABEL[a[0]]) CODE_LABEL[a[0]] = a[1]; }); });
 Object.keys(AP.c).forEach(function (k) { AP.c[k].forEach(function (a) { if (!CODE_LABEL[a[0]]) CODE_LABEL[a[0]] = a[1]; }); });
@@ -338,10 +394,6 @@ function rateOnDate(s, dt) {
   if (other && other.rate != null) return { usd: other.rate, src: "fallback" };
   return { usd: 0, src: "none" };
 }
-function factorAt(i) {
-  if (!$("longStay").checked) return 1;
-  return i < 30 ? 1 : (i < 90 ? 0.8 : 0.7);
-}
 
 function seasonsCoverYear(e) {
   var md = [31,28,31,30,31,30,31,31,30,31,30,31];
@@ -356,7 +408,7 @@ function renderRateInfo(s) {
   var e = s.entry, h = "";
   var name = esc(s.country.zh + (e.zh !== s.country.zh ? "・" + e.zh : ""));
   if (e.manual) {
-    h = name + "：此地區不在本日支數額表內，請在下方「手動覆寫」填入該地區適用的數額。";
+    h = name + "：此地區不在本日支數額表內，請在下方輸入該地區適用的日支數額。";
   } else if (e.rate != null) {
     h = name + "：<strong>US$ " + e.rate + "</strong>／人／日";
   } else {
@@ -405,7 +457,10 @@ function clearAuto() {
 
 function calc() {
   var s = cur();
-  var rate = D($("rate").value), override = D($("override").value), hasOverride = override.v > 0n;
+  var rate = D($("rate").value), override = D($("override").value);
+  var needManual = !!(s && s.entry.manual);          // 只有日支表沒有的地區（港澳、大陸）才需要自己輸入數額
+  $("overrideBox").style.display = needManual ? "" : "none";
+  var hasOverride = needManual && override.v > 0n;
   var d1 = $("d1").value, r1 = $("d2").value, a1 = $("a1").value, a2 = $("a2").value;
   var validRange = !!(d1 && r1 && r1 >= d1);
   var est = [];
@@ -427,11 +482,11 @@ function calc() {
       var auto = kind === "stay" ? 100 : 30;
       var pct = manualPct[iso] != null ? manualPct[iso] : auto;
       var r = hasOverride ? { usd: override, src: "override" } : (s ? rateOnDate(s, dt) : { usd: 0, src: "none" });
-      var rUsd = D(r.usd);
+      var rUsd = hasOverride ? override : D(r.usd);
       if (r.src === "fallback") usedFallback = true;
       if (s && (r.src === "none" || r.src === "manual")) noData = true;
       var idx = iso >= a1 ? dayDiff(a1, iso) : 0;
-      var f = $("longStay").checked ? factorAt(idx) : 1, fPct = Math.round(f * 100);
+      var f = 1, fPct = 100;
       var usd = dscale(rUsd, pct * fPct, 4);          // 日支數額 × 比例 × 折算，全程整數運算
       usdSum = dadd(usdSum, usd); equivUnits += BigInt(pct * fPct);
       var label = kind === "out" ? "飛行中，未留宿"
@@ -440,7 +495,6 @@ function calc() {
       if (iso === r1 && iso === a2) label = "當地起飛並返抵台灣";
       if (iso === a1 && est.indexOf("抵達當地日期") > -1) label += "（抵達日期尚未取得，暫以出發當日計）";
       if (iso === r1 && est.indexOf("返抵台灣日期") > -1) label = "當地起飛（返抵台灣日期尚未取得，暫以當日計）";
-      if (f < 1) label += "（駐留超過 1 個月，數額 × " + fPct + "%）";
       days.push({ iso: iso, label: label, pct: pct, usd: usd, edited: manualPct[iso] != null });
     }
   }
@@ -466,17 +520,15 @@ function calc() {
     : (est.length ? "抵達與返抵日期會在按上方「自動查價」後自動帶入；在此之前，暫以抵達、返抵當日估算。"
     : ($("a1").value || $("a2").value ? "抵達與返抵日期為手動輸入。" : ""));
 
-  var ceilOn = $("ceilUsd").checked;
   var twdSum = dmul(usdSum, rate);                                 // 進位前的精確加總
-  var usdOne = ceilOn ? dceil(usdSum) : usdSum;                    // 依附註 4：加總後才進位為整數美元
+  var usdOne = dceil(usdSum);                                      // 依附註 4：加總後才進位為整數美元（沒有小數就維持原數）
   var twdOne = dmul(usdOne, rate);
 
   var pd = "";
   [["住宿（70%）", 7], ["膳食（20%）", 2], ["零用（10%）", 1]].forEach(function (x) {
     pd += "<tr><td colspan='3'>" + x[0] + "</td><td class='r'>" + dfmt(dscale(usdSum, x[1], 1), 2) + "</td><td class='r'>" + dfmt(dscale(twdSum, x[1], 1), 2) + "</td></tr>";
   });
-  if (ceilOn) pd += "<tr><td colspan='3'>加總（進位前）</td><td class='r'>" + dfmt(usdSum, 2) + "</td><td class='r'>" + dfmt(twdSum, 2) + "</td></tr>";
-  pd += "<tr><td colspan='3'><strong>每人日支合計" + (ceilOn ? "（加總後進位）" : "") + (est.length ? "（暫估）" : "") + "（相當於 " + dfmt({ v: equivUnits, sc: 4 }, 0) + " 個整日）</strong></td><td class='r'><strong>" +
+  pd += "<tr><td colspan='3'><strong>日支合計" + (est.length ? "（暫估）" : "") + "（相當於 " + dfmt({ v: equivUnits, sc: 4 }, 0) + " 個整日）</strong></td><td class='r'><strong>" +
     dfmt(usdOne, 2) + "</strong></td><td class='r'><strong>" + dfmt(twdOne, 2) + "</strong></td></tr>";
   $("pdRows").innerHTML = pd;
 
@@ -484,7 +536,7 @@ function calc() {
   var warns = [];
   if (s && days.length && days[0].iso < "2026-01-01") warns.push("此日支數額表自 2026-01-01 起生效，出差期間早於此日請改用當時適用的舊表。");
   if (usedFallback) warns.push("行程中有日期不在該城市的季節表內，已依附註改用該國「其他」數額。");
-  if (s && noData && !hasOverride) warns.push("此行程缺少日支數額，請手動覆寫。");
+  if (s && noData && !hasOverride) warns.push("此行程缺少日支數額，請在下方輸入。");
   if (orderBad) warns.push("抵達當地日期晚於回程日期，請檢查日期。");
   if (est.length && days.length) warns.push("尚未取得航班時間，日支為暫估（長程航班通常會跨日，實際會比表中多幾天的 30%）。請先按上方「自動查價」，或在「手動修改抵達日期」填入。");
   if (s && rate.v === 0n) warns.push("尚未填入匯率，日支新台幣金額暫以 0 計。");
@@ -505,14 +557,17 @@ function calc() {
   var giftAuto = GIFT_PER_DAY * tripN;
   if (!manualF.oIns) $("oIns").value = insAuto || "";
   if (!manualF.oGift) $("oGift").value = giftAuto || "";
+  refreshRoamPlans(s);
+  var roamR = roamAutoCalc(s, tripN, $("roamPlan").value);
+  if (!manualF.oRoam) $("oRoam").value = roamR.amt || "";
   document.querySelectorAll("[data-reset]").forEach(function (b) { b.style.display = manualF[b.getAttribute("data-reset")] ? "" : "none"; });
   $("autoNote").textContent = tripN > 30 ? "出國天數 " + tripN + " 天，超過保費表的 30 天，請手動輸入保險費。"
-    : (tripN ? "出國天數 " + tripN + " 天：保險費依" + insName + "帶入，禮品交際及雜費 = NT$" + fmt(GIFT_PER_DAY) + " × " + tripN + " 日。"
-    : "取得返抵台灣日期（按「自動查價」或手動輸入）後，會自動帶入保險費與禮品交際及雜費。");
+    : (tripN ? "出國天數 " + tripN + " 天：保險費依" + insName + "帶入，禮品交際及雜費 = NT$" + fmt(GIFT_PER_DAY) + " × " + tripN + " 日，國際漫遊費 = " + roamR.note + "。"
+    : "保險費與禮品交際及雜費會在取得返抵台灣日期（按「自動查價」或手動輸入）後自動帶入；國際漫遊費依你選的方案先以 1 份計入。");
 
-  var ins = D($("oIns").value), gift = D($("oGift").value);
+  var ins = D($("oIns").value), gift = D($("oGift").value), roam = D($("oRoam").value);
   var base = dadd(dadd(D($("oVisa").value), D($("oTrans").value)), D($("oMisc").value));
-  var grand = dadd(dadd(dadd(dadd(fareTotal, pdTotal), ins), gift), base);
+  var grand = dadd(dadd(dadd(dadd(dadd(fareTotal, pdTotal), ins), gift), roam), base);
 
   var out = "";
   function line(label, val, sub) { out += "<tr><td>" + label + (sub ? "<div class='note'>" + sub + "</div>" : "") + "</td><td class='r'>" + dfmt(val, 0) + "</td></tr>"; }
@@ -520,6 +575,7 @@ function calc() {
   line("日支生活費", pdTotal, usdOne.v > 0n && rate.v > 0n ? "US$ " + dfmt(usdOne, 2) + " × 匯率 " + dfmt(rate, 0) : "請確認日支數額與匯率");
   line("保險費", ins, manualF.oIns ? "手動輸入" : (insAuto ? insName + "　" + tripN + " 日" : (tripN > 30 ? "超過 30 天，請手動輸入" : "")));
   line("禮品交際及雜費", gift, manualF.oGift ? "手動輸入" : (tripN ? "NT$ " + fmt(GIFT_PER_DAY) + " × " + tripN + " 日" : ""));
+  line("國際漫遊費", roam, manualF.oRoam ? "手動輸入" : (tripN ? roamR.note : ""));
   line("簽證／當地交通／其他", base, "");
   out += "<tr><td><strong>合計</strong></td><td class='r'><strong>NT$ " + dfmt(grand, 0) + "</strong></td></tr>";
   $("sumRows").innerHTML = out;
@@ -531,7 +587,7 @@ function calc() {
     "期間：" + (tripKnown ? startIso + " ～ " + endIso + "（" + tripN + " 天）" : "尚未確定（需先取得返抵台灣日期）"),
     "機票：NT$ " + dfmt(fareTotal, 0),
     "日支生活費：NT$ " + dfmt(pdTotal, 0) + "（每人 US$ " + dfmt(usdOne, 2) + "，相當於 " + dfmt({ v: equivUnits, sc: 4 }, 0) + " 個整日）",
-    "保險費：NT$ " + dfmt(ins, 0) + "　禮品交際及雜費：NT$ " + dfmt(gift, 0),
+    "保險費：NT$ " + dfmt(ins, 0) + "　禮品交際及雜費：NT$ " + dfmt(gift, 0) + "　國際漫遊費：NT$ " + dfmt(roam, 0),
     "其他費用：NT$ " + dfmt(base, 0),
     "合計：NT$ " + dfmt(grand, 0),
     "（概估，正式報支以規定為準）"
@@ -578,10 +634,11 @@ $("dayRows").addEventListener("change", function (e) {
   if (el && el.classList && el.classList.contains("pct")) { manualPct[el.getAttribute("data-d")] = +el.value; calc(); }
 });
 $("resetPct").addEventListener("click", function () { clearManual(); calc(); });
-["fareBR", "fareCI", "fareOther", "override", "oVisa", "oTrans", "oMisc", "buffer", "longStay", "ceilUsd"].forEach(function (id) {
+["fareBR", "fareCI", "fareOther", "override", "oVisa", "oTrans", "oMisc", "buffer"].forEach(function (id) {
   $(id).addEventListener("input", calc);
 });
-["oIns", "oGift"].forEach(function (id) { $(id).addEventListener("input", function () { manualF[id] = true; calc(); }); });
+["oIns", "oGift", "oRoam"].forEach(function (id) { $(id).addEventListener("input", function () { manualF[id] = true; calc(); }); });
+$("roamPlan").addEventListener("change", function () { manualF.oRoam = false; calc(); });
 $("insType").addEventListener("change", function () { insTypeManual = true; calc(); });
 document.querySelectorAll("[data-reset]").forEach(function (b) {
   b.addEventListener("click", function () { manualF[b.getAttribute("data-reset")] = false; calc(); });

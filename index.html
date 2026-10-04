@@ -407,16 +407,15 @@ function refreshRoamPlans(places) {
   if (sig === roamSig) return;
   roamSig = sig; manualF.oRoam = false;                 // 換目的地就回到自動帶入
   var sel = $("roamPlan"); sel.innerHTML = "";
-  if (!list.length) {
-    var o = document.createElement("option"); o.value = ""; o.textContent = has ? "有國家不在全球通涵蓋名單，請手動輸入" : "請先選擇目的地"; sel.appendChild(o); return;
-  }
-  list.forEach(function (p) {
-    var o = document.createElement("option"); o.value = p.key; o.textContent = p.name + "　TWD " + p.price + "／" + p.days + " 天"; sel.appendChild(o);
-  });
-  sel.value = list[0].key;
+  function add(v, txt) { var o = document.createElement("option"); o.value = v; o.textContent = txt; sel.appendChild(o); }
+  if (!has) add("", "請先選擇目的地");
+  list.forEach(function (p) { add(p.key, p.name + "　TWD " + p.price + "／" + p.days + " 天"); });
+  add("custom", "自訂（自行輸入金額）");
+  sel.value = list.length ? list[0].key : (has ? "custom" : "");
 }
 function roamAutoCalc(places, tripN, key) {
   if (!places.some(Boolean)) return { amt: 0, note: "" };
+  if (key === "custom") return { amt: 0, custom: true, note: roamApplicable(places).length ? "" : "有國家不在全球通方案涵蓋名單，請依中華電信公告手動輸入" };
   var p = ROAM_PLANS.filter(function (x) { return x.key === key; })[0];
   if (!p || roamApplicable(places).indexOf(p) === -1) return { amt: 0, note: "有國家不在全球通方案涵蓋名單，請依中華電信公告手動輸入" };
   var n = tripN ? Math.ceil(tripN / p.days) : 1;       // 天數還不確定時，先以 1 份計
@@ -1009,8 +1008,8 @@ function calc() {
   if (!manualF.oGift) $("oGift").value = giftAuto || "";
   refreshRoamPlans(places);
   var roamR = roamAutoCalc(places, tripN, $("roamPlan").value);
-  if (!manualF.oRoam) $("oRoam").value = roamR.amt || "";
-  document.querySelectorAll("[data-reset]").forEach(function (b) { b.style.display = manualF[b.getAttribute("data-reset")] ? "" : "none"; });
+  if (!manualF.oRoam && !roamR.custom) $("oRoam").value = roamR.amt || "";
+  document.querySelectorAll("[data-reset]").forEach(function (b) { var k = b.getAttribute("data-reset"); b.style.display = (manualF[k] && !(k === "oRoam" && roamR.custom)) ? "" : "none"; });
   var autoMsgs = [];
   if (tripN > 30) autoMsgs.push("出國天數 " + tripN + " 天，超過保費表的 30 天，請手動輸入保險費。");
   if (!tripN) autoMsgs.push("保險費與禮品交際及雜費會在取得返抵台灣日期（按「自動查價」或手動輸入）後自動帶入；國際漫遊費依你選的方案先以 1 份計入。");
@@ -1081,7 +1080,7 @@ function calc() {
   row("s", "保險費", ins, [insMainNote, othText(insO)].filter(Boolean).join("；"));
   var esim = adminItems[3][1], adminParts = [];
   [adminItems[0], adminItems[1]].forEach(function (x) { if (x[1].v !== 0n) adminParts.push(x[0] + " " + dfmt(x[1], 0) + (x[2] ? "（" + x[2] + "）" : "")); });
-  if (roam.v !== 0n) adminParts.push("國際漫遊費 " + dfmt(roam, 0) + (manualF.oRoam ? "（手動輸入）" : (roamR.note ? "（" + roamR.note + "）" : "")));
+  if (roam.v !== 0n) adminParts.push("國際漫遊費 " + dfmt(roam, 0) + ((manualF.oRoam || roamR.custom) ? "（手動輸入）" : (roamR.note ? "（" + roamR.note + "）" : "")));
   if (esim.v !== 0n) adminParts.push("eSIM 費用 " + dfmt(esim, 0));
   var adminOt = othText(adminO); if (adminOt) adminParts.push(adminOt);
   row("s", "行政費", adminTotal, adminParts.join("、"));
@@ -1141,7 +1140,11 @@ $("resetPct").addEventListener("click", function () { clearManual(); calc(); });
   $(id).addEventListener("input", calc);
 });
 ["oIns", "oGift", "oRoam"].forEach(function (id) { $(id).addEventListener("input", function () { manualF[id] = true; calc(); }); });
-$("roamPlan").addEventListener("change", function () { manualF.oRoam = false; calc(); });
+$("roamPlan").addEventListener("change", function () {
+  manualF.oRoam = false;
+  if ($("roamPlan").value === "custom") { $("oRoam").value = ""; $("oRoam").focus(); }
+  calc();
+});
 $("insType").addEventListener("change", function () { insTypeManual = true; calc(); });
 document.querySelectorAll("[data-reset]").forEach(function (b) {
   b.addEventListener("click", function () { manualF[b.getAttribute("data-reset")] = false; calc(); });

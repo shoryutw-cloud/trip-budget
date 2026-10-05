@@ -122,6 +122,9 @@ section[aria-labelledby="s6"] { scroll-margin-top: calc(env(safe-area-inset-top,
 .dotlist { list-style: none; margin: 4px 0 0; padding: 0; }
 .dotlist li { padding-left: 1em; text-indent: -1em; margin: 2px 0; }
 .dotlist li::before { content: "．"; }
+.titlebar { margin: 0 0 18px; }
+.titlebar .byline { margin: 0 0 10px; }
+.titlebar .clearbtn { width: auto; padding: 6px 12px; font-size: .875rem; }
 .chk { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 1rem; color: var(--ink); }
 .stop { border: 1px dashed var(--line); border-radius: 10px; padding: 12px; margin-top: 12px; }
 .stophead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -194,13 +197,14 @@ table.perdiem #pdRows tr:first-child td { border-top: 2px solid var(--line); }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .actions button { width: auto; }
 details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margin-top: 10px; }
-@media print { #clearAll, .stk, .totop, .links, .actions, details, .total { display: none; } body { background: #fff; color: #000; } section { break-inside: avoid; } }
+@media print { .clearbtn, .stk, .totop, .links, .actions, details, .total { display: none; } body { background: #fff; color: #000; } section { break-inside: avoid; } }
 </style>
 </head>
 <body>
 <main>
   <h1>因公赴國外出差旅費試算</h1>
-  <p class="byline">本試算不適用出國訓練</p>
+  <div class="titlebar"><p class="byline">本試算不適用出國訓練</p>
+    <button class="btn ghost clearbtn" id="clearAllTop" type="button">清除已記憶的資料，重新開始</button></div>
 
   <section aria-labelledby="s1">
     <h2 id="s1">1. 行程</h2>
@@ -323,6 +327,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <div class="grid two" style="margin-top:12px">
       <div id="overrideBox" style="display:none"><label for="override">此地區不在日支數額表內，請輸入日支數額（USD／日）</label><input id="override" type="number" min="0" step="0.01" class="num"></div>
     </div>
+    <p class="note" id="overNote" style="display:none;margin-top:12px"><span id="overText"></span>　<button type="button" class="linkbtn" id="resetPct" style="display:inline">全部恢復自動</button></p>
     <div class="scroll" style="margin-top:12px">
       <table class="perdiem">
         <thead><tr><th>日期</th><th>狀態</th><th>日支數額（USD）</th><th>如有供膳或宿</th><th>日支比例</th><th class="r">USD</th><th class="r">TWD</th></tr></thead>
@@ -330,7 +335,6 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
         <tbody id="pdRows"></tbody>
       </table>
     </div>
-    <div class="actions"><button class="btn ghost" id="resetPct" type="button">恢復自動計算</button></div>
     <ul class="notes">
       <li>資料來源：行政院 114 年 10 月 31 日院授主預字第 1140103430 號函修正之日支數額表，自 115 年 1 月 1 日生效。</li>
       <li>日支數額按百分率計算，其總計後尾數不足一元者，進位為一元。</li>
@@ -400,7 +404,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <div class="actions">
       <button class="btn" id="copyBtn" type="button">複製摘要</button>
       <button class="btn ghost" id="printBtn" type="button">列印／存成 PDF</button>
-      <button class="btn ghost" id="clearAll" type="button">清除已記憶的資料，重新開始</button>
+      <button class="btn ghost clearbtn" id="clearAll" type="button">清除已記憶的資料，重新開始</button>
     </div>
     <p class="note">填過的行程與費用會自動記憶在這個瀏覽器裡，下次打開還在；換手機、換瀏覽器或清除瀏覽資料就會消失。匯率另外記憶，要回到預設值請按「恢復預設匯率」。</p>
     <p class="note" id="copyMsg" role="status"></p>
@@ -1011,9 +1015,12 @@ function calc() {
         else { kind = "mid"; for (var g = 0; g < n - 1; g++) if (deps[g] <= iso) pi = g; }      // 兩站之間：用「起飛地」的日支數額
       }
       var dd = deduct[iso] || {};
-      if (dd.lodge != null && dd.lodgeKind !== kind) {         // 那天的狀態變了（例如原本在飛機上、現在變成留宿）：舊的住宿選擇作廢，回到自動
-        delete dd.lodge; delete dd.lodgeKind; if (!Object.keys(dd).length) delete deduct[iso];
+      if (dd.lodge != null && (dd.lodgeKind !== kind || !!dd.lodge === (kind !== "stay"))) {   // 那天的狀態變了，或選的剛好和自動一樣：這個住宿選擇作廢，回到自動
+        delete dd.lodge; delete dd.lodgeKind;
       }
+      ["b", "l", "d"].forEach(function (k) { if (dd[k] === false) delete dd[k]; });
+      if (deduct[iso] && !Object.keys(dd).length) delete deduct[iso];
+      var lodgeOver = dd.lodge != null;                          // 這一天的住宿扣除是使用者手動改的
       var ded = { lodge: dd.lodge != null ? !!dd.lodge : kind !== "stay", b: !!dd.b, l: !!dd.l, d: !!dd.d };     // 沒有留宿的日子，住宿費本來就不用付
       var auto = 100 - (ded.lodge ? DEDUCT.lodge : 0) - (ded.b ? DEDUCT.b : 0) - (ded.l ? DEDUCT.l : 0) - (ded.d ? DEDUCT.d : 0);
       var pct = auto;
@@ -1053,13 +1060,19 @@ function calc() {
         if (iso === arrs[0] && est.indexOf("抵達當地日期") > -1) warn = "抵達日期尚未取得，暫以出發當日計";
         if (iso === deps[n - 1] && est.indexOf("返抵台灣日期") > -1) warn = "返抵台灣日期尚未取得，暫以當日計";
       }
-      days.push({ iso: iso, kind: kind, label: label, warn: warn, rate: dstr(rUsd), autoRate: dstr(autoRate), rateEdited: rateEdited, pct: pct, usd: usd, ded: ded });
+      days.push({ iso: iso, kind: kind, lodgeOver: lodgeOver, label: label, warn: warn, rate: dstr(rUsd), autoRate: dstr(autoRate), rateEdited: rateEdited, pct: pct, usd: usd, ded: ded });
     }
+  }
+  if (validRange) {
+    var inTrip = {}; days.forEach(function (d) { inTrip[d.iso] = true; });
+    Object.keys(deduct).forEach(function (k) { if (!inTrip[k]) delete deduct[k]; });
+    Object.keys(rateOver).forEach(function (k) { if (!inTrip[k]) delete rateOver[k]; });
   }
   var rows = "";
   days.forEach(function (d) {
     function chip(k, text, on) { return "<label class='chip" + (on ? " on" : "") + "'><input type='checkbox' data-d='" + d.iso + "' data-k='" + k + "' data-kind='" + d.kind + "'" + (on ? " checked" : "") + ">" + text + "</label>"; }
     rows += "<tr><td>" + d.iso + "<span class='wd'>（" + wdOf(d.iso) + "）</span></td><td>" + esc(d.label) + (d.warn ? "　<span class='redwarn'>（" + esc(d.warn) + "）</span>" : "") +
+      (d.lodgeOver ? "　<span class='note'>" + (d.ded.lodge ? "已手動扣除住宿" : "已手動取消住宿扣除（照收住宿費）") + "</span>" : "") +
       (d.rateEdited ? "　<span class='note'>日支數額已手動調整</span>" : "") + "</td>" +
       "<td><div class='ratebox'><input type='number' class='ratein num' data-d='" + d.iso + "' data-auto='" + d.autoRate + "' min='0' step='any' value='" + d.rate + "' aria-label='" + d.iso + " 日支數額（USD）'></div></td>" +
       "<td><div class='chips'>" + chip("lodge", "住宿 −" + DEDUCT.lodge + "%", d.ded.lodge) + chip("b", "早 −" + DEDUCT.b + "%", d.ded.b) + chip("l", "午 −" + DEDUCT.l + "%", d.ded.l) + chip("d", "晚 −" + DEDUCT.d + "%", d.ded.d) + "</div></td>" +
@@ -1068,7 +1081,10 @@ function calc() {
   });
   if (!days.length) rows = "<tr><td colspan='7' class='note'>" + (validRange ? "請先選擇目的地。" : (multi ? "請先選好出發日期、各站日期與回程日期。" : "請先選好出發日期與回程日期。")) + "</td></tr>";
   $("dayRows").innerHTML = rows;
-  $("resetPct").style.display = (Object.keys(deduct).length || Object.keys(rateOver).length) ? "" : "none";
+  var overDays = {}; Object.keys(deduct).forEach(function (k) { overDays[k] = 1; }); Object.keys(rateOver).forEach(function (k) { overDays[k] = 1; });
+  var nOver = Object.keys(overDays).length;
+  $("overNote").style.display = nOver ? "" : "none";
+  $("overText").textContent = "有 " + nOver + " 天已手動調整（供應的餐、住宿扣除或日支數額）。";
 
   var startIso = days.length ? days[0].iso : "", endIso = days.length ? days[days.length - 1].iso : "";
   var tripKnown = days.length > 0 && !!ef.a2;      // 要知道「返抵台灣落地日」才算得出天數
@@ -1101,6 +1117,11 @@ function calc() {
   if (usedFallback) warns.push("行程中有日期不在該城市的季節表內，已依附註改用該國「其他」數額。");
   if (s && noData && !hasOverride) warns.push("此行程缺少日支數額，請在下方輸入。");
   if (orderBad) warns.push("抵達當地日期晚於離開日期，請檢查各站日期。");
+  if (multi && validRange) {                         // 各站的日期要一站比一站晚：出發日期 ≤ 第 2 站 ≤ … ≤ 回程日期
+    var seq = [d1].concat(multiStops.map(function (st) { return st.date; }), [r1]), seqBad = false;
+    for (var qi = 1; qi < seq.length; qi++) if (seq[qi] && seq[qi - 1] && seq[qi] < seq[qi - 1]) seqBad = true;
+    if (seqBad) warns.push("各站日期要依序往後（出發日期 ≤ 第 2 站 ≤ … ≤ 回程日期），目前有順序顛倒的，日支費的天數會不對，請檢查。");
+  }
   if (validRange) {
     var early = [];
     if (arrs[0] < d1) early.push("抵達當地日期（" + arrs[0] + "）比出發日期（" + d1 + "）早 " + dayDiff(arrs[0], d1) + " 天");
@@ -1560,13 +1581,15 @@ function finishRestore(s) {                                  // 在第一次計�
 }
 window.addEventListener("pagehide", saveState);
 document.addEventListener("visibilitychange", function () { if (document.hidden) saveState(); });
-$("clearAll").addEventListener("click", function () {
+function clearEverything() {
   if (!window.confirm("確定要清除已記憶的行程與費用資料，重新開始嗎？（匯率不受影響）")) return;
   stateReady = false; clearTimeout(saveTimer); store.del(STATE_KEY);
   try { history.scrollRestoration = "manual"; } catch (e) {}          // 重新載入後不要回到原本捲動的位置
   try { sessionStorage.setItem("goTop", "1"); } catch (e) {}
   window.scrollTo(0, 0); location.reload();
-});
+}
+$("clearAll").addEventListener("click", clearEverything);
+$("clearAllTop").addEventListener("click", clearEverything);
 
 var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 var SCROLL_BEHAVIOR = reduceMotion ? "auto" : "smooth";

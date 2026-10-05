@@ -860,8 +860,8 @@ function renderStops() {
     }
     fillR(); fillC(); fillT(); fillA(false);
 
-    rs.addEventListener("change", function () { st.r = rs.value; st.c = ""; st.t = ""; fillC(); fillT(); fillA(true); onTripChange(); });
-    cs.addEventListener("change", function () { st.c = cs.value; st.t = ""; fillT(); fillA(true); onTripChange(); });
+    rs.addEventListener("change", function () { st.r = rs.value; st.c = ""; st.t = ""; fillC(); fillT(); fillA(true); onTripChange(); if (st.r !== "") openNext(cs); });
+    cs.addEventListener("change", function () { st.c = cs.value; st.t = ""; fillT(); fillA(true); onTripChange(); if (st.c !== "" && st.t === "") openNext(ts); });
     ts.addEventListener("change", function () { st.t = ts.value; fillA(true); onTripChange(); });
     aps.addEventListener("change", function () { st.ap = aps.value; apo.style.display = st.ap === "__other" ? "" : "none"; if (st.ap === "__other") apo.focus(); clearAuto(); refresh(); });
     apo.addEventListener("input", function () { st.apOther = apo.value; clearAuto(); refresh(); });
@@ -1210,8 +1210,15 @@ function fareChosen() {
 function refresh() { calc(); }
 
 function onTripChange() { clearAuto(); clearManual(); insTypeManual = false; clampManualArrivals(); refresh(); }
-regionSel.addEventListener("change", function () { fillCountries(); onTripChange(); });
-countrySel.addEventListener("change", function () { fillCities(); onTripChange(); });
+function openNext(sel) {                          // 選完上一個欄位，自動跳到下一個並打開選單
+  if (!sel || sel.options.length < 2) return;
+  setTimeout(function () {
+    try { sel.focus(); } catch (e) {}
+    try { if (typeof sel.showPicker === "function") sel.showPicker(); } catch (e) {}
+  }, 60);
+}
+regionSel.addEventListener("change", function () { fillCountries(); onTripChange(); if (regionSel.value !== "") openNext(countrySel); });
+countrySel.addEventListener("change", function () { fillCities(); onTripChange(); if (countrySel.value !== "" && citySel.value === "") openNext(citySel); });
 citySel.addEventListener("change", function () { fillAirports(); onTripChange(); });
 $("from").addEventListener("input", function () { clearAuto(); refresh(); });
 $("toSel").addEventListener("change", function () {

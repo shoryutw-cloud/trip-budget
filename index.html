@@ -706,7 +706,7 @@ function initRates() {
 }
 
 // ---------- 大眾陸運工具（可新增多項） ----------
-var TRANS_KINDS = ["捷運", "公車", "地鐵"];
+var TRANS_KINDS = ["捷運", "公車", "地鐵", "火車"];
 var transRows = [{ kind: "捷運", other: "", use: "北車往返桃園機場", amt: "320", cur: "TWD" }];
 function transName(r) {
   var tool = r.kind === "__other" ? ((r.other || "").trim() || "其他") : r.kind;

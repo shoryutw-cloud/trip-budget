@@ -320,6 +320,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <ul class="notes">
       <li>資料來源：行政院 114 年 10 月 31 日院授主預字第 1140103430 號函修正之日支數額表，自 115 年 1 月 1 日生效。</li>
       <li>日支數額按百分率計算，其總計後尾數不足一元者，進位為一元。</li>
+      <li>住宿、膳食、零用三列，是依每一天實際算入的項目分別加總（有人供應的項目只扣掉那一項），三列加起來等於進位前的日支加總。</li>
       <li>回國行程的日支費，以飛機起飛地的日支費計算；如果有轉機，例如 A 地→B 地→台灣，則以 A 地的日支費計算。</li>
       <li>一日內跨越兩地區或兩地區以上者，日支費以當日留宿之地區計算。</li>
       <li>供膳宿等其他扣減情形，請依要點核對。</li>
@@ -484,6 +485,13 @@ function D(x) {
 function dint(n) { return { v: BigInt(n), sc: 0 }; }
 function dup(a, sc) { return a.sc >= sc ? a.v : a.v * (10n ** BigInt(sc - a.sc)); }
 function dadd(a, b) { var sc = Math.max(a.sc, b.sc); return { v: dup(a, sc) + dup(b, sc), sc: sc }; }
+function dsub(a, b) { return dadd(a, { v: -b.v, sc: b.sc }); }
+function dround2(a) {                                   // 四捨五入到分（只用在「手動輸入比例」那天的三項分配）
+  if (a.sc <= 2) return a;
+  var div = 10n ** BigInt(a.sc - 2), q = a.v / div, r = a.v % div;
+  if (r * 2n >= div) q += 1n;
+  return { v: q, sc: 2 };
+}
 function dmul(a, b) { return { v: a.v * b.v, sc: a.sc + b.sc }; }
 function dscale(a, mul, shift) { return { v: a.v * BigInt(mul), sc: a.sc + shift }; }   // a × mul ÷ 10^shift
 function dnum(a) { return Number(a.v) / Math.pow(10, a.sc); }                           // 只用來比大小
@@ -976,7 +984,7 @@ function calc() {
   renderRateInfo(places);
 
   // 逐日列出：出發日 ～ 返抵台灣日（以當地日期）。每一天依「當天留宿的地點」取該地點的日支數額
-  var days = [], usdSum = dint(0), equivSum = dint(0), usedFallback = false, noData = false, orderBad = false;
+  var days = [], usdSum = dint(0), lodgeSum = dint(0), mealSum = dint(0), smallSum = dint(0), equivSum = dint(0), usedFallback = false, noData = false, orderBad = false;
   if (validRange) {
     for (var z = 0; z < n; z++) if (arrs[z] > deps[z]) orderBad = true;
     var start = arrs[0] < d1 ? arrs[0] : d1, end = a2 > deps[n - 1] ? a2 : deps[n - 1];
@@ -1008,6 +1016,16 @@ function calc() {
       }
       var usd = dscale(dmul(rUsd, pctDec), 1, 2);    // 日支數額 × 比例，全程精確小數運算
       usdSum = dadd(usdSum, usd); equivSum = dadd(equivSum, dscale(pctDec, 1, 2));
+      // 這一天的金額拆成 住宿／膳食／零用：有人供應的項目，只扣掉那一項（住宿 70、膳食 20 −早 4 −午 8 −晚 8、零用 10 一律保留）
+      var shL = ded.lodge ? 0 : DEDUCT.lodge, shM = 20 - (ded.b ? DEDUCT.b : 0) - (ded.l ? DEDUCT.l : 0) - (ded.d ? DEDUCT.d : 0), shS = 10;
+      var usdL, usdM, usdS;
+      if (manualPct[iso] == null) {
+        usdL = dscale(dmul(rUsd, D(String(shL))), 1, 2); usdM = dscale(dmul(rUsd, D(String(shM))), 1, 2); usdS = dscale(dmul(rUsd, D(String(shS))), 1, 2);
+      } else {                                         // 手動輸入的比例：三項照原本的比例分配，零用取剩下的，加起來一定等於這一天的金額
+        var scaleTo = function (share) { return { v: (BigInt(share) * pctDec.v * 1000000n) / (BigInt(auto) * (10n ** BigInt(pctDec.sc))), sc: 6 }; };
+        usdL = dround2(dscale(dmul(rUsd, scaleTo(shL)), 1, 2)); usdM = dround2(dscale(dmul(rUsd, scaleTo(shM)), 1, 2)); usdS = dsub(dsub(usd, usdL), usdM);
+      }
+      lodgeSum = dadd(lodgeSum, usdL); mealSum = dadd(mealSum, usdM); smallSum = dadd(smallSum, usdS);
       var label, warn = "";
       if (!multi) {
         label = kind === "out" ? "飛行中，未留宿"
@@ -1060,8 +1078,8 @@ function calc() {
   var twdOne = dmul(usdOne, rate);
 
   var pd = "";
-  [["住宿（70%）", 7], ["膳食（20%）", 2], ["零用（10%）", 1]].forEach(function (x) {
-    pd += "<tr><td colspan='5'>" + x[0] + "</td><td class='r'>" + dfmt(dscale(usdSum, x[1], 1), 2) + "</td><td class='r'>" + dfmt(dscale(twdSum, x[1], 1), 2) + "</td></tr>";
+  [["住宿", lodgeSum], ["膳食", mealSum], ["零用", smallSum]].forEach(function (x) {      // 依每一天實際算入的項目分別加總
+    pd += "<tr><td colspan='5'>" + x[0] + "</td><td class='r'>" + dfmt(x[1], 2) + "</td><td class='r'>" + dfmt(dmul(x[1], rate), 2) + "</td></tr>";
   });
   pd += "<tr><td colspan='5'><strong>日支合計" + (est.length ? "（暫估）" : "") + "（相當於 " + dfmt(equivSum, 0) + " 個整日）</strong></td><td class='r'><strong>" +
     dfmt(usdOne, 2) + "</strong></td><td class='r'><strong>" + dfmt(twdOne, 2) + "</strong></td></tr>";

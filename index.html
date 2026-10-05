@@ -151,8 +151,17 @@ table.perdiem td.r, table.perdiem th.r { white-space: nowrap; min-width: 7.5em; 
 .ratebox span { color: var(--muted); font-size: .875rem; }
 .pctbox { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
 .pctbox input { width: 5.4em; text-align: right; }
-/* 手機窄版：逐日表改成「一天幾行」，不再比螢幕寬 */
-@media (max-width: 640px) {
+@media (min-width: 901px) {                    /* 電腦：固定各欄寬度，讓日支比例往右、整體比較平均 */
+  table.perdiem { table-layout: fixed; }
+  table.perdiem th:nth-child(1) { width: 13%; } table.perdiem th:nth-child(2) { width: 10%; } table.perdiem th:nth-child(3) { width: 19%; }
+  table.perdiem th:nth-child(4) { width: 22%; } table.perdiem th:nth-child(5) { width: 17%; } table.perdiem th:nth-child(6) { width: 8%; } table.perdiem th:nth-child(7) { width: 11%; }
+  table.perdiem th:nth-child(5), table.perdiem td:nth-child(5) { padding-left: 20px; }
+  table.perdiem td:nth-child(1) { white-space: nowrap; }
+  .ratebox { flex-wrap: wrap; }
+  .wd { display: block; color: var(--muted); font-size: .875rem; }
+}
+/* 手機、平板：逐日表改成「一天幾行」，不再比螢幕寬 */
+@media (max-width: 900px) {
   table.perdiem { display: block; width: 100%; }
   table.perdiem thead { display: none; }
   table.perdiem tbody { display: block; }
@@ -297,21 +306,21 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <div class="rate" id="rateInfo" aria-live="polite"></div>
     <p class="note"><strong>計算方式：</strong>看每天有沒有在當地留宿。留宿當地的日子按該地區日支數額 100%；在飛機上、沒有留宿的日子（出發日到抵達前，以及離開當地到返抵台灣）不用付住宿費，按 30%。有人供應的項目，在那一天點選就會扣掉該項費用：住宿 70%、早餐 4%、午餐 8%、晚餐 8%（早、午、晚就是三餐）；零用 10% 一律保留，所以每天最低 10%。日期都以所在地的當地日期為準，算出來的比例也可以直接手動輸入。每一天的「當日日支數額」也可以直接改，例如第一天在紐約，之後幾天改在別的地方過夜，就把那幾天改成當地的日支數額。</p>
     <p class="note" id="flightNote"></p>
-    <details id="manualDates">
-      <summary>手動修改抵達日期</summary>
+    <label class="chk" style="margin-top:12px"><input type="checkbox" id="manualOn"> 手動修改抵達日期（勾選後，才會用下面填的日期計算）</label>
+    <div id="manualDates" style="display:none">
       <div class="grid two" style="margin-top:8px">
         <div><label for="a1">抵達當地日期</label><input type="date" id="a1"></div>
         <div><label for="a2">返抵台灣日期</label><input type="date" id="a2"></div>
       </div>
       <div id="extraArr" class="grid two" style="margin-top:8px"></div>
       <p class="note" id="arrNote">抵達當地日期最多可以比出發日期早 1 天（時差造成）；返抵台灣日期不能早於回程日期。</p>
-    </details>
+    </div>
     <div class="grid two" style="margin-top:12px">
       <div id="overrideBox" style="display:none"><label for="override">此地區不在日支數額表內，請輸入日支數額（USD／日）</label><input id="override" type="number" min="0" step="0.01" class="num"></div>
     </div>
     <div class="scroll" style="margin-top:12px">
       <table class="perdiem">
-        <thead><tr><th>日期</th><th>狀態</th><th>當日日支數額（可改）</th><th>有人供應就點選（扣除）</th><th>日支比例</th><th class="r">USD</th><th class="r">TWD</th></tr></thead>
+        <thead><tr><th>日期</th><th>狀態</th><th>當日日支數額（可改）</th><th>如有供膳宿</th><th>日支比例</th><th class="r">USD</th><th class="r">TWD</th></tr></thead>
         <tbody id="dayRows"></tbody>
         <tbody id="pdRows"></tbody>
       </table>
@@ -886,7 +895,7 @@ function renderExtraArr() {
     inp.addEventListener("input", function () {
       var mn = isoAdd(st.date, -1);
       if (clampTo(inp, mn)) $("arrNote").textContent = "第 " + (i + 2) + " 站的抵達日期最多只能比前往日期早 1 天，已改成 " + mn + "。"; else $("arrNote").textContent = ARR_HINT;
-      st.arr = inp.value; autoFilled = false; autoInfo = ""; clearManual(); calc();
+      st.arr = inp.value; clearManual(); calc();
     });
     d.appendChild(l); d.appendChild(inp); box.appendChild(d);
   });
@@ -899,7 +908,13 @@ function addStop() {
 
 var lastSummary = "";
 var manualPct = {};          // 使用者手動改過的日期 -> 比例
-var autoFilled = false;      // 抵達日期是否由自動查價填入
+var autoFilled = false;      // 是否已經有自動查價帶回的抵達日期
+var autoD = { a1: "", a2: "", arr: [] };     // 自動查價帶回的日期（和手動填的分開存）
+function isManual() { return $("manualOn").checked; }
+function effDates() {                        // 實際拿來算日支費的日期：有勾選手動就用手動填的，否則用自動查價的，都沒有就由 calc() 暫以當日估算
+  if (isManual()) return { a1: $("a1").value, a2: $("a2").value, arr: multiStops.map(function (st) { return st.arr; }) };
+  return { a1: autoD.a1, a2: autoD.a2, arr: multiStops.map(function (st, i) { return autoD.arr[i] || ""; }) };
+}
 var autoInfo = "";
 var WD = ["日", "一", "二", "三", "四", "五", "六"];
 var DEDUCT = { lodge: 70, b: 4, l: 8, d: 8 };      // 有人供應就扣掉：住宿 70%、早餐 4%、午餐 8%、晚餐 8%（零用 10% 一律保留，所以每天最少 10%）
@@ -937,30 +952,27 @@ function showAirline() {                                    // 班機資訊與�
   var mode = document.querySelector('input[name="fareMode"]:checked').value, it = fareItins[mode];
   if (mode === "other") {                                   // 選「自訂」：下面的班機資訊清空；抵達日期沿用，讓日支與天數照常計算
     renderItin(null);
-    if (autoFilled) { autoInfo = "抵達與返抵日期沿用自動查價的結果；若與你的票不同，請在下方「手動修改抵達日期」修改。"; clearManual(); }
+    if (autoFilled) { autoInfo = "抵達與返抵日期沿用自動查價的結果；若與你的票不同，請勾選下方「手動修改抵達日期」修改。"; clearManual(); }
     return;
   }
   if (!it) {
     if (!Object.keys(fareItins).length) return;             // 完全沒有分航空公司的資料（舊版 Worker）：維持目前顯示
     renderItin(null);                                       // 這家航空公司查不到班機：下面的班機資訊清空，抵達日期沿用
-    if (autoFilled) { autoInfo = "這家航空公司沒有查到班機；抵達與返抵日期沿用先前的結果，如有不同請在下方「手動修改抵達日期」修改。"; clearManual(); }
+    if (autoFilled) { autoInfo = "這家航空公司沒有查到班機；抵達與返抵日期沿用先前的結果，如有不同請勾選下方「手動修改抵達日期」修改。"; clearManual(); }
     return;
   }
   renderItin({ out: it.out, ret: it.ret });
   if (autoFilled) {
-    $("a1").value = it.out.length ? it.out[it.out.length - 1].arr.time.slice(0, 10) : "";
-    $("a2").value = it.ret && it.ret.length ? it.ret[it.ret.length - 1].arr.time.slice(0, 10) : "";
-    autoInfo = "抵達與返抵日期取自" + AIRLINE_NAME[mode] + "最低價航班（起訖時間見上方「自動查價」結果）。如有不同，可在下方「手動修改抵達日期」改。";
+    autoD.a1 = it.out.length ? it.out[it.out.length - 1].arr.time.slice(0, 10) : "";
+    autoD.a2 = it.ret && it.ret.length ? it.ret[it.ret.length - 1].arr.time.slice(0, 10) : "";
+    autoInfo = "抵達與返抵日期取自" + AIRLINE_NAME[mode] + "最低價航班（起訖時間見上方「自動查價」結果）。如有不同，可勾選下方「手動修改抵達日期」改。";
     clearManual();
   }
 }
 function clearAuto() {
   fareItins = {};
   renderItin(null);
-  if (autoFilled) {
-    $("a1").value = ""; $("a2").value = ""; autoFilled = false; autoInfo = "";
-    multiStops.forEach(function (st) { st.arr = ""; }); renderExtraArr();
-  }
+  if (autoFilled) { autoD = { a1: "", a2: "", arr: [] }; autoFilled = false; autoInfo = ""; }
 }
 
 function calc() {
@@ -970,7 +982,8 @@ function calc() {
   var needManual = places.some(function (p) { return p && p.entry.manual; });   // 只有日支表沒有的地區（港澳、大陸）才需要自己輸入數額
   $("overrideBox").style.display = needManual ? "" : "none";
   var hasOverride = needManual && override.v > 0n;
-  var d1 = $("d1").value, r1 = $("d2").value, a1 = $("a1").value, a2 = $("a2").value;
+  var ef = effDates();
+  var d1 = $("d1").value, r1 = $("d2").value, a1 = ef.a1, a2 = ef.a2;
   var stopsOk = !multi || multiStops.every(function (st) { return !!st.date; });
   var validRange = !!(d1 && r1 && r1 >= d1 && stopsOk);
   var est = [], arrs = [], deps = [];
@@ -978,7 +991,7 @@ function calc() {
     if (!a1) { a1 = d1; est.push("抵達當地日期"); }
     if (!a2) { a2 = r1; est.push("返抵台灣日期"); }
     arrs.push(a1);
-    if (multi) multiStops.forEach(function (st, i) { if (!st.arr) est.push("第 " + (i + 2) + " 站抵達日期"); arrs.push(st.arr || st.date); });
+    if (multi) multiStops.forEach(function (st, i) { var ar = ef.arr[i]; if (!ar) est.push("第 " + (i + 2) + " 站抵達日期"); arrs.push(ar || st.date); });
     for (var q = 0; q < n; q++) deps.push(q < n - 1 ? multiStops[q].date : r1);
   }
   renderRateInfo(places);
@@ -999,6 +1012,9 @@ function calc() {
         else { kind = "mid"; for (var g = 0; g < n - 1; g++) if (deps[g] <= iso) pi = g; }      // 兩站之間：用「起飛地」的日支數額
       }
       var dd = deduct[iso] || {};
+      if (dd.lodge != null && dd.lodgeKind !== kind) {         // 那天的狀態變了（例如原本在飛機上、現在變成留宿）：舊的住宿選擇作廢，回到自動
+        delete dd.lodge; delete dd.lodgeKind; if (!Object.keys(dd).length) delete deduct[iso];
+      }
       var ded = { lodge: dd.lodge != null ? !!dd.lodge : kind !== "stay", b: !!dd.b, l: !!dd.l, d: !!dd.d };     // 沒有留宿的日子，住宿費本來就不用付
       var auto = 100 - (ded.lodge ? DEDUCT.lodge : 0) - (ded.b ? DEDUCT.b : 0) - (ded.l ? DEDUCT.l : 0) - (ded.d ? DEDUCT.d : 0);
       var pct = manualPct[iso] != null ? Math.min(100, Math.max(10, manualPct[iso])) : auto;
@@ -1049,8 +1065,8 @@ function calc() {
   }
   var rows = "";
   days.forEach(function (d) {
-    function chip(k, text, on) { return "<label class='chip" + (on ? " on" : "") + "'><input type='checkbox' data-d='" + d.iso + "' data-k='" + k + "'" + (on ? " checked" : "") + ">" + text + "</label>"; }
-    rows += "<tr><td>" + d.iso + "（" + wdOf(d.iso) + "）</td><td>" + esc(d.label) + (d.warn ? "　<span class='redwarn'>（" + esc(d.warn) + "）</span>" : "") +
+    function chip(k, text, on) { return "<label class='chip" + (on ? " on" : "") + "'><input type='checkbox' data-d='" + d.iso + "' data-k='" + k + "' data-kind='" + d.kind + "'" + (on ? " checked" : "") + ">" + text + "</label>"; }
+    rows += "<tr><td>" + d.iso + "<span class='wd'>（" + wdOf(d.iso) + "）</span></td><td>" + esc(d.label) + (d.warn ? "　<span class='redwarn'>（" + esc(d.warn) + "）</span>" : "") +
       (d.rateEdited ? "　<span class='note'>日支數額已手動調整</span>" : "") + (d.edited ? "　<span class='note'>比例已手動調整</span>" : "") + "</td>" +
       "<td><div class='ratebox'><input type='number' class='ratein num' data-d='" + d.iso + "' data-auto='" + d.autoRate + "' min='0' step='any' value='" + d.rate + "' aria-label='" + d.iso + " 當日日支數額（USD）'><span>USD／日</span></div></td>" +
       "<td><div class='chips'>" + chip("lodge", "住宿 −" + DEDUCT.lodge + "%", d.ded.lodge) + chip("b", "早 −" + DEDUCT.b + "%", d.ded.b) + chip("l", "午 −" + DEDUCT.l + "%", d.ded.l) + chip("d", "晚 −" + DEDUCT.d + "%", d.ded.d) + "</div></td>" +
@@ -1062,16 +1078,15 @@ function calc() {
   $("resetPct").style.display = (Object.keys(manualPct).length || Object.keys(deduct).length || Object.keys(rateOver).length) ? "" : "none";
 
   var startIso = days.length ? days[0].iso : "", endIso = days.length ? days[days.length - 1].iso : "";
-  var tripKnown = days.length > 0 && !!$("a2").value;      // 要知道「返抵台灣落地日」才算得出天數
+  var tripKnown = days.length > 0 && !!ef.a2;      // 要知道「返抵台灣落地日」才算得出天數
   $("daysInfo").textContent = tripKnown
     ? "出差期間 " + startIso + " 至 " + endIso + "，共 " + days.length + " 天（從台灣出發到返抵台灣落地）。"
     : (multi && !stopsOk ? "請填入每一站「前往此站」的日期。"
     : d1 && r1 && r1 < d1 ? "請確認回程日期不早於出發日期。"
-    : (d1 && r1 ? "出差期間與天數要等按「自動查價」取得返抵台灣日期後才能確定（從台灣出發算到返抵台灣落地）。"
+    : (d1 && r1 ? "出差期間與天數要等按「自動查價」取得返抵台灣日期，或勾選下方「手動修改抵達日期」後才能確定（從台灣出發算到返抵台灣落地）。"
     : "請選擇出發日期與回程日期。"));
-  $("flightNote").textContent = autoInfo ? autoInfo
-    : (est.length ? "抵達與返抵日期會在按上方「自動查價」後自動帶入；在此之前，暫以抵達、返抵當日估算。"
-    : ($("a1").value || $("a2").value ? "抵達與返抵日期為手動輸入。" : ""));
+  $("flightNote").textContent = isManual() ? "抵達與返抵日期為手動輸入。"
+    : (autoInfo ? autoInfo : (est.length ? "抵達與返抵日期會在按上方「自動查價」後自動帶入；在此之前，暫以抵達、返抵當日估算。" : ""));
 
   var twdSum = dmul(usdSum, rate);                                 // 進位前的精確加總
   var usdOne = dceil(usdSum);                                      // 依附註 4：加總後才進位為整數美元（沒有小數就維持原數）
@@ -1227,7 +1242,15 @@ function fareChosen() {
 
 function refresh() { calc(); }
 
-function onTripChange() { clearAuto(); clearManual(); insTypeManual = false; clampManualArrivals(); refresh(); }
+var lastPlaceSig = null;
+function placeSig() { return placesList().filter(Boolean).map(placeName).join("|"); }
+function onTripChange() {
+  clearAuto(); clearManual(); insTypeManual = false; clampManualArrivals();
+  var sig = placeSig();
+  if (lastPlaceSig !== null && sig !== lastPlaceSig) { deduct = {}; rateOver = {}; }     // 換了目的地：之前逐天勾選的供膳宿、改過的日支數額都不再適用
+  lastPlaceSig = sig;
+  refresh();
+}
 function openNext(sel) {                          // 選完上一個欄位，自動跳到下一個並打開選單
   if (!sel || sel.options.length < 2) return;
   setTimeout(function () {
@@ -1258,17 +1281,19 @@ $("d2").addEventListener("input", function () { d2Manual = true; onTripChange();
 var ARR_HINT = "抵達當地日期最多可以比出發日期早 1 天（時差造成）；返抵台灣日期不能早於回程日期。";
 function isoAdd(iso, n) { return iso ? isoOf(addDays(parseISO(iso), n)) : ""; }
 function clampTo(inp, minVal) { if (inp.value && minVal && inp.value < minVal) { inp.value = minVal; return true; } return false; }
-function fillManualDefaults() {                     // 手動修改區打開時，還是空的抵達日期先帶入各自的出發日期
-  if (!$("manualDates").open) return false;
-  var changed = false;
-  if (!$("a1").value && $("d1").value) { $("a1").value = $("d1").value; changed = true; }
-  if (!$("a2").value && $("d2").value) { $("a2").value = $("d2").value; changed = true; }
-  multiStops.forEach(function (st) { if (!st.arr && st.date) { st.arr = st.date; changed = true; } });
+function fillManualDefaults() {                     // 勾選手動時，還是空的日期先帶入：有自動查價的就用它，沒有就用各自的出發日期
+  if (!isManual()) return false;
+  var changed = false, v;
+  if (!$("a1").value && (v = autoD.a1 || $("d1").value)) { $("a1").value = v; changed = true; }
+  if (!$("a2").value && (v = autoD.a2 || $("d2").value)) { $("a2").value = v; changed = true; }
+  multiStops.forEach(function (st, i) { if (!st.arr && (v = autoD.arr[i] || st.date)) { st.arr = v; changed = true; } });
   return changed;
 }
-function clampManualArrivals() {                    // 出發／回程日期改了以後，手動填的抵達日期不能比它早
-  if (autoFilled) return;
-  clampTo($("a1"), isoAdd($("d1").value, -1)); clampTo($("a2"), $("d2").value);
+function clampManualArrivals() {                    // 出發／回程日期改了以後，手動填的抵達日期不能比它早，也不能離譜地比回程晚
+  var d1 = $("d1").value, d2 = $("d2").value;
+  clampTo($("a1"), isoAdd(d1, -1)); clampTo($("a2"), d2);
+  if ($("a1").value && d2 && $("a1").value > d2) $("a1").value = d1;
+  if ($("a2").value && d2 && $("a2").value > isoAdd(d2, 3)) $("a2").value = d2;
   multiStops.forEach(function (st) { var mn = isoAdd(st.date, -1); if (st.arr && mn && st.arr < mn) st.arr = mn; });
   fillManualDefaults();
   if (multiStops.length) renderExtraArr();
@@ -1277,18 +1302,23 @@ function clampManualArrivals() {                    // 出發／回程日期改�
   $(x[0]).addEventListener("input", function () {
     var mn = isoAdd($(x[1]).value, x[3]), fixed = clampTo($(x[0]), mn);
     $("arrNote").textContent = fixed ? x[2] + "，已改成 " + mn + "。" : ARR_HINT;
-    autoFilled = false; autoInfo = ""; clearManual(); calc();
+    clearManual(); calc();
   });
 });
-// 打開「手動修改抵達日期」時：還沒有日期的欄位，先帶入出發日期／回程日期
-$("manualDates").addEventListener("toggle", function () {
-  if (fillManualDefaults()) { renderExtraArr(); autoFilled = false; autoInfo = ""; clearManual(); calc(); }
+// 勾選「手動修改抵達日期」：顯示下面的日期欄位（沒勾選就收起來，也不會被拿來計算）
+$("manualOn").addEventListener("change", function () {
+  var on = isManual();
+  $("manualDates").style.display = on ? "" : "none";
+  if (on) { clampManualArrivals(); fillManualDefaults(); renderExtraArr(); }
+  clearManual(); calc();
 });
 $("dayRows").addEventListener("change", function (e) {
   var el = e.target, iso = el && el.getAttribute ? el.getAttribute("data-d") : null;
   if (!iso) return;
   if (el.type === "checkbox") {                      // 勾選／取消「有人供應」：重新算這一天的比例
-    (deduct[iso] = deduct[iso] || {})[el.getAttribute("data-k")] = el.checked; delete manualPct[iso]; calc();
+    var ddo = (deduct[iso] = deduct[iso] || {}), dk = el.getAttribute("data-k");
+    ddo[dk] = el.checked; if (dk === "lodge") ddo.lodgeKind = el.getAttribute("data-kind");
+    delete manualPct[iso]; calc();
   } else if (el.classList.contains("ratein")) {      // 改這一天的日支數額（例如那天改在別的地方過夜）
     var rv = parseFloat(el.value);
     if (isNaN(rv) || rv < 0 || String(rv) === el.getAttribute("data-auto")) delete rateOver[iso]; else rateOver[iso] = rv;
@@ -1339,11 +1369,9 @@ function multiLookup(msg, btn) {
     if (j.error && !(j.legs && j.legs.length)) throw new Error(typeof j.error === "string" ? j.error : "查詢失敗");
     var L = j.legs || [], lastOf = function (leg) { return leg.flights[leg.flights.length - 1].arr.time.slice(0, 10); };
     if (L.length) {
-      $("a1").value = lastOf(L[0]);
-      multiStops.forEach(function (st, i) { st.arr = L[i + 1] ? lastOf(L[i + 1]) : ""; });
-      $("a2").value = L.length === legs.length ? lastOf(L[L.length - 1]) : "";
-      renderExtraArr(); autoFilled = true; clearManual();
-      autoInfo = "各站抵達與返抵日期取自 Google Flights 最低價組合（起訖時間見上方「自動查價」結果）。如有不同，可在下方「手動修改抵達日期」改。";
+      autoD = { a1: lastOf(L[0]), a2: L.length === legs.length ? lastOf(L[L.length - 1]) : "", arr: multiStops.map(function (st, i) { return L[i + 1] ? lastOf(L[i + 1]) : ""; }) };
+      autoFilled = true; clearManual();
+      autoInfo = "各站抵達與返抵日期取自 Google Flights 最低價組合（起訖時間見上方「自動查價」結果）。如有不同，可勾選下方「手動修改抵達日期」改。";
       renderItin({ groups: L.map(function (leg, i) { return { title: "第 " + (i + 1) + " 段：" + legs[i].from + " → " + legs[i].to, flights: leg.flights }; }) });
     }
     if (j.price) { $("fareOther").value = Math.round(j.price); document.querySelector('input[name="fareMode"][value="other"]').checked = true; }
@@ -1384,11 +1412,10 @@ $("apiBtn").addEventListener("click", function () {
     })();
     var tm = j.times, extra = "";
     if (tm && tm.outArrive) {
-      $("a1").value = tm.outArrive.slice(0, 10);
-      if (tm.retArrive) $("a2").value = tm.retArrive.slice(0, 10); else $("a2").value = "";
+      autoD = { a1: tm.outArrive.slice(0, 10), a2: tm.retArrive ? tm.retArrive.slice(0, 10) : "", arr: [] };
       autoFilled = true; clearManual();
       var al = { BR: "長榮", CI: "華航", JX: "星宇" }[tm.airline] || tm.airline;
-      autoInfo = "抵達與返抵日期取自" + al + "最低價航班（起訖時間見上方「自動查價」結果）。如有不同，可在下方「手動修改抵達日期」改。";
+      autoInfo = "抵達與返抵日期取自" + al + "最低價航班（起訖時間見上方「自動查價」結果）。如有不同，可勾選下方「手動修改抵達日期」改。";
       var it = j.itinerary;
       if (!it) it = { out: [{ flight: "", dep: { id: $("from").value, time: tm.outDepart }, arr: { id: to, time: tm.outArrive } }],
                       ret: tm.retDepart ? [{ flight: "", dep: { id: to, time: tm.retDepart }, arr: { id: $("from").value, time: tm.retArrive } }] : null };
@@ -1477,7 +1504,7 @@ function snapState() {
     stops: multiStops.map(function (st) { var n = selNames(st.r, st.c, st.t); n.ap = st.ap; n.apOther = st.apOther; n.date = st.date; n.arr = st.arr; return n; }),
     vals: vals, fareMode: mode ? mode.value : "BR", roamPlan: $("roamPlan").value,
     manualF: manualF, insTypeManual: insTypeManual, manualPct: manualPct, deduct: deduct, rateOver: rateOver,
-    autoFilled: autoFilled, autoInfo: autoInfo, itin: lastItin, fareItins: fareItins,
+    autoFilled: autoFilled, autoInfo: autoInfo, autoD: autoD, manualOn: isManual(), itin: lastItin, fareItins: fareItins,
     trans: transRows, oth: { fee: OTH.fee.rows, ins: OTH.ins.rows, admin: OTH.admin.rows, gift: OTH.gift.rows }
   };
 }
@@ -1526,6 +1553,14 @@ function restoreState() {
   deduct = s.deduct || {};
   rateOver = s.rateOver || {};
   autoFilled = !!s.autoFilled; autoInfo = s.autoInfo || "";
+  if (s.autoD) autoD = { a1: s.autoD.a1 || "", a2: s.autoD.a2 || "", arr: s.autoD.arr || [] };
+  else if (s.autoFilled) {                                      // 舊版存的資料：自動查價的日期原本放在手動欄位裡，搬到自動日期去，手動欄位清空
+    autoD = { a1: (s.vals || {}).a1 || "", a2: (s.vals || {}).a2 || "", arr: (s.stops || []).map(function (st) { return st.arr || ""; }) };
+    $("a1").value = ""; $("a2").value = ""; multiStops.forEach(function (st) { st.arr = ""; });
+  } else autoD = { a1: "", a2: "", arr: [] };
+  var mOn = s.manualOn !== undefined ? !!s.manualOn : (!s.autoFilled && !!((s.vals || {}).a1 || (s.vals || {}).a2));     // 舊版手動填過日期的，視為已勾選手動
+  $("manualOn").checked = mOn; $("manualDates").style.display = mOn ? "" : "none";
+  renderExtraArr();
   fareItins = s.fareItins || {};
   if (s.itin) renderItin(s.itin);
   insTypeManual = !!s.insTypeManual;
@@ -1578,6 +1613,7 @@ window.addEventListener("scroll", syncToTop, { passive: true });
 toTop.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: SCROLL_BEHAVIOR }); });
 syncToTop();
 var savedState = restoreState();
+lastPlaceSig = placeSig();
 calc();
 finishRestore(savedState);
 stateReady = true;

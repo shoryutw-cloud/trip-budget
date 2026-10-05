@@ -146,6 +146,9 @@ table.perdiem td.r, table.perdiem th.r { white-space: nowrap; min-width: 7.5em; 
 .chip input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
 .chip:focus-within { outline: 3px solid var(--focus); outline-offset: 1px; }
 .chip.on, .chipbtn.on { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); font-weight: 500; }
+.ratebox { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.ratebox input { width: 6.4em; text-align: right; }
+.ratebox span { color: var(--muted); font-size: .875rem; }
 .pctbox { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
 .pctbox input { width: 5.4em; text-align: right; }
 /* 手機窄版：逐日表改成「一天幾行」，不再比螢幕寬 */
@@ -157,13 +160,15 @@ table.perdiem td.r, table.perdiem th.r { white-space: nowrap; min-width: 7.5em; 
   #dayRows tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 4px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
   #dayRows td { border: 0; padding: 0; }
   #dayRows td:nth-child(1) { grid-column: 1; grid-row: 1; font-weight: 500; }
-  #dayRows td:nth-child(4) { grid-column: 2; grid-row: 1; }
+  #dayRows td:nth-child(5) { grid-column: 2; grid-row: 1; }
   #dayRows td:nth-child(2) { grid-column: 1 / -1; grid-row: 2; color: var(--muted); font-size: .875rem; }
-  #dayRows td:nth-child(3) { grid-column: 1 / -1; grid-row: 3; }
-  #dayRows td:nth-child(5) { grid-column: 1; grid-row: 4; text-align: left; }
-  #dayRows td:nth-child(6) { grid-column: 2; grid-row: 4; text-align: right; }
-  #dayRows td:nth-child(5)::before { content: "USD "; color: var(--muted); font-size: .875rem; }
-  #dayRows td:nth-child(6)::before { content: "TWD "; color: var(--muted); font-size: .875rem; }
+  #dayRows td:nth-child(3) { grid-column: 1 / -1; grid-row: 3; display: flex; align-items: center; gap: 8px; }
+  #dayRows td:nth-child(3)::before { content: "當日日支數額"; color: var(--muted); font-size: .875rem; }
+  #dayRows td:nth-child(4) { grid-column: 1 / -1; grid-row: 4; }
+  #dayRows td:nth-child(6) { grid-column: 1; grid-row: 5; text-align: left; }
+  #dayRows td:nth-child(7) { grid-column: 2; grid-row: 5; text-align: right; }
+  #dayRows td:nth-child(6)::before { content: "USD "; color: var(--muted); font-size: .875rem; }
+  #dayRows td:nth-child(7)::before { content: "TWD "; color: var(--muted); font-size: .875rem; }
   #dayRows td[colspan] { grid-column: 1 / -1; grid-row: auto; }
   #pdRows tr { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; column-gap: 12px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--line); }
   #pdRows td { border: 0; padding: 0; }
@@ -290,7 +295,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
   <section aria-labelledby="s5">
     <h2 id="s5">5. 生活費（日支費）</h2>
     <div class="rate" id="rateInfo" aria-live="polite"></div>
-    <p class="note"><strong>計算方式：</strong>看每天有沒有在當地留宿。留宿當地的日子按該地區日支數額 100%；在飛機上、沒有留宿的日子（出發日到抵達前，以及離開當地到返抵台灣）不用付住宿費，按 30%。有人供應的項目，在那一天點選就會扣掉該項費用：住宿 70%、早餐 4%、午餐 8%、晚餐 8%（早、午、晚就是三餐）；零用 10% 一律保留，所以每天最低 10%。日期都以所在地的當地日期為準，算出來的比例也可以直接手動輸入。</p>
+    <p class="note"><strong>計算方式：</strong>看每天有沒有在當地留宿。留宿當地的日子按該地區日支數額 100%；在飛機上、沒有留宿的日子（出發日到抵達前，以及離開當地到返抵台灣）不用付住宿費，按 30%。有人供應的項目，在那一天點選就會扣掉該項費用：住宿 70%、早餐 4%、午餐 8%、晚餐 8%（早、午、晚就是三餐）；零用 10% 一律保留，所以每天最低 10%。日期都以所在地的當地日期為準，算出來的比例也可以直接手動輸入。每一天的「當日日支數額」也可以直接改，例如第一天在紐約，之後幾天改在別的地方過夜，就把那幾天改成當地的日支數額。</p>
     <p class="note" id="flightNote"></p>
     <details id="manualDates">
       <summary>手動修改抵達日期</summary>
@@ -308,7 +313,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
       <button type="button" class="chipbtn" data-k="b">早餐 −4%</button><button type="button" class="chipbtn" data-k="l">午餐 −8%</button><button type="button" class="chipbtn" data-k="d">晚餐 −8%</button></div>
     <div class="scroll" style="margin-top:12px">
       <table class="perdiem">
-        <thead><tr><th>日期</th><th>狀態</th><th>有人供應就點選（扣除）</th><th>日支比例</th><th class="r">USD</th><th class="r">TWD</th></tr></thead>
+        <thead><tr><th>日期</th><th>狀態</th><th>當日日支數額（可改）</th><th>有人供應就點選（扣除）</th><th>日支比例</th><th class="r">USD</th><th class="r">TWD</th></tr></thead>
         <tbody id="dayRows"></tbody>
         <tbody id="pdRows"></tbody>
       </table>
@@ -893,6 +898,8 @@ var autoInfo = "";
 var WD = ["日", "一", "二", "三", "四", "五", "六"];
 var DEDUCT = { lodge: 70, b: 4, l: 8, d: 8 };      // 有人供應就扣掉：住宿 70%、早餐 4%、午餐 8%、晚餐 8%（零用 10% 一律保留，所以每天最少 10%）
 var lastStayDays = [];
+var rateOver = {};           // 使用者改過「當日日支數額」的日期 -> USD／日
+function dstr(x) { return dfmt(x, 0).replace(/,/g, ""); }
 var deduct = {};             // 使用者在各天勾選的「有人供應」：{ 日期: { lodge, b, l, d } }
 function wdOf(iso) { return WD[new Date(parseISO(iso)).getUTCDay()]; }
 function dayDiff(a, b) { return Math.round((parseISO(b) - parseISO(a)) / 86400000); }
@@ -996,8 +1003,12 @@ function calc() {
       else if (p.entry.manual) r = hasOverride ? { usd: override, src: "override" } : { usd: 0, src: "manual" };
       else r = rateOnDate(p, dt);
       var rUsd = (p && p.entry.manual && hasOverride) ? override : D(r.usd);
-      if (r.src === "fallback") usedFallback = true;
-      if (p && (r.src === "none" || r.src === "manual")) noData = true;
+      var autoRate = rUsd, rateEdited = rateOver[iso] != null;
+      if (rateEdited) rUsd = D(String(rateOver[iso]));                 // 這一天的日支數額被使用者改過（例如那天改在別的地方過夜）
+      else {
+        if (r.src === "fallback") usedFallback = true;
+        if (p && (r.src === "none" || r.src === "manual")) noData = true;
+      }
       var usd = dscale(dmul(rUsd, pctDec), 1, 2);    // 日支數額 × 比例，全程精確小數運算
       usdSum = dadd(usdSum, usd); equivSum = dadd(equivSum, dscale(pctDec, 1, 2));
       var label, warn = "";
@@ -1018,20 +1029,22 @@ function calc() {
         if (iso === arrs[0] && est.indexOf("抵達當地日期") > -1) warn = "抵達日期尚未取得，暫以出發當日計";
         if (iso === deps[n - 1] && est.indexOf("返抵台灣日期") > -1) warn = "返抵台灣日期尚未取得，暫以當日計";
       }
-      days.push({ iso: iso, kind: kind, label: label, warn: warn, pct: pct, usd: usd, ded: ded, edited: manualPct[iso] != null });
+      days.push({ iso: iso, kind: kind, label: label, warn: warn, rate: dstr(rUsd), autoRate: dstr(autoRate), rateEdited: rateEdited, pct: pct, usd: usd, ded: ded, edited: manualPct[iso] != null });
     }
   }
   var rows = "";
   days.forEach(function (d) {
     function chip(k, text, on) { return "<label class='chip" + (on ? " on" : "") + "'><input type='checkbox' data-d='" + d.iso + "' data-k='" + k + "'" + (on ? " checked" : "") + ">" + text + "</label>"; }
-    rows += "<tr><td>" + d.iso + "（" + wdOf(d.iso) + "）</td><td>" + esc(d.label) + (d.warn ? "　<span class='redwarn'>（" + esc(d.warn) + "）</span>" : "") + (d.edited ? "　<span class='note'>已手動調整</span>" : "") + "</td>" +
+    rows += "<tr><td>" + d.iso + "（" + wdOf(d.iso) + "）</td><td>" + esc(d.label) + (d.warn ? "　<span class='redwarn'>（" + esc(d.warn) + "）</span>" : "") +
+      (d.rateEdited ? "　<span class='note'>日支數額已手動調整</span>" : "") + (d.edited ? "　<span class='note'>比例已手動調整</span>" : "") + "</td>" +
+      "<td><div class='ratebox'><input type='number' class='ratein num' data-d='" + d.iso + "' data-auto='" + d.autoRate + "' min='0' step='any' value='" + d.rate + "' aria-label='" + d.iso + " 當日日支數額（USD）'><span>USD／日</span></div></td>" +
       "<td><div class='chips'>" + chip("lodge", "住宿 −" + DEDUCT.lodge + "%", d.ded.lodge) + chip("b", "早 −" + DEDUCT.b + "%", d.ded.b) + chip("l", "午 −" + DEDUCT.l + "%", d.ded.l) + chip("d", "晚 −" + DEDUCT.d + "%", d.ded.d) + "</div></td>" +
       "<td><div class='pctbox'><input type='number' class='pctin num' data-d='" + d.iso + "' min='10' max='100' step='any' value='" + d.pct + "' aria-label='" + d.iso + " 日支比例（％）'>%</div></td>" +
       "<td class='r'>" + dfmt(d.usd, 2) + "</td><td class='r'>" + dfmt(dmul(d.usd, rate), 2) + "</td></tr>";
   });
-  if (!days.length) rows = "<tr><td colspan='6' class='note'>" + (validRange ? "請先選擇目的地。" : (multi ? "請先選好出發日期、各站日期與回程日期。" : "請先選好出發日期與回程日期。")) + "</td></tr>";
+  if (!days.length) rows = "<tr><td colspan='7' class='note'>" + (validRange ? "請先選擇目的地。" : (multi ? "請先選好出發日期、各站日期與回程日期。" : "請先選好出發日期與回程日期。")) + "</td></tr>";
   $("dayRows").innerHTML = rows;
-  $("resetPct").style.display = (Object.keys(manualPct).length || Object.keys(deduct).length) ? "" : "none";
+  $("resetPct").style.display = (Object.keys(manualPct).length || Object.keys(deduct).length || Object.keys(rateOver).length) ? "" : "none";
   lastStayDays = days.filter(function (d) { return d.kind === "stay"; }).map(function (d) { return d.iso; });
   document.querySelectorAll("#bulk .chipbtn").forEach(function (b) {
     var k = b.getAttribute("data-k"), on = lastStayDays.length > 0 && lastStayDays.every(function (iso) { return (deduct[iso] || {})[k]; });
@@ -1056,9 +1069,9 @@ function calc() {
 
   var pd = "";
   [["住宿（70%）", 7], ["膳食（20%）", 2], ["零用（10%）", 1]].forEach(function (x) {
-    pd += "<tr><td colspan='4'>" + x[0] + "</td><td class='r'>" + dfmt(dscale(usdSum, x[1], 1), 2) + "</td><td class='r'>" + dfmt(dscale(twdSum, x[1], 1), 2) + "</td></tr>";
+    pd += "<tr><td colspan='5'>" + x[0] + "</td><td class='r'>" + dfmt(dscale(usdSum, x[1], 1), 2) + "</td><td class='r'>" + dfmt(dscale(twdSum, x[1], 1), 2) + "</td></tr>";
   });
-  pd += "<tr><td colspan='4'><strong>日支合計" + (est.length ? "（暫估）" : "") + "（相當於 " + dfmt(equivSum, 0) + " 個整日）</strong></td><td class='r'><strong>" +
+  pd += "<tr><td colspan='5'><strong>日支合計" + (est.length ? "（暫估）" : "") + "（相當於 " + dfmt(equivSum, 0) + " 個整日）</strong></td><td class='r'><strong>" +
     dfmt(usdOne, 2) + "</strong></td><td class='r'><strong>" + dfmt(twdOne, 2) + "</strong></td></tr>";
   $("pdRows").innerHTML = pd;
 
@@ -1259,6 +1272,10 @@ $("dayRows").addEventListener("change", function (e) {
   if (!iso) return;
   if (el.type === "checkbox") {                      // 勾選／取消「有人供應」：重新算這一天的比例
     (deduct[iso] = deduct[iso] || {})[el.getAttribute("data-k")] = el.checked; delete manualPct[iso]; calc();
+  } else if (el.classList.contains("ratein")) {      // 改這一天的日支數額（例如那天改在別的地方過夜）
+    var rv = parseFloat(el.value);
+    if (isNaN(rv) || rv < 0 || String(rv) === el.getAttribute("data-auto")) delete rateOver[iso]; else rateOver[iso] = rv;
+    calc();
   } else if (el.classList.contains("pctin")) {        // 直接輸入比例（最少 10%，零用一律保留）
     var v = parseFloat(el.value);
     if (isNaN(v)) delete manualPct[iso]; else manualPct[iso] = Math.min(100, Math.max(10, v));
@@ -1271,7 +1288,7 @@ $("bulk").addEventListener("click", function (e) {   // 留宿的日子一起套
   lastStayDays.forEach(function (iso) { (deduct[iso] = deduct[iso] || {})[k] = turnOn; delete manualPct[iso]; });
   calc();
 });
-$("resetPct").addEventListener("click", function () { clearManual(); deduct = {}; calc(); });
+$("resetPct").addEventListener("click", function () { clearManual(); deduct = {}; rateOver = {}; calc(); });
 ["fareBR", "fareCI", "fareJX", "fareOther", "override", "oBoat", "oBoatCur", "oBag", "bagCur", "fPass", "fVisa", "fVisaCur", "fYellow", "fVacc", "fFx", "fAirport", "aReg", "aRegCur", "aDocs", "aDocsCur", "aEsim"].forEach(function (id) {
   $(id).addEventListener("input", calc);
 });
@@ -1448,7 +1465,7 @@ function snapState() {
     multi: $("multi").checked,
     stops: multiStops.map(function (st) { var n = selNames(st.r, st.c, st.t); n.ap = st.ap; n.apOther = st.apOther; n.date = st.date; n.arr = st.arr; return n; }),
     vals: vals, fareMode: mode ? mode.value : "BR", roamPlan: $("roamPlan").value,
-    manualF: manualF, insTypeManual: insTypeManual, manualPct: manualPct, deduct: deduct,
+    manualF: manualF, insTypeManual: insTypeManual, manualPct: manualPct, deduct: deduct, rateOver: rateOver,
     autoFilled: autoFilled, autoInfo: autoInfo, itin: lastItin, fareItins: fareItins,
     trans: transRows, oth: { fee: OTH.fee.rows, ins: OTH.ins.rows, admin: OTH.admin.rows, gift: OTH.gift.rows }
   };
@@ -1496,6 +1513,7 @@ function restoreState() {
   });
   manualPct = s.manualPct || {}; Object.keys(manualPct).forEach(function (k) { manualPct[k] = Math.min(100, Math.max(10, +manualPct[k] || 10)); });
   deduct = s.deduct || {};
+  rateOver = s.rateOver || {};
   autoFilled = !!s.autoFilled; autoInfo = s.autoInfo || "";
   fareItins = s.fareItins || {};
   if (s.itin) renderItin(s.itin);

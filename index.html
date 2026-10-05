@@ -142,10 +142,10 @@ td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
 table.perdiem td.r, table.perdiem th.r { white-space: nowrap; min-width: 7.5em; }
 .redwarn { color: var(--red); font-weight: 500; }
 .chips { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
-.chip, .chipbtn { position: relative; display: inline-flex; align-items: center; padding: 7px 8px; border: 1px solid var(--line); border-radius: 999px; font: inherit; font-size: .875rem; line-height: 1.3; color: var(--ink); background: var(--bg); cursor: pointer; margin: 0; width: auto; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+.chip { position: relative; display: inline-flex; align-items: center; padding: 7px 8px; border: 1px solid var(--line); border-radius: 999px; font: inherit; font-size: .875rem; line-height: 1.3; color: var(--ink); background: var(--bg); cursor: pointer; margin: 0; width: auto; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
 .chip input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
 .chip:focus-within { outline: 3px solid var(--focus); outline-offset: 1px; }
-.chip.on, .chipbtn.on { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); font-weight: 500; }
+.chip.on { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); font-weight: 500; }
 .ratebox { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
 .ratebox input { width: 6.4em; text-align: right; }
 .ratebox span { color: var(--muted); font-size: .875rem; }
@@ -309,8 +309,6 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <div class="grid two" style="margin-top:12px">
       <div id="overrideBox" style="display:none"><label for="override">此地區不在日支數額表內，請輸入日支數額（USD／日）</label><input id="override" type="number" min="0" step="0.01" class="num"></div>
     </div>
-    <div id="bulk" class="chips" style="margin-top:12px"><span class="note" style="margin:0">留宿的日子一起套用：</span>
-      <button type="button" class="chipbtn" data-k="b">早餐 −4%</button><button type="button" class="chipbtn" data-k="l">午餐 −8%</button><button type="button" class="chipbtn" data-k="d">晚餐 −8%</button></div>
     <div class="scroll" style="margin-top:12px">
       <table class="perdiem">
         <thead><tr><th>日期</th><th>狀態</th><th>當日日支數額（可改）</th><th>有人供應就點選（扣除）</th><th>日支比例</th><th class="r">USD</th><th class="r">TWD</th></tr></thead>
@@ -897,7 +895,6 @@ var autoFilled = false;      // 抵達日期是否由自動查價填入
 var autoInfo = "";
 var WD = ["日", "一", "二", "三", "四", "五", "六"];
 var DEDUCT = { lodge: 70, b: 4, l: 8, d: 8 };      // 有人供應就扣掉：住宿 70%、早餐 4%、午餐 8%、晚餐 8%（零用 10% 一律保留，所以每天最少 10%）
-var lastStayDays = [];
 var rateOver = {};           // 使用者改過「當日日支數額」的日期 -> USD／日
 function dstr(x) { return dfmt(x, 0).replace(/,/g, ""); }
 var deduct = {};             // 使用者在各天勾選的「有人供應」：{ 日期: { lodge, b, l, d } }
@@ -1045,11 +1042,6 @@ function calc() {
   if (!days.length) rows = "<tr><td colspan='7' class='note'>" + (validRange ? "請先選擇目的地。" : (multi ? "請先選好出發日期、各站日期與回程日期。" : "請先選好出發日期與回程日期。")) + "</td></tr>";
   $("dayRows").innerHTML = rows;
   $("resetPct").style.display = (Object.keys(manualPct).length || Object.keys(deduct).length || Object.keys(rateOver).length) ? "" : "none";
-  lastStayDays = days.filter(function (d) { return d.kind === "stay"; }).map(function (d) { return d.iso; });
-  document.querySelectorAll("#bulk .chipbtn").forEach(function (b) {
-    var k = b.getAttribute("data-k"), on = lastStayDays.length > 0 && lastStayDays.every(function (iso) { return (deduct[iso] || {})[k]; });
-    b.classList.toggle("on", on); b.setAttribute("aria-pressed", on ? "true" : "false");
-  });
 
   var startIso = days.length ? days[0].iso : "", endIso = days.length ? days[days.length - 1].iso : "";
   var tripKnown = days.length > 0 && !!$("a2").value;      // 要知道「返抵台灣落地日」才算得出天數
@@ -1281,12 +1273,6 @@ $("dayRows").addEventListener("change", function (e) {
     if (isNaN(v)) delete manualPct[iso]; else manualPct[iso] = Math.min(100, Math.max(10, v));
     calc();
   }
-});
-$("bulk").addEventListener("click", function (e) {   // 留宿的日子一起套用某一餐
-  var b = e.target.closest ? e.target.closest(".chipbtn") : null; if (!b) return;
-  var k = b.getAttribute("data-k"), turnOn = !lastStayDays.every(function (iso) { return (deduct[iso] || {})[k]; });
-  lastStayDays.forEach(function (iso) { (deduct[iso] = deduct[iso] || {})[k] = turnOn; delete manualPct[iso]; });
-  calc();
 });
 $("resetPct").addEventListener("click", function () { clearManual(); deduct = {}; rateOver = {}; calc(); });
 ["fareBR", "fareCI", "fareJX", "fareOther", "override", "oBoat", "oBoatCur", "oBag", "bagCur", "fPass", "fVisa", "fVisaCur", "fYellow", "fVacc", "fFx", "fAirport", "aReg", "aRegCur", "aDocs", "aDocsCur", "aEsim"].forEach(function (id) {

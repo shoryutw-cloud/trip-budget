@@ -264,6 +264,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <div class="warn" style="margin-top:12px"><strong>注意：</strong>
       <ul class="dotlist">
         <li>自動查價取得的是 <strong>Google Flights 顯示的最低價組合，非航空公司官網價格</strong>。</li>
+        <li>自動查價<strong>只找直飛班機</strong>（不含轉機），和 Google Flights 開啟「直達」篩選的結果相同。</li>
         <li>自動查價<strong>每個月只能查 250 次</strong>：來回票每按一次最多會用掉 4 次額度（長榮、華航、星宇各查一次回程班機）；多段航班有幾段就用掉幾次（例如 3 段用 3 次）。</li>
       </ul></div>
   </section>
@@ -1373,7 +1374,7 @@ function multiLookup(msg, btn) {
   legs.push({ from: prev, to: from, date: $("d2").value });
   for (var i = 1; i < legs.length; i++) if (legs[i].date < legs[i - 1].date) bad = bad || "各段日期要依序往後，請檢查。";
   if (bad) { msg.textContent = bad; return; }
-  var url = WORKER_URL + "/?multi=1&legs=" + encodeURIComponent(JSON.stringify(legs)) + "&cabin=e&v=5";
+  var url = WORKER_URL + "/?multi=1&legs=" + encodeURIComponent(JSON.stringify(legs)) + "&cabin=e&v=6";
   msg.textContent = "查詢中…（多段航班每一段會用 1 次查價額度，" + legs.length + " 段約需數秒）"; btn.disabled = true;
   var seq = lookupSeq;
   fetch(url).then(readWorker).then(function (j) {
@@ -1387,7 +1388,8 @@ function multiLookup(msg, btn) {
     }
     if (j.price) { $("fareOther").value = Math.round(j.price); document.querySelector('input[name="fareMode"][value="other"]').checked = true; }
     msg.textContent = j.price ? "已填入多段航班的最低價（不分航空公司，填在「其他／自訂票價」）" + (L.length === legs.length ? "，並填入各站抵達日期。" : "，但只查到前 " + L.length + " 段，其餘請手動輸入。")
-      : "沒有查到整段行程的票價，請換日期或到官網查詢。";
+      : "沒有查到整段行程的直飛票價，請換日期，或自行查詢後填入「其他／自訂票價」。";
+    if (j.error && L.length < legs.length) msg.textContent += "（原因：" + j.error + "）";
     calc();
   }).catch(function (e) { if (seq === lookupSeq) msg.textContent = "查價失敗：" + e.message; }).then(function () { btn.disabled = false; });
 }
@@ -1395,7 +1397,6 @@ function multiLookup(msg, btn) {
 // ---------- 自動查價 ----------
 var WORKER_URL = "https://flight-fare.shoryu-tw.workers.dev";
 function readWorker(res) {                              // 查價服務回來的結果；失敗時取出它說明的原因
-  if (res.status === 429) throw new Error("查價次數太多，請稍後再試");
   if (res.status === 403) throw new Error("這個網址不被允許使用查價服務");
   if (res.ok) return res.json();
   return res.json().then(function (j) {
@@ -1410,7 +1411,7 @@ $("apiBtn").addEventListener("click", function () {
   if (!AP_RE.test(to) || !$("d1").value || !$("d2").value) { msg.textContent = "請先選好目的地、抵達機場，並填入出發日期與回程日期。"; return; }
   if ($("d2").value < $("d1").value) { msg.textContent = "回程日期不能早於出發日期。"; return; }
   var url = WORKER_URL + "/?from=" + $("from").value + "&to=" + to +
-    "&depart=" + $("d1").value + "&return=" + $("d2").value + "&cabin=e&v=7";
+    "&depart=" + $("d1").value + "&return=" + $("d2").value + "&cabin=e&v=8";
   msg.textContent = "查詢中…"; btn.disabled = true;
   var seq = lookupSeq;
   fetch(url).then(readWorker).then(function (j) {
@@ -1442,7 +1443,8 @@ $("apiBtn").addEventListener("click", function () {
     }
     showAirline();
     if (!tm && (j.BR || j.CI || j.JX)) extra = "，但沒有取得航班時間（請確認 Cloudflare 上的 Worker 是最新版）";
-    msg.textContent = (j.BR || j.CI || j.JX) ? "已填入查到的票價" + extra + "。" : "這個航線與日期查不到長榮、華航或星宇的票價，請換日期或到官網查詢。";
+    msg.textContent = (j.BR || j.CI || j.JX) ? "已填入查到的票價" + extra + "。" : "這個航線與日期查不到長榮、華航或星宇的直飛班機，請換日期，或自行查詢後填入「其他／自訂票價」。";
+    if (j.warn) msg.textContent += j.warn + "。";                  // 例如查到一半碰到 SerpApi 每小時上限，部分回程班機沒查到
     calc();
   }).catch(function (e) {
     if (seq === lookupSeq) msg.textContent = "查價失敗：" + e.message;

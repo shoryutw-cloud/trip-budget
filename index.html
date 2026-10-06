@@ -53,7 +53,7 @@ input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible
 .num { font-variant-numeric: tabular-nums; text-align: right; }
 .linkbtn { background: none; border: 0; color: var(--accent); padding: 0 0 0 8px; width: auto; font-size: .875rem; cursor: pointer; text-decoration: underline; }
 ul.notes { font-size: .875rem; color: var(--muted); margin: 8px 0 0; padding-left: 1.3em; }
-ul.notes a { color: var(--accent); text-decoration: underline; }
+ul.notes a, .note a { color: var(--accent); text-decoration: underline; }
 ul.notes li { margin: 2px 0; }
 h3 { font-size: 1.0625rem; margin: 20px 0 4px; display: grid; grid-template-columns: minmax(0, 11.5em) auto; justify-content: start; column-gap: 12px; align-items: baseline; }
 h3 .amt { font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 700; white-space: nowrap; text-align: left; }
@@ -263,8 +263,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <p class="note" id="flightManualNote" style="display:none">日支費目前用的是你手動填的抵達日期，和上面航班時間不同時，以手動填的為準。</p>
     <div class="warn" style="margin-top:12px"><strong>注意：</strong>
       <ul class="dotlist">
-        <li>自動查價取得的是 <strong>Google Flights 顯示的最低價組合，非航空公司官網價格</strong>。</li>
-        <li>自動查價<strong>只找直飛班機</strong>（不含轉機），和 Google Flights 開啟「直達」篩選的結果相同。</li>
+        <li>自動查價取得的是 <strong>Google Flights 直飛班機最低價組合，非航空公司官網價格</strong>。</li>
         <li>自動查價<strong>每個月只能查 250 次</strong>：來回票每按一次最多會用掉 4 次額度（長榮、華航、星宇各查一次回程班機）；多段航班有幾段就用掉幾次（例如 3 段用 3 次）。</li>
       </ul></div>
   </section>
@@ -371,7 +370,7 @@ details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margi
     <div class="actions"><button class="btn ghost" id="othAdd_fee" type="button">＋ 新增其他</button></div>
 
     <h3>6-2 保險費<span class="amt" id="subIns">TWD 0</span></h3>
-    <p class="note">依保費表（1–30 天）帶入，申根國家預設選申根險。</p>
+    <p class="note">依<a href="https://acc.nsysu.edu.tw/app/index.php?Action=downloadfile&amp;file=WVhSMFlXTm9MelE1TDNCMFlWOHlORFE0TlRoZk1UTTJORFF4TjE4NE5qVTNNaTV3WkdZPQ==&amp;fname=WSGGHGGHUSLKOOYXDGLK54MKZSMOWTJGWSJCCCGCQPIDPO40FCUSEGB4WWOOA0OKYW54ZXIHA40454TX34XSTSXWB0MOMKNKCCVXXWTSSWECCDSWFHA4WXFCNPPOFDKKDGA041GDRKPKHCGCDGB0USWSUTRLQPOOUSECZSFGGGKKYSUSTWQOXTXX44LKKPGDTWXSRLYSWSRO54HC212504B5POMK20LLECGG01SSSSWW4100EDPONKMOSTTW1400WSJCYSHCUT51IGRKROB4FDUWOOOKFCSTMKPOGG00B0FG41WW34KOMOKKOPB0GGMKXTJD30A014B0LKKL14KKYWXXTWLKQLYX04NOUW34TWNKUSICKLMO0400A1QLVSA534B430TWDG00TSA0YW10HDHH00POKKZWTW14SW352024QOHCQPIDROA0QKB0GHB4WSGGUWGHWWTS450124FGDHJG&amp;cg=997" target="_blank" rel="noopener noreferrer">保費表</a>(115年6月21日起至116年6月20日止)帶入，申根國家預設為申根險。</p>
     <div class="sub"><label for="oIns">(1) 保險費（種類與金額，自動帶入，可手動修改）<button type="button" class="linkbtn" data-reset="oIns" style="display:none">恢復自動</button></label><div class="ctrl">
       <div class="money"><select id="insType" aria-label="保險種類"><option value="general">一般險</option><option value="schengen">申根險</option></select><input id="oIns" type="number" min="0" step="any" class="num" placeholder="TWD 金額"></div></div></div>
     <div id="oth_ins"></div>

@@ -51,9 +51,6 @@ input[type="date"] { -webkit-appearance: none; appearance: none; display: block;
 input[type="date"]::-webkit-date-and-time-value { text-align: left; min-width: 0; }
 input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
 .num { font-variant-numeric: tabular-nums; text-align: right; }
-.links { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
-.links a { display: inline-block; text-decoration: none; color: var(--accent); border: 1px solid var(--accent); border-radius: 8px; padding: 8px 12px; font-size: .92rem; }
-.links a:hover { background: var(--accent); color: var(--accent-ink); }
 .linkbtn { background: none; border: 0; color: var(--accent); padding: 0 0 0 8px; width: auto; font-size: .875rem; cursor: pointer; text-decoration: underline; }
 ul.notes { font-size: .875rem; color: var(--muted); margin: 8px 0 0; padding-left: 1.3em; }
 ul.notes a { color: var(--accent); text-decoration: underline; }
@@ -78,7 +75,6 @@ section[aria-labelledby="s6"] { scroll-margin-top: calc(env(safe-area-inset-top,
 #stk3 { top: calc(env(safe-area-inset-top, 0px) + 2 * var(--stkh)); }
 .subtotal { display: flex; justify-content: space-between; align-items: baseline; margin-top: 16px; padding-top: 10px; border-top: 2px solid var(--line); font-weight: 700; }
 .subtotal span:last-child { font-variant-numeric: tabular-nums; }
-.readonly { background: var(--bg); border: 1px dashed var(--line); border-radius: 8px; padding: 9px 10px; min-height: 42px; text-align: right; font-variant-numeric: tabular-nums; }
 #sumRows tr.g td { font-weight: 700; background: var(--bg); }
 #sumRows td.r { white-space: nowrap; }
 #sumRows tr.s td:first-child { padding-left: 1.6em; }
@@ -96,8 +92,6 @@ section[aria-labelledby="s6"] { scroll-margin-top: calc(env(safe-area-inset-top,
   .transrow .t-kind, .transrow .t-use { grid-column: 1 / -1; }
   .transhead { display: none; }
 }
-#sumRows tr.s2 td:first-child { padding-left: 3.2em; }
-#sumRows tr.s2 td { font-size: .92rem; }
 .item { display: grid; grid-template-columns: 11.5em 24em auto; grid-template-areas: "name ctrl amt"; column-gap: 12px; align-items: center; justify-content: start; margin-top: 16px; }
 .item h3 { grid-area: name; margin: 0; display: block; }
 .item .ctrl { grid-area: ctrl; min-width: 0; }
@@ -154,10 +148,8 @@ input[aria-invalid="true"] { border-color: var(--red); }
 .chip.on { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); font-weight: 500; }
 .ratebox { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
 .ratebox input { width: 5.4em; text-align: right; }
-.ratebox span { color: var(--muted); font-size: .875rem; }
 .pctval { font-weight: 500; font-variant-numeric: tabular-nums; }
 .pctbox { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
-.pctbox input { width: 5.4em; text-align: right; }
 @media (min-width: 901px) {                    /* 電腦：固定各欄寬度；標題和內容一律靠左，讓整張表比較平均 */
   table.perdiem { table-layout: fixed; }
   table.perdiem th:nth-child(1) { width: 13%; } table.perdiem th:nth-child(2) { width: 10%; } table.perdiem th:nth-child(3) { width: 17%; }
@@ -199,7 +191,7 @@ table.perdiem #pdRows tr:first-child td { border-top: 2px solid var(--line); }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .actions button { width: auto; }
 details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margin-top: 10px; }
-@media print { .clearbtn, .stk, .totop, .links, .actions, details, .total { display: none; } body { background: #fff; color: #000; } section { break-inside: avoid; } }
+@media print { .clearbtn, .stk, .totop, .actions, details, .total { display: none; } body { background: #fff; color: #000; } section { break-inside: avoid; } }
 </style>
 </head>
 <body>
@@ -504,7 +496,6 @@ function D(x) {
 function dint(n) { return { v: BigInt(n), sc: 0 }; }
 function dup(a, sc) { return a.sc >= sc ? a.v : a.v * (10n ** BigInt(sc - a.sc)); }
 function dadd(a, b) { var sc = Math.max(a.sc, b.sc); return { v: dup(a, sc) + dup(b, sc), sc: sc }; }
-function dsub(a, b) { return dadd(a, { v: -b.v, sc: b.sc }); }
 function dmul(a, b) { return { v: a.v * b.v, sc: a.sc + b.sc }; }
 function dscale(a, mul, shift) { return { v: a.v * BigInt(mul), sc: a.sc + shift }; }   // a × mul ÷ 10^shift
 function dnum(a) { return Number(a.v) / Math.pow(10, a.sc); }                           // 只用來比大小
@@ -582,11 +573,6 @@ function getTo() {
 function parseISO(s) { var p = s.split("-"); return Date.UTC(+p[0], +p[1] - 1, +p[2]); }
 function addDays(ms, n) { return new Date(ms + n * 86400000); }
 function isoOf(d) { return d.toISOString().slice(0, 10); }
-function tripDays() {
-  if (!$("d1").value || !$("d2").value) return 0;
-  var a = parseISO($("d1").value), b = parseISO($("d2").value);
-  return b < a ? 0 : Math.round((b - a) / 86400000) + 1;
-}
 function mmdd(m, d) { return String(m).padStart(2, "0") + "/" + String(d).padStart(2, "0"); }
 function inRanges(ranges, m, d) {
   var x = m * 100 + d;
@@ -896,6 +882,7 @@ function renderStops() {
 }
 function renderExtraArr() {
   var box = $("extraArr"); box.innerHTML = "";
+  box.style.display = $("multi").checked ? "" : "none";             // 取消勾選多段：第 2 站以上的抵達日期欄位收起來，資料照樣留著，再勾選就會回來
   multiStops.forEach(function (st, i) {
     var d = document.createElement("div"), l = document.createElement("label"), inp = document.createElement("input");
     l.textContent = "第 " + (i + 2) + " 站抵達日期"; inp.type = "date"; inp.value = st.arr; inp.min = isoAdd(st.date, -1); attachPicker(inp, function () { fillDefault(inp, st.date); });
@@ -917,7 +904,7 @@ var lastSummary = "";
 var autoFilled = false;      // 是否已經有自動查價帶回的抵達日期
 var autoD = { a1: "", a2: "", arr: [] };     // 自動查價帶回的日期（和手動填的分開存）
 function isManual() { return $("manualOn").checked; }
-function effDates() {                        // 實際拿來算日支費的日期：有勾選手動就用手動填的，否則用自動查價的，都沒有就由 calc() 暫以當日估算
+function effDates() {                        // 實際拿來算日支費的日期：有勾選手動就用手動填的，否則用自動查價的；缺任何一個，calc() 就不計算日支費
   if (isManual()) return { a1: $("a1").value, a2: $("a2").value, arr: multiStops.map(function (st) { return st.arr; }) };
   return { a1: autoD.a1, a2: autoD.a2, arr: multiStops.map(function (st, i) { return autoD.arr[i] || ""; }) };
 }
@@ -949,7 +936,7 @@ function renderItin(it) {
         (diff ? "<span class='note'>　（當地日期 " + (diff > 0 ? "+" : "") + diff + " 天）</span>" : "") + "</div>";
     });
   });
-  if (!it.groups && (!it.ret || !it.ret.length)) h += "<div class='note' style='margin-top:10px'>回程航班時間沒有取得，返抵台灣日期暫以回程起飛當日計。</div>";
+  if (!it.groups && (!it.ret || !it.ret.length)) h += "<div class='note' style='margin-top:10px'>回程航班時間沒有取得，請勾選下方「手動修改抵達日期」填入返抵台灣日期，日支費才會計算。</div>";
   box.innerHTML = h; box.style.display = "";
 }
 function showAirline() {                                    // 班機資訊與抵達日期，跟著「選擇要帶入的票價」換
@@ -973,7 +960,9 @@ function showAirline() {                                    // 班機資訊與�
     autoInfo = "抵達與返抵日期取自" + AIRLINE_NAME[mode] + "最低價航班（起訖時間見上方「自動查價」結果）。如有不同，可勾選下方「手動修改抵達日期」改。";
       }
 }
+var lookupSeq = 0;                                   // 每次行程改變就加 1：查價途中改了行程，舊行程的查價結果就不採用
 function clearAuto() {
+  lookupSeq++;
   $("apiMsg").textContent = "";                                                // 「已填入查到的票價，並填入抵達日期」這類說明，資料沒了就跟著消失
   $("fareBR").value = ""; $("fareCI").value = ""; $("fareJX").value = "";     // 換了目的地或日期：上一次查到的三家票價作廢（自訂票價不動）
   fareItins = {};
@@ -1093,7 +1082,7 @@ function calc() {
     ? "出差期間 " + startIso + " 至 " + endIso + "，共 " + days.length + " 天（從台灣出發到返抵台灣落地）。"
     : (multi && !stopsOk ? "請填入每一站「前往此站」的日期。"
     : d1 && r1 && r1 < d1 ? ""
-    : (d1 && r1 ? "出差期間與天數要等按「自動查價」取得返抵台灣日期，或勾選下方「手動修改抵達日期」後才能確定（從台灣出發算到返抵台灣落地）。"
+    : (d1 && r1 ? "出差期間與天數要等取得抵達當地日期與返抵台灣日期（按「自動查價」，或勾選下方「手動修改抵達日期」並填入）後才能確定（從台灣出發算到返抵台灣落地）。"
     : "請選擇出發日期與回程日期。"));
   $("flightManualNote").style.display = (isManual() && autoFilled && lastItin && (ef.a1 !== autoD.a1 || ef.a2 !== autoD.a2)) ? "" : "none";
   var sumTxt = "";
@@ -1108,7 +1097,6 @@ function calc() {
     : (autoInfo ? (sumTxt ? sumTxt + " " : "") + autoInfo : "");
   $("flightNote").textContent = fnText; $("flightNote").style.display = fnText ? "" : "none";
 
-  var twdSum = dmul(usdSum, rate);                                 // 進位前的精確加總
   var usdOne = dceil(usdSum);                                      // 依附註 4：加總後才進位為整數美元（沒有小數就維持原數）
   var twdOne = dmul(usdOne, rate);
 
@@ -1249,7 +1237,7 @@ function calc() {
   lastSummary = [
     "因公赴國外出差旅費試算",
     "目的地：" + (places.filter(Boolean).map(placeName).join(" → ") || "（尚未選擇）"),
-    "期間：" + (tripKnown ? startIso + " ～ " + endIso + "（" + tripN + " 天）" : "尚未確定（需先取得返抵台灣日期）"),
+    "期間：" + (tripKnown ? startIso + " ～ " + endIso + "（" + tripN + " 天）" : "尚未確定（需先取得抵達當地日期與返抵台灣日期）"),
     "一、交通費：TWD " + dfmt(transTotal, 0) + "（機票 " + dfmt(fare, 0) + "、船舶 " + dfmt(boat, 0) + "、大眾陸運工具 " + dfmt(transit, 0) + "、行李托運費 " + dfmt(bag, 0) + "）",
     "二、生活費（日支費）：TWD " + dfmt(living, 0) + "（每人 USD " + dfmt(usdOne, 2) + "，相當於 " + dfmt(equivSum, 0) + " 個整日）",
     "三、辦公費：TWD " + dfmt(officeTotal, 0) + "（手續費 " + dfmt(feeTotal, 0) + "、保險費 " + dfmt(ins, 0) + "、行政費 " + dfmt(adminTotal, 0) + "、禮品交際及雜費 " + dfmt(gift, 0) + "）",
@@ -1299,7 +1287,6 @@ $("toSel").addEventListener("change", function () {
   clearAuto(); refresh();
 });
 $("toOther").addEventListener("input", function () { clearAuto(); refresh(); });
-var d2Manual = false;                                 // （舊版存下來的記憶欄位，保留避免讀取時出錯）
 $("d1").addEventListener("input", function () {
   $("d2").min = $("d1").value || "";                  // 只限制日曆上能選的日期；回程日期本身不會被改動
   resetLiving(); onTripChange();
@@ -1378,7 +1365,9 @@ function multiLookup(msg, btn) {
   if (bad) { msg.textContent = bad; return; }
   var url = WORKER_URL + "/?multi=1&legs=" + encodeURIComponent(JSON.stringify(legs)) + "&cabin=e&v=5";
   msg.textContent = "查詢中…（多段航班每一段會用 1 次查價額度，" + legs.length + " 段約需數秒）"; btn.disabled = true;
+  var seq = lookupSeq;
   fetch(url).then(function (res) { if (res.status === 429) throw new Error("查價次數太多，請稍後再試"); if (res.status === 403) throw new Error("這個網址不被允許使用查價服務"); if (!res.ok) throw new Error("HTTP " + res.status); return res.json(); }).then(function (j) {
+    if (seq !== lookupSeq) return;                       // 查詢途中行程被改了：這個結果屬於舊行程，丟掉
     if (j.error && !(j.legs && j.legs.length)) throw new Error(typeof j.error === "string" ? j.error : "查詢失敗");
     var L = j.legs || [], lastOf = function (leg) { return leg.flights[leg.flights.length - 1].arr.time.slice(0, 10); };
     if (L.length) {
@@ -1390,7 +1379,7 @@ function multiLookup(msg, btn) {
     msg.textContent = j.price ? "已填入多段航班的最低價（不分航空公司，填在「其他／自訂票價」）" + (L.length === legs.length ? "，並填入各站抵達日期。" : "，但只查到前 " + L.length + " 段，其餘請手動輸入。")
       : "沒有查到整段行程的票價，請換日期或到官網查詢。";
     calc();
-  }).catch(function (e) { msg.textContent = "查價失敗：" + e.message; }).then(function () { btn.disabled = false; });
+  }).catch(function (e) { if (seq === lookupSeq) msg.textContent = "查價失敗：" + e.message; }).then(function () { btn.disabled = false; });
 }
 
 // ---------- 自動查價 ----------
@@ -1404,12 +1393,14 @@ $("apiBtn").addEventListener("click", function () {
   var url = WORKER_URL + "/?from=" + $("from").value + "&to=" + to +
     "&depart=" + $("d1").value + "&return=" + $("d2").value + "&cabin=e&v=7";
   msg.textContent = "查詢中…"; btn.disabled = true;
+  var seq = lookupSeq;
   fetch(url).then(function (res) {
     if (res.status === 429) throw new Error("查價次數太多，請稍後再試");
     if (res.status === 403) throw new Error("這個網址不被允許使用查價服務");
     if (!res.ok) throw new Error("HTTP " + res.status);
     return res.json();
   }).then(function (j) {
+    if (seq !== lookupSeq) return;                       // 查詢途中行程被改了：這個結果屬於舊行程，丟掉
     if (j.error) throw new Error(typeof j.error === "string" ? j.error : "查詢失敗");
     $("fareBR").value = j.BR ? Math.round(j.BR) : "";             // 這次沒查到的航空公司就清空，不留上一次別條航線的價格
     $("fareCI").value = j.CI ? Math.round(j.CI) : "";
@@ -1440,7 +1431,7 @@ $("apiBtn").addEventListener("click", function () {
     msg.textContent = (j.BR || j.CI || j.JX) ? "已填入查到的票價" + extra + "。" : "這個航線與日期查不到長榮、華航或星宇的票價，請換日期或到官網查詢。";
     calc();
   }).catch(function (e) {
-    msg.textContent = "查價失敗：" + e.message;
+    if (seq === lookupSeq) msg.textContent = "查價失敗：" + e.message;
   }).then(function () { btn.disabled = false; });
 });
 
@@ -1461,6 +1452,7 @@ $("multi").addEventListener("change", function () {
   var on = $("multi").checked;
   $("multiBox").style.display = on ? "" : "none";
   $("d2Label").textContent = on ? "回程日期（最後一站當地起飛）" : "回程日期（當地起飛）";
+  $("extraArr").style.display = on ? "" : "none";
   if (on && !multiStops.length) addStop();
   onTripChange();
 });
@@ -1515,7 +1507,7 @@ function snapState() {
   var mode = document.querySelector('input[name="fareMode"]:checked');
   return {
     v: 1, main: selNames(regionSel.value, countrySel.value, citySel.value),
-    to: $("toSel").value, toOther: $("toOther").value, d2Manual: d2Manual,
+    to: $("toSel").value, toOther: $("toOther").value,
     multi: $("multi").checked,
     stops: multiStops.map(function (st) { var n = selNames(st.r, st.c, st.t); n.ap = st.ap; n.apOther = st.apOther; n.date = st.date; n.arr = st.arr; return n; }),
     vals: vals, fareMode: mode ? mode.value : "BR", roamPlan: $("roamPlan").value,
@@ -1556,7 +1548,6 @@ function restoreState() {
     el.value = vals[id];
   });
   if ($("d1").value) $("d2").min = $("d1").value;
-  d2Manual = !!s.d2Manual;
   var fm = document.querySelector('input[name="fareMode"][value="' + s.fareMode + '"]'); if (fm) fm.checked = true;
 
   transRows = (s.trans || []).filter(function (r) { return !(r.kind === "捷運" && r.use === "北車往返桃園機場" && String(r.amt) === "320" && r.cur === "TWD"); })

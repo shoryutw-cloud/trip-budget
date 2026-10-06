@@ -207,7 +207,7 @@ main { position: relative; }
 </head>
 <body>
 <main>
-  <div class="verstamp" id="verStamp">v2026/10/6 20:17</div>
+  <div class="verstamp" id="verStamp">v2026/10/6 21:35</div>
   <div class="printonly" id="printTotal" aria-hidden="true"><span>預算合計</span><strong id="printGrand">TWD 0</strong></div>
   <h1>因公赴國外出差旅費試算</h1>
   <div class="titlebar"><p class="byline">本試算不適用出國訓練</p>
@@ -252,16 +252,22 @@ main { position: relative; }
     <label class="chk" style="margin-top:8px"><input type="checkbox" id="connOk"> 接受轉機（最多轉 1 次；從台灣出發與回台灣的航段須為長榮、華航或星宇）</label>
     <p class="note" id="apiMsg" role="status"></p>
     <div class="grid" style="margin-top:12px">
-      <div><label for="fareBR">長榮 BR 每人票價（TWD）</label><input id="fareBR" type="number" min="0" class="num" placeholder="查到後填入"></div>
-      <div><label for="fareCI">華航 CI 每人票價（TWD）</label><input id="fareCI" type="number" min="0" class="num" placeholder="查到後填入"></div>
-      <div><label for="fareJX">星宇 JX 每人票價（TWD）</label><input id="fareJX" type="number" min="0" class="num" placeholder="查到後填入"></div>
+      <div><label for="fareBR">長榮 BR <span class="fkind">每人票價</span>（TWD）</label><input id="fareBR" type="number" min="0" class="num" placeholder="查到後填入"></div>
+      <div class="connOnly"><label for="fareBRc">長榮 BR 轉機（TWD）</label><input id="fareBRc" type="number" min="0" class="num" placeholder="查到後填入"></div>
+      <div><label for="fareCI">華航 CI <span class="fkind">每人票價</span>（TWD）</label><input id="fareCI" type="number" min="0" class="num" placeholder="查到後填入"></div>
+      <div class="connOnly"><label for="fareCIc">華航 CI 轉機（TWD）</label><input id="fareCIc" type="number" min="0" class="num" placeholder="查到後填入"></div>
+      <div><label for="fareJX">星宇 JX <span class="fkind">每人票價</span>（TWD）</label><input id="fareJX" type="number" min="0" class="num" placeholder="查到後填入"></div>
+      <div class="connOnly"><label for="fareJXc">星宇 JX 轉機（TWD）</label><input id="fareJXc" type="number" min="0" class="num" placeholder="查到後填入"></div>
       <div><label for="fareOther">其他／自訂票價（TWD）</label><input id="fareOther" type="number" min="0" class="num"></div>
     </div>
     <div class="choices" role="radiogroup" aria-labelledby="fareModeLabel">
       <span id="fareModeLabel" style="font-weight:500">選擇要帶入的票價：</span>
-      <label><input type="radio" name="fareMode" value="BR" checked> 長榮</label>
-      <label><input type="radio" name="fareMode" value="CI"> 華航</label>
-      <label><input type="radio" name="fareMode" value="JX"> 星宇</label>
+      <label><input type="radio" name="fareMode" value="BR" checked> <span class="rkind" data-n="長榮">長榮</span></label>
+      <label class="connOnly"><input type="radio" name="fareMode" value="BRc"> 長榮轉機</label>
+      <label><input type="radio" name="fareMode" value="CI"> <span class="rkind" data-n="華航">華航</span></label>
+      <label class="connOnly"><input type="radio" name="fareMode" value="CIc"> 華航轉機</label>
+      <label><input type="radio" name="fareMode" value="JX"> <span class="rkind" data-n="星宇">星宇</span></label>
+      <label class="connOnly"><input type="radio" name="fareMode" value="JXc"> 星宇轉機</label>
       <label><input type="radio" name="fareMode" value="other"> 自訂</label>
     </div>
     <div class="rate" id="flightBox" style="display:none" aria-live="polite"></div>
@@ -271,7 +277,7 @@ main { position: relative; }
         <li>自動查價預設查Google Flights 直飛班機最低價組合，非航空公司官網價格。</li>
         <li>如接受轉機，請另外勾選。</li>
         <li>查到的票價不代表一定有機位，實際訂位以航空公司或旅行社為準。</li>
-        <li>自動查價每個月只能查 250 次：來回票每按一次最多會用掉 4 次額度；多段航班有幾段就用掉幾次。</li>
+        <li>自動查價每個月只能查 250 次：來回票每按一次最多會用掉 4 次額度（勾選接受轉機時最多 10 次）；多段航班有幾段就用掉幾次。</li>
       </ul></div>
   </section>
 
@@ -936,6 +942,16 @@ function fmtT(s) { var iso = s.slice(0, 10); return iso.slice(5, 7) + "/" + iso.
 function apLabel(c) { return c + (CODE_LABEL[c] ? " " + CODE_LABEL[c] : ""); }
 var lastItin = null, fareItins = {};
 var AIRLINE_NAME = { BR: "長榮", CI: "華航", JX: "星宇" };
+var FARE_KEYS = ["BR", "CI", "JX", "BRc", "CIc", "JXc"];          // 結尾 c＝轉機那一組（勾選「接受轉機」才有）
+function fareName(k) { return AIRLINE_NAME[k.slice(0, 2)] + (k.length === 3 ? "（轉機）" : ($("connOk").checked ? "（直飛）" : "")); }
+function syncConnUI() {                                   // 勾選「接受轉機」：多出三家的「轉機」票價欄與選項，原本的改叫「直飛」
+  var on = $("connOk").checked;
+  document.querySelectorAll(".connOnly").forEach(function (e) { e.style.display = on ? "" : "none"; });
+  document.querySelectorAll(".fkind").forEach(function (e) { e.textContent = on ? "直飛" : "每人票價"; });
+  document.querySelectorAll(".rkind").forEach(function (e) { e.textContent = e.getAttribute("data-n") + (on ? "直飛" : ""); });
+  var sel = document.querySelector('input[name="fareMode"]:checked');
+  if (!on && sel && /c$/.test(sel.value)) document.querySelector('input[name="fareMode"][value="' + sel.value.slice(0, 2) + '"]').checked = true;
+}
 function tMin(s) { return Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10), +s.slice(11, 13), +s.slice(14, 16)) / 60000; }   // "YYYY-MM-DD HH:MM" → 分鐘
 // 轉機過夜：上一班在當地 24:00 前落地、下一班在隔日 00:00 後起飛 → 那一晚在轉機城市留宿（只看去程，回程不會在轉機地過夜）
 function transitNights(groups) {
@@ -989,15 +1005,13 @@ function renderItin(it) {
 function showAirline() {                                    // 班機資訊與抵達日期，跟著「選擇要帶入的票價」換
   if ($("multi").checked) return;                           // 多段航班沒有分航空公司的班機資料
   var mode = document.querySelector('input[name="fareMode"]:checked').value, it = fareItins[mode];
-  if (mode === "other") {                                   // 選「自訂」：下面的班機資訊清空；抵達日期沿用，讓日支與天數照常計算
+  if (mode === "other" || !it) {                            // 選「自訂」或沒有班機資料的選項：沒有抵達日期，生活費先不算（勾選手動修改抵達日期的話照手動日期算）
+    if (mode !== "other" && !Object.keys(fareItins).length) return;   // 完全沒有分航空公司的資料（舊版 Worker）：維持目前顯示
     renderItin(null);
-    if (autoFilled) { autoInfo = "抵達與返抵日期沿用自動查價的結果；若與你的票不同，請勾選下方「手動修改抵達日期」修改。"; }
-    return;
-  }
-  if (!it) {
-    if (!Object.keys(fareItins).length) return;             // 完全沒有分航空公司的資料（舊版 Worker）：維持目前顯示
-    renderItin(null);                                       // 這家航空公司查不到班機：下面的班機資訊清空，抵達日期沿用
-    if (autoFilled) { autoInfo = "這家航空公司沒有查到班機；抵達與返抵日期沿用先前的結果，如有不同請勾選下方「手動修改抵達日期」修改。"; }
+    if (autoFilled) {
+      autoD.a1 = ""; autoD.a2 = ""; autoD.tn = {};
+      autoInfo = (mode === "other" ? "選「自訂」沒有班機資料" : "這個選項沒有查到班機") + "，所以沒有抵達日期；請勾選下方「手動修改抵達日期」填入，才會計算生活費。";
+    }
     return;
   }
   renderItin({ out: it.out, ret: it.ret });
@@ -1005,14 +1019,14 @@ function showAirline() {                                    // 班機資訊與�
     autoD.a1 = it.out.length ? it.out[it.out.length - 1].arr.time.slice(0, 10) : "";
     autoD.a2 = it.ret && it.ret.length ? it.ret[it.ret.length - 1].arr.time.slice(0, 10) : "";
     autoD.tn = transitNights([it.out]);
-    autoInfo = "抵達與返抵日期取自" + AIRLINE_NAME[mode] + "最低價航班（起訖時間見上方「自動查價」結果）。如有不同，可勾選下方「手動修改抵達日期」改。";
+    autoInfo = "抵達與返抵日期取自" + fareName(mode) + "最低價航班（起訖時間見上方「自動查價」結果）。如有不同，可勾選下方「手動修改抵達日期」改。";
       }
 }
 var lookupSeq = 0;                                   // 每次行程改變就加 1：查價途中改了行程，舊行程的查價結果就不採用
 function clearAuto() {
   lookupSeq++;
   $("apiMsg").textContent = "";                                                // 「已填入查到的票價，並填入抵達日期」這類說明，資料沒了就跟著消失
-  $("fareBR").value = ""; $("fareCI").value = ""; $("fareJX").value = "";     // 換了目的地或日期：上一次查到的三家票價作廢（自訂票價不動）
+  FARE_KEYS.forEach(function (k) { $("fare" + k).value = ""; });                  // 換了目的地或日期：上一次查到的票價作廢（自訂票價不動）
   fareItins = {};
   renderItin(null);
   if (autoFilled) { autoD = { a1: "", a2: "", arr: [] }; autoFilled = false; autoInfo = ""; }
@@ -1308,7 +1322,7 @@ function calc() {
 
 function fareChosen() {
   var mode = document.querySelector('input[name="fareMode"]:checked').value;
-  return D($({ BR: "fareBR", CI: "fareCI", JX: "fareJX", other: "fareOther" }[mode]).value);
+  return D($(mode === "other" ? "fareOther" : "fare" + mode).value);
 }
 
 function refresh() { calc(); }
@@ -1466,12 +1480,11 @@ $("apiBtn").addEventListener("click", function () {
   fetch(url).then(readWorker).then(function (j) {
     if (seq !== lookupSeq) return;                       // 查詢途中行程被改了：這個結果屬於舊行程，丟掉
     if (j.error) throw new Error(typeof j.error === "string" ? j.error : "查詢失敗");
-    $("fareBR").value = j.BR ? Math.round(j.BR) : "";             // 這次沒查到的航空公司就清空，不留上一次別條航線的價格
-    $("fareCI").value = j.CI ? Math.round(j.CI) : "";
-    $("fareJX").value = j.JX ? Math.round(j.JX) : "";
+    FARE_KEYS.forEach(function (k) { $("fare" + k).value = j[k] ? Math.round(j[k]) : ""; });   // 這次沒查到的就清空，不留上一次別條航線的價格
     fareItins = j.byAirline || {};
     (function () {                                     // 選到的那一家沒有票價、別家有時，自動改選最便宜的那一家
-      var ids = { BR: "fareBR", CI: "fareCI", JX: "fareJX" }, vals = {};
+      var ids = {}, vals = {};
+      FARE_KEYS.forEach(function (k) { if (k.length === 2 || $("connOk").checked) ids[k] = "fare" + k; });
       Object.keys(ids).forEach(function (k) { var v = D($(ids[k]).value); if (v.v > 0n) vals[k] = dnum(v); });
       var sel = document.querySelector('input[name="fareMode"]:checked').value, left = Object.keys(vals);
       if (sel in ids && !(sel in vals) && left.length) {
@@ -1482,7 +1495,7 @@ $("apiBtn").addEventListener("click", function () {
     var tm = j.times, extra = "";
     if (tm && tm.outArrive) {
       autoD = { a1: tm.outArrive.slice(0, 10), a2: tm.retArrive ? tm.retArrive.slice(0, 10) : "", arr: [] };
-      autoFilled = true;       var al = { BR: "長榮", CI: "華航", JX: "星宇" }[tm.airline] || tm.airline;
+      autoFilled = true;       var al = /^(BR|CI|JX)c?$/.test(tm.airline) ? fareName(tm.airline) : tm.airline;
       autoInfo = "抵達與返抵日期取自" + al + "最低價航班（起訖時間見上方「自動查價」結果）。如有不同，可勾選下方「手動修改抵達日期」改。";
       var it = j.itinerary;
       if (!it) it = { out: [{ flight: "", dep: { id: $("from").value, time: tm.outDepart }, arr: { id: to, time: tm.outArrive } }],
@@ -1491,8 +1504,9 @@ $("apiBtn").addEventListener("click", function () {
       extra = "，並填入抵達日期";
     }
     showAirline();
-    if (!tm && (j.BR || j.CI || j.JX)) extra = "，但沒有取得航班時間（請確認 Cloudflare 上的 Worker 是最新版）";
-    msg.textContent = (j.BR || j.CI || j.JX) ? "已填入查到的票價" + extra + "。" : ($("connOk").checked ? "這個航線與日期查不到符合條件的班機（直飛或轉 1 次，台灣出發與回台灣的航段須為長榮、華航或星宇），請換日期，或自行查詢後填入「其他／自訂票價」。" : "這個航線與日期查不到長榮、華航或星宇的直飛班機，可以勾選「接受轉機」再查，或自行查詢後填入「其他／自訂票價」。");
+    var anyFare = FARE_KEYS.some(function (k) { return j[k]; });
+    if (!tm && anyFare) extra = "，但沒有取得航班時間（請確認 Cloudflare 上的 Worker 是最新版）";
+    msg.textContent = anyFare ? "已填入查到的票價" + extra + "。" : ($("connOk").checked ? "這個航線與日期查不到符合條件的班機（直飛或轉 1 次，台灣出發與回台灣的航段須為長榮、華航或星宇），請換日期，或自行查詢後填入「其他／自訂票價」。" : "這個航線與日期查不到長榮、華航或星宇的直飛班機，可以勾選「接受轉機」再查，或自行查詢後填入「其他／自訂票價」。");
     if (j.warn) msg.textContent += j.warn + "。";                  // 例如查到一半碰到 SerpApi 每小時上限，部分回程班機沒查到
     calc();
   }).catch(function (e) {
@@ -1513,7 +1527,7 @@ attachPicker($("d1"));
 attachPicker($("d2"), function () { fillDefault($("d2"), $("d1").value); });          // 點「回程日期」欄位：還是空的就先帶入出發日期，日曆會停在同一個月
 attachPicker($("a1"), function () { fillDefault($("a1"), $("d1").value); });          // 點「抵達當地日期」：預設出現最上面的出發日期
 attachPicker($("a2"), function () { fillDefault($("a2"), $("d2").value); });          // 點「返抵台灣日期」：預設出現最上面的回程日期
-$("connOk").addEventListener("change", function () { clearAuto(); refresh(); });
+$("connOk").addEventListener("change", function () { syncConnUI(); clearAuto(); refresh(); });
 $("multi").addEventListener("change", function () {
   var on = $("multi").checked;
   $("multiBox").style.display = on ? "" : "none";
@@ -1540,7 +1554,7 @@ $("transAdd").addEventListener("click", function () {
 });
 // ---------- 自動記憶：行程、票價、各項費用 ----------
 var STATE_KEY = "trip_state_v1", stateReady = false, saveTimer = null;
-var STATE_IDS = ["from", "d1", "d2", "a1", "a2", "fareBR", "fareCI", "fareJX", "fareOther", "override", "oBoat", "oBoatCur", "oBag", "bagCur",
+var STATE_IDS = ["from", "d1", "d2", "a1", "a2", "fareBR", "fareCI", "fareJX", "fareBRc", "fareCIc", "fareJXc", "fareOther", "override", "oBoat", "oBoatCur", "oBag", "bagCur",
   "fPass", "fVisa", "fVisaCur", "fYellow", "fVacc", "fFx", "fAirport", "insType", "oIns", "aReg", "aRegCur", "aDocs", "aDocsCur", "aEsim", "oRoam", "oGift"];
 function selNames(rv, cv, tv) {
   var o = { rc: "", cz: "", ez: "", ei: 0 };
@@ -1633,7 +1647,7 @@ function restoreState() {
   } else autoD = { a1: "", a2: "", arr: [] };
   var mOn = s.manualOn !== undefined ? !!s.manualOn : (!s.autoFilled && !!((s.vals || {}).a1 || (s.vals || {}).a2));     // 舊版手動填過日期的，視為已勾選手動
   $("manualOn").checked = mOn;
-  $("connOk").checked = !!s.connOk;
+  $("connOk").checked = !!s.connOk; syncConnUI();
   renderExtraArr();
   fareItins = s.fareItins || {};
   if (s.itin) renderItin(s.itin);
@@ -1689,6 +1703,7 @@ window.addEventListener("scroll", syncToTop, { passive: true });
 toTop.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: SCROLL_BEHAVIOR }); });
 syncToTop();
 var savedState = restoreState();
+syncConnUI();
 lastPlaceSig = placeSig();
 calc();
 finishRestore(savedState);

@@ -192,10 +192,19 @@ table.perdiem #pdRows tr:first-child td { border-top: 2px solid var(--line); }
 .actions button { width: auto; }
 details summary { cursor: pointer; color: var(--accent); font-size: .9rem; margin-top: 10px; }
 @media print { .clearbtn, .stk, .totop, .actions, details, .total { display: none; } body { background: #fff; color: #000; } section { break-inside: avoid; } }
+.printonly { display: none; }
+@media print {
+  main { position: relative; }
+  .printonly { display: block; position: absolute; top: 18px; right: 16px; text-align: right; border: 2px solid #000; border-radius: 8px; padding: 8px 14px; background: #fff; color: #000; }
+  .printonly span { display: block; font-size: .875rem; }
+  .printonly strong { display: block; font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+  :focus, :focus-visible { outline: none !important; }        /* 列印時不要印出游標停留的外框 */
+}
 </style>
 </head>
 <body>
 <main>
+  <div class="printonly" id="printTotal" aria-hidden="true"><span>預算合計</span><strong id="printGrand">TWD 0</strong></div>
   <h1>因公赴國外出差旅費試算</h1>
   <div class="titlebar"><p class="byline">本試算不適用出國訓練</p>
     <button class="btn ghost clearbtn" id="clearAllTop" type="button">清除已記憶的資料，重新開始</button></div>
@@ -1233,6 +1242,7 @@ function calc() {
   out += "<tr class='g'><td><strong>合計</strong></td><td class='r'><strong>TWD " + dfmt(grand, 0) + "</strong></td></tr>";
   $("sumRows").innerHTML = out;
   $("grand").textContent = "TWD " + dfmt(grand, 0);
+  $("printGrand").textContent = "TWD " + dfmt(grand, 0);          // 列印時第一頁右上角的預算合計
 
   lastSummary = [
     "因公赴國外出差旅費試算",
@@ -1366,7 +1376,7 @@ function multiLookup(msg, btn) {
   var url = WORKER_URL + "/?multi=1&legs=" + encodeURIComponent(JSON.stringify(legs)) + "&cabin=e&v=5";
   msg.textContent = "查詢中…（多段航班每一段會用 1 次查價額度，" + legs.length + " 段約需數秒）"; btn.disabled = true;
   var seq = lookupSeq;
-  fetch(url).then(function (res) { if (res.status === 429) throw new Error("查價次數太多，請稍後再試"); if (res.status === 403) throw new Error("這個網址不被允許使用查價服務"); if (!res.ok) throw new Error("HTTP " + res.status); return res.json(); }).then(function (j) {
+  fetch(url).then(readWorker).then(function (j) {
     if (seq !== lookupSeq) return;                       // 查詢途中行程被改了：這個結果屬於舊行程，丟掉
     if (j.error && !(j.legs && j.legs.length)) throw new Error(typeof j.error === "string" ? j.error : "查詢失敗");
     var L = j.legs || [], lastOf = function (leg) { return leg.flights[leg.flights.length - 1].arr.time.slice(0, 10); };
@@ -1384,6 +1394,15 @@ function multiLookup(msg, btn) {
 
 // ---------- 自動查價 ----------
 var WORKER_URL = "https://flight-fare.shoryu-tw.workers.dev";
+function readWorker(res) {                              // 查價服務回來的結果；失敗時取出它說明的原因
+  if (res.status === 429) throw new Error("查價次數太多，請稍後再試");
+  if (res.status === 403) throw new Error("這個網址不被允許使用查價服務");
+  if (res.ok) return res.json();
+  return res.json().then(function (j) {
+    var e = j && typeof j.error === "string" ? j.error : "";
+    throw new Error(/^bad |missing/.test(e) ? "查詢條件有誤，請檢查機場與日期" : (e || "HTTP " + res.status));
+  }, function () { throw new Error("HTTP " + res.status); });
+}
 $("apiBtn").addEventListener("click", function () {
   var msg = $("apiMsg"), btn = $("apiBtn");
   var to = getTo();
@@ -1394,12 +1413,7 @@ $("apiBtn").addEventListener("click", function () {
     "&depart=" + $("d1").value + "&return=" + $("d2").value + "&cabin=e&v=7";
   msg.textContent = "查詢中…"; btn.disabled = true;
   var seq = lookupSeq;
-  fetch(url).then(function (res) {
-    if (res.status === 429) throw new Error("查價次數太多，請稍後再試");
-    if (res.status === 403) throw new Error("這個網址不被允許使用查價服務");
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    return res.json();
-  }).then(function (j) {
+  fetch(url).then(readWorker).then(function (j) {
     if (seq !== lookupSeq) return;                       // 查詢途中行程被改了：這個結果屬於舊行程，丟掉
     if (j.error) throw new Error(typeof j.error === "string" ? j.error : "查詢失敗");
     $("fareBR").value = j.BR ? Math.round(j.BR) : "";             // 這次沒查到的航空公司就清空，不留上一次別條航線的價格

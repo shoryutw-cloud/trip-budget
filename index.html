@@ -207,7 +207,7 @@ main { position: relative; }
 </head>
 <body>
 <main>
-  <div class="verstamp" id="verStamp">v2026/10/6 21:35</div>
+  <div class="verstamp" id="verStamp">v2026/10/6 21:58</div>
   <div class="printonly" id="printTotal" aria-hidden="true"><span>預算合計</span><strong id="printGrand">TWD 0</strong></div>
   <h1>因公赴國外出差旅費試算</h1>
   <div class="titlebar"><p class="byline">本試算不適用出國訓練</p>
@@ -252,21 +252,21 @@ main { position: relative; }
     <label class="chk" style="margin-top:8px"><input type="checkbox" id="connOk"> 接受轉機（最多轉 1 次；從台灣出發與回台灣的航段須為長榮、華航或星宇）</label>
     <p class="note" id="apiMsg" role="status"></p>
     <div class="grid" style="margin-top:12px">
-      <div><label for="fareBR">長榮 BR <span class="fkind">每人票價</span>（TWD）</label><input id="fareBR" type="number" min="0" class="num" placeholder="查到後填入"></div>
+      <div><label for="fareBR">長榮 BR <span class="fkind">直飛</span>（TWD）</label><input id="fareBR" type="number" min="0" class="num" placeholder="查到後填入"></div>
       <div class="connOnly"><label for="fareBRc">長榮 BR 轉機（TWD）</label><input id="fareBRc" type="number" min="0" class="num" placeholder="查到後填入"></div>
-      <div><label for="fareCI">華航 CI <span class="fkind">每人票價</span>（TWD）</label><input id="fareCI" type="number" min="0" class="num" placeholder="查到後填入"></div>
+      <div><label for="fareCI">華航 CI <span class="fkind">直飛</span>（TWD）</label><input id="fareCI" type="number" min="0" class="num" placeholder="查到後填入"></div>
       <div class="connOnly"><label for="fareCIc">華航 CI 轉機（TWD）</label><input id="fareCIc" type="number" min="0" class="num" placeholder="查到後填入"></div>
-      <div><label for="fareJX">星宇 JX <span class="fkind">每人票價</span>（TWD）</label><input id="fareJX" type="number" min="0" class="num" placeholder="查到後填入"></div>
+      <div><label for="fareJX">星宇 JX <span class="fkind">直飛</span>（TWD）</label><input id="fareJX" type="number" min="0" class="num" placeholder="查到後填入"></div>
       <div class="connOnly"><label for="fareJXc">星宇 JX 轉機（TWD）</label><input id="fareJXc" type="number" min="0" class="num" placeholder="查到後填入"></div>
       <div><label for="fareOther">其他／自訂票價（TWD）</label><input id="fareOther" type="number" min="0" class="num"></div>
     </div>
     <div class="choices" role="radiogroup" aria-labelledby="fareModeLabel">
       <span id="fareModeLabel" style="font-weight:500">選擇要帶入的票價：</span>
-      <label><input type="radio" name="fareMode" value="BR" checked> <span class="rkind" data-n="長榮">長榮</span></label>
+      <label><input type="radio" name="fareMode" value="BR" checked> <span class="rkind" data-n="長榮">長榮直飛</span></label>
       <label class="connOnly"><input type="radio" name="fareMode" value="BRc"> 長榮轉機</label>
-      <label><input type="radio" name="fareMode" value="CI"> <span class="rkind" data-n="華航">華航</span></label>
+      <label><input type="radio" name="fareMode" value="CI"> <span class="rkind" data-n="華航">華航直飛</span></label>
       <label class="connOnly"><input type="radio" name="fareMode" value="CIc"> 華航轉機</label>
-      <label><input type="radio" name="fareMode" value="JX"> <span class="rkind" data-n="星宇">星宇</span></label>
+      <label><input type="radio" name="fareMode" value="JX"> <span class="rkind" data-n="星宇">星宇直飛</span></label>
       <label class="connOnly"><input type="radio" name="fareMode" value="JXc"> 星宇轉機</label>
       <label><input type="radio" name="fareMode" value="other"> 自訂</label>
     </div>
@@ -943,12 +943,12 @@ function apLabel(c) { return c + (CODE_LABEL[c] ? " " + CODE_LABEL[c] : ""); }
 var lastItin = null, fareItins = {};
 var AIRLINE_NAME = { BR: "長榮", CI: "華航", JX: "星宇" };
 var FARE_KEYS = ["BR", "CI", "JX", "BRc", "CIc", "JXc"];          // 結尾 c＝轉機那一組（勾選「接受轉機」才有）
-function fareName(k) { return AIRLINE_NAME[k.slice(0, 2)] + (k.length === 3 ? "（轉機）" : ($("connOk").checked ? "（直飛）" : "")); }
+function fareName(k) { return AIRLINE_NAME[k.slice(0, 2)] + (k.length === 3 ? "（轉機）" : "（直飛）"); }
 function syncConnUI() {                                   // 勾選「接受轉機」：多出三家的「轉機」票價欄與選項，原本的改叫「直飛」
   var on = $("connOk").checked;
   document.querySelectorAll(".connOnly").forEach(function (e) { e.style.display = on ? "" : "none"; });
-  document.querySelectorAll(".fkind").forEach(function (e) { e.textContent = on ? "直飛" : "每人票價"; });
-  document.querySelectorAll(".rkind").forEach(function (e) { e.textContent = e.getAttribute("data-n") + (on ? "直飛" : ""); });
+  document.querySelectorAll(".fkind").forEach(function (e) { e.textContent = "直飛"; });
+  document.querySelectorAll(".rkind").forEach(function (e) { e.textContent = e.getAttribute("data-n") + "直飛"; });
   var sel = document.querySelector('input[name="fareMode"]:checked');
   if (!on && sel && /c$/.test(sel.value)) document.querySelector('input[name="fareMode"][value="' + sel.value.slice(0, 2) + '"]').checked = true;
 }

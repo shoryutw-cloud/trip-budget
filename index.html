@@ -207,7 +207,7 @@ main { position: relative; }
 </head>
 <body>
 <main>
-  <div class="verstamp" id="verStamp">v2026/10/6 21:58</div>
+  <div class="verstamp" id="verStamp">v2026/10/7 09:47</div>
   <div class="printonly" id="printTotal" aria-hidden="true"><span>預算合計</span><strong id="printGrand">TWD 0</strong></div>
   <h1>因公赴國外出差旅費試算</h1>
   <div class="titlebar"><p class="byline">本試算不適用出國訓練</p>
@@ -1006,7 +1006,6 @@ function showAirline() {                                    // 班機資訊與�
   if ($("multi").checked) return;                           // 多段航班沒有分航空公司的班機資料
   var mode = document.querySelector('input[name="fareMode"]:checked').value, it = fareItins[mode];
   if (mode === "other" || !it) {                            // 選「自訂」或沒有班機資料的選項：沒有抵達日期，生活費先不算（勾選手動修改抵達日期的話照手動日期算）
-    if (mode !== "other" && !Object.keys(fareItins).length) return;   // 完全沒有分航空公司的資料（舊版 Worker）：維持目前顯示
     renderItin(null);
     if (autoFilled) {
       autoD.a1 = ""; autoD.a2 = ""; autoD.tn = {};
@@ -1492,21 +1491,11 @@ $("apiBtn").addEventListener("click", function () {
         document.querySelector('input[name="fareMode"][value="' + best + '"]').checked = true;
       }
     })();
-    var tm = j.times, extra = "";
-    if (tm && tm.outArrive) {
-      autoD = { a1: tm.outArrive.slice(0, 10), a2: tm.retArrive ? tm.retArrive.slice(0, 10) : "", arr: [] };
-      autoFilled = true;       var al = /^(BR|CI|JX)c?$/.test(tm.airline) ? fareName(tm.airline) : tm.airline;
-      autoInfo = "抵達與返抵日期取自" + al + "最低價航班（起訖時間見上方「自動查價」結果）。如有不同，可勾選下方「手動修改抵達日期」改。";
-      var it = j.itinerary;
-      if (!it) it = { out: [{ flight: "", dep: { id: $("from").value, time: tm.outDepart }, arr: { id: to, time: tm.outArrive } }],
-                      ret: tm.retDepart ? [{ flight: "", dep: { id: to, time: tm.retDepart }, arr: { id: $("from").value, time: tm.retArrive } }] : null };
-      renderItin(it);
-      extra = "，並填入抵達日期";
-    }
-    showAirline();
+    autoD = { a1: "", a2: "", arr: [], tn: {} };
+    autoFilled = Object.keys(fareItins).length > 0;
+    showAirline();                                     // 抵達日期、轉機過夜、班機資訊都取自目前選的那一個選項
     var anyFare = FARE_KEYS.some(function (k) { return j[k]; });
-    if (!tm && anyFare) extra = "，但沒有取得航班時間（請確認 Cloudflare 上的 Worker 是最新版）";
-    msg.textContent = anyFare ? "已填入查到的票價" + extra + "。" : ($("connOk").checked ? "這個航線與日期查不到符合條件的班機（直飛或轉 1 次，台灣出發與回台灣的航段須為長榮、華航或星宇），請換日期，或自行查詢後填入「其他／自訂票價」。" : "這個航線與日期查不到長榮、華航或星宇的直飛班機，可以勾選「接受轉機」再查，或自行查詢後填入「其他／自訂票價」。");
+    msg.textContent = anyFare ? "已填入查到的票價，並填入抵達日期。" : ($("connOk").checked ? "這個航線與日期查不到符合條件的班機（直飛或轉 1 次，台灣出發與回台灣的航段須為長榮、華航或星宇），請換日期，或自行查詢後填入「其他／自訂票價」。" : "這個航線與日期查不到長榮、華航或星宇的直飛班機，可以勾選「接受轉機」再查，或自行查詢後填入「其他／自訂票價」。");
     if (j.warn) msg.textContent += j.warn + "。";                  // 例如查到一半碰到 SerpApi 每小時上限，部分回程班機沒查到
     calc();
   }).catch(function (e) {
@@ -1630,8 +1619,7 @@ function restoreState() {
   if ($("d1").value) $("d2").min = $("d1").value;
   var fm = document.querySelector('input[name="fareMode"][value="' + s.fareMode + '"]'); if (fm) fm.checked = true;
 
-  transRows = (s.trans || []).filter(function (r) { return !(r.kind === "捷運" && r.use === "北車往返桃園機場" && String(r.amt) === "320" && r.cur === "TWD"); })
-    .map(function (r) { r.cur = okCur(r.cur); return r; });
+  transRows = (s.trans || []).map(function (r) { r.cur = okCur(r.cur); return r; });
   renderTrans();
   ["fee", "ins", "admin", "gift"].forEach(function (g) {
     OTH[g].rows = ((s.oth || {})[g] || []).map(function (r) { r.cur = okCur(r.cur); return r; });
@@ -1640,13 +1628,9 @@ function restoreState() {
   deduct = s.deduct || {};
   rateOver = s.rateOver || {};
   autoFilled = !!s.autoFilled; autoInfo = s.autoInfo || "";
-  if (s.autoD) autoD = { a1: s.autoD.a1 || "", a2: s.autoD.a2 || "", arr: s.autoD.arr || [], tn: s.autoD.tn || {} };
-  else if (s.autoFilled) {                                      // 舊版存的資料：自動查價的日期原本放在手動欄位裡，搬到自動日期去，手動欄位清空
-    autoD = { a1: (s.vals || {}).a1 || "", a2: (s.vals || {}).a2 || "", arr: (s.stops || []).map(function (st) { return st.arr || ""; }) };
-    $("a1").value = ""; $("a2").value = ""; multiStops.forEach(function (st) { st.arr = ""; });
-  } else autoD = { a1: "", a2: "", arr: [] };
-  var mOn = s.manualOn !== undefined ? !!s.manualOn : (!s.autoFilled && !!((s.vals || {}).a1 || (s.vals || {}).a2));     // 舊版手動填過日期的，視為已勾選手動
-  $("manualOn").checked = mOn;
+  var sd = s.autoD || {};
+  autoD = { a1: sd.a1 || "", a2: sd.a2 || "", arr: sd.arr || [], tn: sd.tn || {} };
+  $("manualOn").checked = !!s.manualOn;
   $("connOk").checked = !!s.connOk; syncConnUI();
   renderExtraArr();
   fareItins = s.fareItins || {};

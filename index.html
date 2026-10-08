@@ -207,7 +207,7 @@ main { position: relative; }
 </head>
 <body>
 <main>
-  <div class="verstamp" id="verStamp">v2026/10/7 09:47</div>
+  <div class="verstamp" id="verStamp">v2026/10/8 09:50</div>
   <div class="printonly" id="printTotal" aria-hidden="true"><span>預算合計</span><strong id="printGrand">TWD 0</strong></div>
   <h1>因公赴國外出差旅費試算</h1>
   <div class="titlebar"><p class="byline">本試算不適用出國訓練</p>
@@ -299,7 +299,6 @@ main { position: relative; }
 
   <section aria-labelledby="s4">
     <h2 id="s4">4. 交通費</h2>
-    <p class="note">含機票、船舶及大眾陸運工具、行李托運費。</p>
 
     <div class="item"><h3>機票</h3>
       <div class="ctrl note">依上方「機票查詢」所選的票價。</div>
@@ -370,7 +369,6 @@ main { position: relative; }
     <p class="note" id="autoNote"></p>
 
     <h3>6-1 手續費<span class="amt" id="subFee">TWD 0</span></h3>
-    <p class="note">包括護照費、簽證費、黃皮書費、預防針費、結匯手續費及機場服務費。</p>
     <div class="sub"><label for="fPass">(1) 護照費（僅公務護照可核銷）</label><div class="ctrl"><input id="fPass" type="number" min="0" step="any" class="num" placeholder="TWD 金額"></div></div>
     <div class="sub"><label for="fVisa">(2) 簽證費</label><div class="ctrl">
       <div class="money"><input id="fVisa" type="number" min="0" step="any" class="num" placeholder="金額"><select class="cur" id="fVisaCur" data-def="USD" aria-label="簽證費幣別"></select></div>
@@ -390,7 +388,6 @@ main { position: relative; }
     <div class="actions"><button class="btn ghost" id="othAdd_ins" type="button">＋ 新增其他</button></div>
 
     <h3>6-3 行政費<span class="amt" id="subAdmin">TWD 0</span></h3>
-    <p class="note">包括在國外執行公務所必要之資料、報名、註冊、郵電、翻譯及運費等費用。</p>
     <div class="sub"><label for="aReg">(1) 報名／註冊費</label><div class="ctrl">
       <div class="money"><input id="aReg" type="number" min="0" step="any" class="num" placeholder="金額"><select class="cur" id="aRegCur" data-def="USD" aria-label="報名註冊費幣別"></select></div>
       <div class="note" id="aRegNT" style="margin-top:4px"></div></div></div>
@@ -421,7 +418,7 @@ main { position: relative; }
       <button class="btn ghost" id="printBtn" type="button">列印／存成 PDF</button>
       <button class="btn ghost clearbtn" id="clearAll" type="button">清除已記憶的資料，重新開始</button>
     </div>
-    <p class="note">填過的行程與費用會自動記憶在這個瀏覽器裡，下次打開還在；換手機、換瀏覽器或清除瀏覽資料就會消失。匯率另外記憶，要回到預設值請按「恢復預設匯率」。</p>
+    <p class="note">填過的行程與費用會自動記憶在這個瀏覽器。匯率另外記憶，要回到預設值請按「恢復預設匯率」。</p>
     <p class="note" id="copyMsg" role="status"></p>
   </section>
 
